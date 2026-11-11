@@ -1,1 +1,1 @@
-<span class="demo-tag" title="Grupo fictício para demonstração">Fictício · demo</span>
+<% if (g.is_demo) { %><span class="demo-tag" title="Grupo fictício para demonstração">Fictício · demo</span><% } else if (g.owner_name) { %><span class="demo-tag">Cadastrado por <%= g.owner_name %></span><% } %>

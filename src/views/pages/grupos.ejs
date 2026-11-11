@@ -1,0 +1,29 @@
+<%- include('../partials/page-head', {
+  kicker: 'Encontrar grupos',
+  title: 'Grupos de corrida em SP',
+  text: 'Filtre por zona, dia, horário, pace e nível. Os resultados atualizam na hora.',
+}) %>
+<% const n = groups.length; -%>
+  <div class="wrap"><div class="search-layout">
+    <form class="filters" id="filters" method="get" action="/grupos" role="search" aria-label="Filtros">
+      <h2>Filtros <a class="link" href="/grupos" style="font-family:var(--f-body);font-size:14px;text-transform:none">Limpar filtros</a></h2>
+      <div class="field"><span class="lbl" id="lbl-z">Zona</span><div class="zone-toggles" role="group" aria-labelledby="lbl-z">
+        <% for (const z of ZONA_ORDEM) { %><label class="ztog" style="<%= zstyle(z) %>"><input class="sr-only" type="checkbox" name="zona" value="<%= z %>" data-z="<%= z %>"<% if (filters.zonas.includes(z)) { %> checked<% } %>><%= ZONAS[z].curto %></label><% } %>
+      </div></div>
+      <div class="field"><label for="f-nome">Nome do grupo</label><div class="with-ico"><%- ic('search') %><input class="input" id="f-nome" name="nome" data-f="nome" type="search" placeholder="Ex.: Correria" value="<%= filters.nome %>" autocomplete="off"></div></div>
+      <div class="field"><label for="f-local">Local de encontro</label><div class="with-ico"><%- ic('pin') %><input class="input" id="f-local" name="local" data-f="local" type="search" placeholder="Ex.: Ibirapuera" value="<%= filters.local %>" autocomplete="off"></div></div>
+      <div class="field"><label for="f-dia">Dia da semana</label><select class="select" id="f-dia" name="dia" data-f="dia"><%- include('../partials/filter-options', { entries: DIA_ORDEM.map((d) => [d, DIAS[d]]), value: filters.dia, todos: 'Qualquer dia' }) %></select></div>
+      <div class="field"><label for="f-periodo">Horário da corrida</label><select class="select" id="f-periodo" name="periodo" data-f="periodo"><%- include('../partials/filter-options', { entries: Object.entries(PERIODOS), value: filters.periodo, todos: 'Qualquer horário' }) %></select></div>
+      <div class="field"><label for="f-pace">Faixa de pace</label><select class="select mono" id="f-pace" name="pace" data-f="pace"><%- include('../partials/filter-options', { entries: Object.entries(PACE_FAIXAS).map(([k, v]) => [k, v.nome]), value: filters.pace, todos: 'Qualquer pace' }) %></select><span class="hint">Mostra grupos cuja faixa cruza a escolhida.</span></div>
+      <div class="field"><label for="f-nivel">Nível de experiência</label><select class="select" id="f-nivel" name="nivel" data-f="nivel"><%- include('../partials/filter-options', { entries: Object.entries(NIVEIS).map(([k, v]) => [k, v.nome]), value: filters.nivel, todos: 'Todos os níveis' }) %></select></div>
+      <button class="btn btn-primary" type="submit"><%- ic('search', 'ico-sm') %> Aplicar filtros</button>
+    </form>
+    <section aria-label="Resultados">
+      <div class="results-bar">
+        <span class="count" id="count" aria-live="polite"><%= n %> <%= n === 1 ? 'grupo encontrado' : 'grupos encontrados' %></span>
+        <a class="btn btn-outline btn-sm filters-toggle" href="#filters" aria-controls="filters"><%- ic('filter', 'ico-sm') %> Filtros</a>
+      </div>
+      <div class="active-chips" id="chips" style="margin-bottom:16px"><% for (const chip of chips) { %><a class="achip" href="<%= chip.href %>" aria-label="Remover filtro <%= chip.label %>"><%= chip.label %> <%- ic('x', 'ico-sm') %></a><% } %></div>
+      <div id="results"><% if (n > 0) { %><div class="grid-cards"><% for (const g of groups) { %><%- include('../partials/group-card', { g }) %><% } %></div><% } else { %><div class="empty"><%- ic('run') %><h3>Nenhum grupo nesse ritmo</h3><p>Nenhum grupo atende a todos os filtros. Tente ampliar a faixa de pace, escolher outro dia ou incluir mais zonas.</p><a class="btn btn-primary" href="/grupos">Limpar filtros</a></div><% } %></div>
+    </section>
+  </div></div>

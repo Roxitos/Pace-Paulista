@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fmtDiasCurto, fmtHora, sortDias } from '../../src/domain/schedule.js';
+import { fmtDiasCurto, fmtHora, periodoDe, sortDias } from '../../src/domain/schedule.js';
 
 describe('fmtHora', () => {
   it.each([
@@ -52,4 +52,27 @@ describe('dias inválidos', () => {
     expect(() => fmtDiasCurto(['xxx', 'seg'])).toThrow();
     expect(() => fmtDiasCurto(['toString'])).toThrow();
   });
+});
+
+describe('periodoDe', () => {
+  it.each([
+    ['00:00', 'cedo'],
+    ['06:30:00', 'cedo'],
+    ['06:59', 'cedo'],
+    ['07:00', 'manha'],
+    ['11:59', 'manha'],
+    ['12:00', 'tarde'],
+    ['17:59', 'tarde'],
+    ['18:00', 'noite'],
+    ['23:59', 'noite'],
+  ])('classifica "%s" como %s', (hhmm, expected) => {
+    expect(periodoDe(hhmm)).toBe(expected);
+  });
+
+  it.each(['abc', '', '6:30', '24:00', '06:60', null, undefined, 630])(
+    'lança RangeError para %s',
+    (v) => {
+      expect(() => periodoDe(v)).toThrow(RangeError);
+    },
+  );
 });

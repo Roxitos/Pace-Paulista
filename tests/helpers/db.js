@@ -1,5 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { isConnectionFailure } from '../../scripts/cli.js';
 import { runMigrations } from '../../scripts/migrate.js';
+import { runSeed } from '../../scripts/seed.js';
 import { describeDatabaseUrl } from '../../src/config/env.js';
 
 // Trava antes de qualquer DROP/TRUNCATE: os testes apagam dados e só podem tocar num banco *_test.
@@ -17,7 +19,7 @@ export async function ensureTestDb(pool) {
     }
     if (isConnectionFailure(err)) {
       throw new Error(
-        `Postgres de teste indisponível em ${target}. Rode npm run db:up e tente de novo (sem banco: npx vitest run tests/domain tests/http tests/scripts).`,
+        `Postgres de teste indisponível em ${target}. Rode npm run db:up e tente de novo (sem banco: npx vitest run tests/domain tests/scripts).`,
         { cause: err },
       );
     }
@@ -42,4 +44,22 @@ export async function resetSchema(pool) {
 export async function truncateAll(pool) {
   await ensureTestDb(pool);
   await pool.query('TRUNCATE memberships, groups, users, "session" RESTART IDENTITY CASCADE');
+}
+
+export async function seedDemo(pool) {
+  await truncateAll(pool);
+  await runSeed({ pool, nodeEnv: 'test' });
+}
+
+export async function insertUser(
+  pool,
+  displayName,
+  { email = `${randomUUID()}@exemplo.com`, passwordHash = 'hash', role = 'user' } = {},
+) {
+  const { rows } = await pool.query(
+    `INSERT INTO users (email, password_hash, display_name, role)
+     VALUES ($1, $2, $3, $4) RETURNING id`,
+    [email, passwordHash, displayName, role],
+  );
+  return rows[0].id;
 }

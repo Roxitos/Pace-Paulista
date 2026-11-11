@@ -1,5 +1,5 @@
 <article class="card" style="<%= zstyle(g.zone) %>">
-    <div class="card-top"><%- include('zone-chip', { zone: g.zone }) -%><%- include('demo-tag') -%></div>
+    <div class="card-top"><%- include('zone-chip', { zone: g.zone }) -%><%- include('demo-tag', { g }) -%></div>
     <h3><a href="/grupos/<%= encodeURIComponent(g.slug) %>"><%= g.name %></a></h3>
     <p class="card-desc"><%= g.description %></p>
     <dl class="facts">

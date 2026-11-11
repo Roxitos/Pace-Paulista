@@ -1,0 +1,11 @@
+<%- include('../partials/page-head', {
+  kicker: 'Explorar zonas',
+  title: 'As cinco zonas de São Paulo',
+  text: 'Cada região tem uma cor e um selo inspirado em um marco da cidade. As cores identificam os grupos em todo o site.',
+}) %>
+  <div class="wrap"><div class="zone-rows">
+    <% for (const { zone: z, count, locations } of zones) { %><article class="zrow" style="<%= zstyle(z) %>"><div class="zrow-seal"><%- seal(z, 120) %></div>
+      <div class="zrow-body"><span class="kicker" style="color:var(--muted)"><%= ZONAS[z].marco %></span><h2><%= ZONAS[z].nome %></h2><p><%= ZONAS[z].desc %></p>
+      <div class="zrow-meta"><span><%- ic('users', 'ico-sm') %><b><%= count %></b>&nbsp;<%= count === 1 ? 'grupo' : 'grupos' %></span><span><%- ic('pin', 'ico-sm') %><%= locations.join(' · ') || 'Nenhum local ainda' %></span></div></div>
+      <div class="zrow-cta"><a class="btn btn-primary" href="/grupos?zona=<%= z %>">Explorar grupos <%- ic('arrow', 'ico-sm') %></a></div></article><% } %>
+  </div></div>

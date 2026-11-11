@@ -95,7 +95,7 @@ pace-paulista/
 │   │   ├── constants.js      ← ZONAS, DIAS, NIVEIS, PERIODOS, PACE_FAIXAS (copiar do protótipo)
 │   │   ├── pace.js           ← parsePace, fmtPace, fmtFaixa
 │   │   ├── schedule.js       ← periodoDe, proximos (fuso America/Sao_Paulo), fmtHora, fmtDias*
-│   │   ├── filters.js        ← montagem do WHERE a partir dos filtros
+│   │   ├── filters.js        ← normaliza a query string dos filtros e monta os chips (o WHERE fica no groups.repo)
 │   │   ├── match.js          ← calcMatch (algoritmo de compatibilidade)
 │   │   └── slug.js
 │   ├── modules/
@@ -112,7 +112,8 @@ pace-paulista/
 │   └── views/
 │       ├── layout.ejs
 │       ├── partials/         ← header, footer, icons (função ic), seal, zone-chip, level-meter,
-│       │                        group-card, page-head, track-deco, empty-state, form-errors, flash
+│       │                        group-card, page-head, track-deco, empty-state, form-errors, flash,
+│       │                        filter-options
 │       └── pages/            ← home, grupos, grupo-detalhe, zonas, mapa, encontrar, grupo-novo,
 │                                meus, sobre, conta-entrar, conta-criar, 404, 500
 ├── public/
@@ -261,7 +262,8 @@ ZONA_ORDEM = ['norte','oeste','centro','leste','sul']
 DIA_ORDEM  = ['seg','ter','qua','qui','sex','sab','dom']
 NIVEIS     = { iniciante:{nome:'Iniciante',n:1}, intermediario:{nome:'Intermediário',n:2}, avancado:{nome:'Avançado',n:3} }
 PERIODOS   = { cedo:'Antes das 7h', manha:'Das 7h às 12h', tarde:'Das 12h às 18h', noite:'A partir das 18h' }
-PACE_FAIXAS= { ate5:[0,300], '5a6':[300,360], '6a7':[360,420], mais7:[420,9999] }  // segundos
+PACE_FAIXAS= { ate5:{nome:'Até 5:00 min/km',min:0,max:300}, '5a6':{nome:'5:00 a 6:00 min/km',min:300,max:360},
+               '6a7':{nome:'6:00 a 7:00 min/km',min:360,max:420}, mais7:{nome:'Acima de 7:00 min/km',min:420,max:9999} }  // segundos; formato do protótipo (spec 005)
 DESTAQUES  = ['correria-do-carmo','pace-da-oca','pelotao-paulista']
 ```
 Textos `desc` das zonas, selos SVG (`SEAL`), ícones (`P`) e polígonos do mapa (`ZPOLY`, `ZLABEL`, `ZCENTRO`): **copiar literalmente de `docs/prototipo.html`**.
@@ -358,7 +360,7 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 - Ícones: o objeto `P` + função `ic(nome, cls)` viram um helper de view (`partials/icons.ejs` ou função em `res.locals`).
 - Os "componentes" JS do protótipo (`GroupCard`, `LevelMeter`, `ZoneChip`, `PageHead`, `TrackDeco`, `seal`) viram **partials EJS** com o mesmo HTML.
 - **Escape**: sempre `<%= %>`. `<%- %>` só para partials e SVGs internos, **nunca** com dado vindo do usuário/banco.
-- **Acessibilidade** (já presente no protótipo, manter): foco visível, `aria-current` na navegação, `aria-pressed` nos toggles de zona, `aria-live` na contagem de resultados, modal com trap de foco e `Esc`, `prefers-reduced-motion`.
+- **Acessibilidade** (já presente no protótipo, manter): foco visível, `aria-current` na navegação, toggles de zona como checkboxes (`label.ztog` + `:has(input:checked)`, mesmo visual do protótipo, para funcionar sem JS — spec 005), `aria-live` na contagem de resultados, modal com trap de foco e `Esc`, `prefers-reduced-motion`.
 - JS do cliente é **progressivo**: toda ação precisa funcionar sem JS (forms normais). JS só adiciona modal, filtro ao vivo, toast, menu mobile.
 - Mobile first: testar em 360 px de largura, sem scroll horizontal.
 

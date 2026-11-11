@@ -5,8 +5,17 @@ import { locals } from './middlewares/locals.js';
 import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { pagesRouter } from './modules/pages/pages.routes.js';
+import { groupsRouter } from './modules/groups/groups.routes.js';
 import { ic, seal, zstyle } from './views/helpers.js';
-import { NIVEIS, ZONA_ORDEM, ZONAS } from './domain/constants.js';
+import {
+  DIA_ORDEM,
+  DIAS,
+  NIVEIS,
+  PACE_FAIXAS,
+  PERIODOS,
+  ZONA_ORDEM,
+  ZONAS,
+} from './domain/constants.js';
 import { fmtFaixa, fmtPace } from './domain/pace.js';
 import { fmtDiasCurto, fmtHora } from './domain/schedule.js';
 
@@ -27,6 +36,10 @@ export function createApp({ beforeErrorHandlers } = {}) {
     ZONAS,
     ZONA_ORDEM,
     NIVEIS,
+    DIAS,
+    DIA_ORDEM,
+    PERIODOS,
+    PACE_FAIXAS,
     fmtPace,
     fmtFaixa,
     fmtHora,
@@ -36,6 +49,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
   app.use(express.static(path.join(root, '..', 'public')));
   app.use(locals);
   app.use(pagesRouter);
+  app.use(groupsRouter);
   if (beforeErrorHandlers) beforeErrorHandlers(app);
 
   app.use(notFound);

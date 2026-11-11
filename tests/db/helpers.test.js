@@ -41,7 +41,7 @@ describe('banco de teste', () => {
 
   it('falha rápido com mensagem clara quando o Postgres não responde', async () => {
     await expect(ensureTestDb(poolFor('pace_paulista_test', 1))).rejects.toThrow(
-      'Postgres de teste indisponível em localhost:1/pace_paulista_test. Rode npm run db:up e tente de novo (sem banco: npx vitest run tests/domain tests/http tests/scripts).',
+      'Postgres de teste indisponível em localhost:1/pace_paulista_test. Rode npm run db:up e tente de novo (sem banco: npx vitest run tests/domain tests/scripts).',
     );
   });
 });

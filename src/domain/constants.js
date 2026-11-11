@@ -73,3 +73,18 @@ export const NIVEIS = {
 };
 
 export const DESTAQUES = ['correria-do-carmo', 'pace-da-oca', 'pelotao-paulista'];
+
+export const PERIODOS = {
+  cedo: 'Antes das 7h',
+  manha: 'Das 7h às 12h',
+  tarde: 'Das 12h às 18h',
+  noite: 'A partir das 18h',
+};
+
+// Formato do protótipo: `nome` é o texto do <select> e do chip; min/max em segundos por km.
+export const PACE_FAIXAS = {
+  ate5: { nome: 'Até 5:00 min/km', min: 0, max: 300 },
+  '5a6': { nome: '5:00 a 6:00 min/km', min: 300, max: 360 },
+  '6a7': { nome: '6:00 a 7:00 min/km', min: 360, max: 420 },
+  mais7: { nome: 'Acima de 7:00 min/km', min: 420, max: 9999 },
+};
