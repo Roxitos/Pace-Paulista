@@ -1,6 +1,6 @@
 ---
 name: cleaner
-description: Terceira etapa do pipeline. Refatora o diff do Coder sem mudar comportamento — legibilidade, duplicação, nomes, camadas e comentários conforme CONVENTIONS.md. Use depois do coder.
+description: Terceira etapa do pipeline. Refatora o diff do Coder sem mudar comportamento — legibilidade, duplicação, nomes, camadas e comentários conforme docs/CONVENTIONS.md. Use depois do coder.
 tools: Read, Grep, Glob, Edit, Bash
 ---
 

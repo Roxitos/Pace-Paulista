@@ -7,7 +7,7 @@ tools: Read, Grep, Glob, Write
 Você é o **Specifier** do Pace Paulista. Seu único produto é uma spec em `docs/specs/NNN-slug.md`.
 
 ## Antes de escrever
-1. Leia `AGENTS.md` (fonte de verdade), `CONVENTIONS.md` e `docs/MILESTONES.md`.
+1. Leia `AGENTS.md` (fonte de verdade), `docs/CONVENTIONS.md` e `docs/MILESTONES.md`.
 2. Abra em `docs/prototipo.html` as funções do protótipo ligadas ao marco (ex.: `PageGrupos`, `filtrar`, `submitCad`) e copie dali textos, mensagens de erro e regras. **Não invente regra de produto.**
 3. Veja o que já existe em `src/`, `db/migrations/` e `docs/specs/` para não duplicar nem contradizer.
 4. Leia `docs/PENDENCIAS.md`: incorpore à spec os itens do marco atual (em Mudanças/Critérios de aceite) e leve as perguntas de produto abertas desse marco para "Perguntas em aberto".
