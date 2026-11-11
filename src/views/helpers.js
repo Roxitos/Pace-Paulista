@@ -1,3 +1,5 @@
+import { ZONAS } from '../domain/constants.js';
+
 // Ícones copiados literalmente do protótipo (docs/prototipo.html, objeto P).
 export const P = {
   pin: '<path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>',
@@ -46,4 +48,34 @@ export function currentNav(path) {
   if (path === '/zonas') return 'zonas';
   if (path === '/sobre') return 'sobre';
   return '';
+}
+
+// Selos das zonas copiados literalmente do protótipo (docs/prototipo.html, objeto SEAL).
+export const SEAL = {
+  norte:
+    '<path d="M6 46 L22 20 L31 33 L39 23 L58 46 Z"/><path d="M16 46v-6l-3 0 3-5-2 0 3-5 3 5-2 0 3 5-3 0v6"/><path d="M47 46v-5h-3l3-5h-2l3-5 3 5h-2l3 5h-3v5"/><path d="M4 50h56" stroke-dasharray="3 3"/>',
+  oeste:
+    '<path d="M32 8 L26 44 M32 8 L38 44"/><path d="M28.5 30h7"/><path d="M4 44h56"/><path d="M31 14 L8 44M31 18 L16 44M33 14 L56 44M33 18 L48 44"/><path d="M4 50h56" stroke-dasharray="3 3"/>',
+  centro:
+    '<path d="M8 50V30h8v20M18 50V20h9v30M29 50V26h8v24M39 50V14h9v36M50 50V32h7v18"/><path d="M43.5 14V6M41 9h5"/><path d="M4 50h56"/><path d="M21 25h3M21 31h3M21 37h3M42 20h3M42 26h3M42 32h3"/>',
+  leste:
+    '<path d="M6 44c4-14 14-22 26-22s22 8 26 22"/><path d="M6 44h52"/><path d="M12 44c3-9 10-15 20-15s17 6 20 15"/><path d="M18 31v13M26 26v18M38 26v18M46 31v13"/><path d="M4 50h56" stroke-dasharray="3 3"/>',
+  sul: '<path d="M8 46a24 24 0 0 1 48 0"/><path d="M4 46h56"/><circle cx="20" cy="38" r="2.2"/><circle cx="28" cy="31" r="2.2"/><circle cx="36" cy="31" r="2.2"/><circle cx="44" cy="38" r="2.2"/><circle cx="32" cy="40" r="2.2"/><path d="M4 52h56" stroke-dasharray="3 3"/>',
+};
+
+function zoneOf(z) {
+  if (!Object.hasOwn(ZONAS, z)) throw new Error(`Zona desconhecida: ${z}`);
+  return ZONAS[z];
+}
+
+// O retorno entra com <%- %>; por isso a zona é validada e o tamanho precisa ser inteiro.
+export function seal(z, size = 64) {
+  const { nome, marco } = zoneOf(z);
+  if (!Number.isInteger(size)) throw new Error(`Tamanho inválido: ${size}`);
+  return `<svg class="seal" width="${size}" height="${size}" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Selo da ${nome}, inspirado em ${marco}"><circle cx="32" cy="32" r="31" stroke-width="1.6" opacity=".55"/>${SEAL[z]}</svg>`;
+}
+
+export function zstyle(z) {
+  const { cor, on } = zoneOf(z);
+  return `--z:${cor};--zon:${on}`;
 }

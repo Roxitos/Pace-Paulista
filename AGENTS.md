@@ -422,6 +422,7 @@ Todo trabalho passa por cinco subagentes em `.claude/agents/`, orquestrados por 
 Specifier → (OK humano) → Coder → Cleaner → Hardener → QA
    spec em docs/specs/                                  veredito em docs/qa/
 ```
+O orquestrador registra a saída de cada etapa em `docs/reports/NNN-slug.md` e mantém `docs/PENDENCIAS.md` (riscos, pendências e perguntas por marco), que o Specifier lê antes de cada spec.
 
 | Agente | Faz | Não faz |
 |---|---|---|

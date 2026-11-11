@@ -5,7 +5,10 @@ import { locals } from './middlewares/locals.js';
 import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { pagesRouter } from './modules/pages/pages.routes.js';
-import { ic } from './views/helpers.js';
+import { ic, seal, zstyle } from './views/helpers.js';
+import { NIVEIS, ZONA_ORDEM, ZONAS } from './domain/constants.js';
+import { fmtFaixa, fmtPace } from './domain/pace.js';
+import { fmtDiasCurto, fmtHora } from './domain/schedule.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,7 +20,18 @@ export function createApp({ beforeErrorHandlers } = {}) {
   app.set('view engine', 'ejs');
   app.set('views', path.join(root, 'views'));
   app.disable('x-powered-by');
-  app.locals.ic = ic;
+  Object.assign(app.locals, {
+    ic,
+    seal,
+    zstyle,
+    ZONAS,
+    ZONA_ORDEM,
+    NIVEIS,
+    fmtPace,
+    fmtFaixa,
+    fmtHora,
+    fmtDiasCurto,
+  });
 
   app.use(express.static(path.join(root, '..', 'public')));
   app.use(locals);

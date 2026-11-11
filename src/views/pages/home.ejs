@@ -1,0 +1,56 @@
+<section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">São Paulo · 5 zonas · grupos de corrida</span>
+        <h1 class="display">Encontre seu grupo. <span class="g">Encontre seu <span class="u">ritmo.</span></span></h1>
+        <p class="lead">Do Parque do Carmo ao Ibirapuera, da Cantareira à Paulista: diga onde você corre, em que pace e quando tem tempo. A gente mostra os grupos que combinam com você, seja no seu primeiro quilômetro ou na próxima maratona.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="/grupos">Explorar grupos <%- ic('arrow') %></a>
+          <a class="btn btn-light btn-lg" href="/encontrar">Encontrar meu grupo</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong><%= totalGroups %></strong>grupos cadastrados</div>
+          <div><strong>5</strong>zonas da cidade</div>
+<% if (paceMinS !== null) { %>          <div><strong><%= fmtPace(paceMinS) %>–<%= fmtPace(paceMaxS) %></strong>min/km de pace</div>
+<% } -%>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="140 60 420 420" preserveAspectRatio="xMaxYMax slice">
+          <circle cx="560" cy="480" r="150" fill="#5E9A22"/>
+          <circle cx="560" cy="480" r="150" fill="none" stroke="#4A7C17" stroke-width="1" stroke-dasharray="4 8"/>
+          <circle cx="560" cy="480" r="265" fill="none" stroke="#B3262E" stroke-width="230"/>
+          <% for (const r of [150, 188, 226, 264, 302, 340, 380]) { %><circle cx="560" cy="480" r="<%= r %>" fill="none" stroke="#F7F4EC" stroke-width="<%= r === 150 || r === 380 ? 3 : 1.8 %>"/><% } %>
+          <% [1, 2, 3, 4, 5, 6].forEach((n, i) => { const r = 169 + i * 38, a = Math.PI * 1.12, x = 560 + r * Math.cos(a), y = 480 + r * Math.sin(a); %><text x="<%= x %>" y="<%= y %>" fill="#F7F4EC" font-family="Anton, Impact, sans-serif" font-size="22" text-anchor="middle" dominant-baseline="middle" transform="rotate(-70 <%= x %> <%= y %>)"><%= n %></text><% }) %>
+          <circle cx="560" cy="480" r="245" fill="none" stroke="#E8B923" stroke-width="3" class="route-dash"/>
+          <g transform="translate(<%= 560 + 245 * Math.cos(Math.PI * 1.32) %> <%= 480 + 245 * Math.sin(Math.PI * 1.32) %>)"><circle r="11" fill="#E8B923"/><circle r="4.5" fill="#17171A"/></g>
+        </svg>
+      </div>
+    </div>
+  </section>
+<% if (hasDemo) { %>  <div class="notice"><div class="wrap"><%- ic('info') %><span><strong>Versão de demonstração.</strong> Os grupos exibidos são fictícios, em locais públicos reais da cidade, criados para mostrar como a plataforma funciona.</span></div></div>
+<% } %>
+  <section class="section"><div class="wrap">
+    <div class="sec-head"><div><span class="kicker">Explorar zonas</span><h2 class="display">Cinco zonas, um mapa de ritmos</h2><p>Cada região tem sua cor e seu marco. Escolha a sua para ver os grupos que treinam por perto.</p></div><a class="btn btn-outline" href="/zonas">Ver todas as zonas <%- ic('arrow', 'ico-sm') %></a></div>
+    <div class="zone-strip">
+      <% for (const z of ZONA_ORDEM) { const c = countsByZone[z]; %><a class="zcard" style="<%= zstyle(z) %>" href="/grupos?zona=<%= z %>"><%- seal(z) %><h3><%= ZONAS[z].nome %></h3><span style="font-size:14px"><%= ZONAS[z].marco %></span><span class="zmeta"><span><%= c %> <%= c === 1 ? 'grupo' : 'grupos' %></span><%- ic('arrow', 'ico-sm') %></span></a><% } %>
+    </div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="sec-head"><div><span class="kicker">Em destaque</span><h2 class="display">Grupos para conhecer</h2><p>Três estilos de treino diferentes: rodagem de bairro, treino de performance e corrida urbana de domingo.</p></div><a class="btn btn-outline" href="/grupos">Ver todos os grupos <%- ic('arrow', 'ico-sm') %></a></div>
+    <div class="grid-cards"><% for (const g of featured) { %><%- include('../partials/group-card', { g }) %><% } %></div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="sec-head"><div><span class="kicker">Como funciona</span><h2 class="display">Da raia 1 à linha de chegada</h2></div></div>
+    <div class="lanes">
+      <div class="lane"><span class="lane-n">1</span><div><h3>Conte seu ritmo e sua região</h3><p>Informe sua zona, seu pace aproximado, os dias livres e seu nível. Sem cadastro para começar.</p></div></div>
+      <div class="lane"><span class="lane-n">2</span><div><h3>Compare os grupos compatíveis</h3><p>Veja local de encontro, horários, faixa de pace e o perfil de cada comunidade, com a compatibilidade calculada para você.</p></div></div>
+      <div class="lane"><span class="lane-n">3</span><div><h3>Entre e apareça no próximo treino</h3><p>Entre no grupo, confira os próximos encontros e abra a rota até o ponto de encontro.</p></div></div>
+    </div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="cta-band"><div><h2 class="display">Organiza um grupo de corrida?</h2><p>Cadastre seu grupo e apareça para corredores da sua região que procuram exatamente o seu ritmo.</p></div><a class="btn btn-lg" href="/grupos/novo"><%- ic('plus') %> Cadastrar grupo</a></div>
+  </div></section>

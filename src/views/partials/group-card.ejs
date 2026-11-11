@@ -1,0 +1,17 @@
+<article class="card" style="<%= zstyle(g.zone) %>">
+    <div class="card-top"><%- include('zone-chip', { zone: g.zone }) -%><%- include('demo-tag') -%></div>
+    <h3><a href="/grupos/<%= encodeURIComponent(g.slug) %>"><%= g.name %></a></h3>
+    <p class="card-desc"><%= g.description %></p>
+    <dl class="facts">
+      <div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= g.location %></dd></div>
+      <div><dt><%- ic('cal', 'ico-sm') %>Quando</dt><dd><%= fmtDiasCurto(g.days) %> · <%= fmtHora(g.start_time) %></dd></div>
+      <div><dt><%- ic('gauge', 'ico-sm') %>Pace</dt><dd class="mono"><%= fmtFaixa(g.pace_min_s, g.pace_max_s) %></dd></div>
+      <div><dt><%- ic('users', 'ico-sm') %>Participantes</dt><dd class="mono"><%= g.participants %></dd></div>
+    </dl>
+    <%- include('level-meter', { level: g.level }) -%>
+    <div class="card-actions">
+      <a class="btn btn-primary" href="/conta/entrar?next=/grupos/<%= encodeURIComponent(g.slug) %>%23participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a>
+      <a class="btn btn-outline btn-sm" href="/grupos/<%= encodeURIComponent(g.slug) %>">Ver detalhes</a>
+      <a class="btn btn-outline btn-sm" href="/mapa/<%= encodeURIComponent(g.slug) %>"><%- ic('route', 'ico-sm') %> Ver rota</a>
+    </div>
+  </article>
