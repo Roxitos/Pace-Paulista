@@ -1,4 +1,5 @@
 import { DESTAQUES, ZONA_ORDEM } from '../../domain/constants.js';
+import { pinPos } from '../../domain/map.js';
 import { listPublishedGroups } from '../groups/groups.service.js';
 
 // Puras: recebem a lista já lida do banco, para testar sem I/O.
@@ -30,10 +31,31 @@ export function getZonesData(groups) {
   });
 }
 
+// O contato só pode chegar a quem está logado (P4) e o mapa nem o exibe: sai aqui, antes da view,
+// para não ter como vazar em data-*, JSON ou comentário.
+function toMapGroup(group) {
+  const g = { ...group, pin: pinPos(group) };
+  delete g.contact;
+  return g;
+}
+
+export function getMapData(groups, selectedSlug) {
+  const list = groups.map(toMapGroup);
+  const selected = selectedSlug ? list.find((g) => g.slug === selectedSlug) : list[0];
+  return { groups: list, selected: selected ?? null };
+}
+
 export async function loadHomeData() {
   return getHomeData(await listPublishedGroups());
 }
 
 export async function loadZonesData() {
   return getZonesData(await listPublishedGroups());
+}
+
+// null = o slug pedido não está entre os publicados (a rota responde 404).
+export async function loadMapData(selectedSlug) {
+  const data = getMapData(await listPublishedGroups(), selectedSlug);
+  if (selectedSlug && !data.selected) return null;
+  return data;
 }

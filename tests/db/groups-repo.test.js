@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { pool } from '../../src/db/pool.js';
 import { parseFilters } from '../../src/domain/filters.js';
-import { listPublished } from '../../src/modules/groups/groups.repo.js';
-import { insertUser, migrateTestDb, seedDemo } from '../helpers/db.js';
+import { findPublishedBySlug, listPublished } from '../../src/modules/groups/groups.repo.js';
+import { insertMembership, insertUser, migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const GROUP_KEYS = [
   'slug',
@@ -319,6 +319,47 @@ describe('groupsRepo.listPublished com filtros', () => {
         420,
         'iniciante',
       ]);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
+describe('groupsRepo.findPublishedBySlug', () => {
+  it('devolve o grupo com as mesmas chaves do contrato Group', async () => {
+    const g = await findPublishedBySlug('pace-da-oca');
+    expect(Object.keys(g).sort()).toEqual([...GROUP_KEYS].sort());
+    expect(g).toEqual(await bySlug('pace-da-oca'));
+    expect(g).toMatchObject({
+      name: 'Pace da Oca',
+      start_time: '06:00',
+      days: ['seg', 'qua', 'sex'],
+      participants: 56,
+      distance: '10 a 14 km',
+    });
+  });
+
+  it('soma as participações como listPublished', async () => {
+    await insertMembership(pool, await createUser('Ana'), 'pace-da-oca', 'Ana');
+    expect((await findPublishedBySlug('pace-da-oca')).participants).toBe(57);
+  });
+
+  it.each(['pending', 'rejected'])('devolve null para grupo com status %s', async (status) => {
+    await pool.query("UPDATE groups SET status = $1 WHERE slug = 'pace-da-oca'", [status]);
+    expect(await findPublishedBySlug('pace-da-oca')).toBeNull();
+  });
+
+  it('devolve null para slug inexistente', async () => {
+    expect(await findPublishedBySlug('nao-existe')).toBeNull();
+  });
+
+  it('envia o slug como parâmetro, nunca no texto do SQL', async () => {
+    const spy = vi.spyOn(pool, 'query');
+    try {
+      await findPublishedBySlug("x' OR 1=1 --");
+      const [sql, params] = spy.mock.calls[0];
+      expect(sql).not.toContain("x' OR 1=1");
+      expect(params).toEqual(["x' OR 1=1 --"]);
     } finally {
       spy.mockRestore();
     }

@@ -16,8 +16,9 @@ import {
   ZONA_ORDEM,
   ZONAS,
 } from './domain/constants.js';
+import { gmapsBusca, gmapsRota, ZLABEL, ZPOLY } from './domain/map.js';
 import { fmtFaixa, fmtPace } from './domain/pace.js';
-import { fmtDiasCurto, fmtHora } from './domain/schedule.js';
+import { fmtDiasCurto, fmtDiasLongo, fmtHora } from './domain/schedule.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,6 +45,11 @@ export function createApp({ beforeErrorHandlers } = {}) {
     fmtFaixa,
     fmtHora,
     fmtDiasCurto,
+    fmtDiasLongo,
+    ZPOLY,
+    ZLABEL,
+    gmapsRota,
+    gmapsBusca,
   });
 
   app.use(express.static(path.join(root, '..', 'public')));
