@@ -5,10 +5,14 @@ import { ensureTestDb } from '../helpers/db.js';
 
 const otherPools = [];
 
-function poolFor(database, port = 5432) {
+// Mesma porta do DATABASE_URL_TEST: na máquina de dev ela pode não ser a 5432 (DB_PORT).
+const testUrl = new URL(env.DATABASE_URL_TEST);
+const testHostPort = `${testUrl.hostname}:${testUrl.port || '5432'}`;
+
+function poolFor(database, port) {
   const url = new URL(env.DATABASE_URL_TEST);
   url.pathname = `/${database}`;
-  url.port = String(port);
+  if (port !== undefined) url.port = String(port);
   const created = createPool(url.href);
   otherPools.push(created);
   return created;
@@ -35,7 +39,7 @@ describe('banco de teste', () => {
 
   it('orienta a criar o banco de teste quando ele não existe', async () => {
     await expect(ensureTestDb(poolFor('pace_inexistente_test'))).rejects.toThrow(
-      'Banco de teste não existe em localhost:5432/pace_inexistente_test. Crie com: docker compose exec db createdb -U pace pace_paulista_test',
+      `Banco de teste não existe em ${testHostPort}/pace_inexistente_test. Crie com: docker compose exec db createdb -U pace pace_paulista_test`,
     );
   });
 

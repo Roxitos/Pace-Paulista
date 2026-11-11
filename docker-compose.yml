@@ -8,7 +8,8 @@ services:
       POSTGRES_DB: pace_paulista
     ports:
       # Só na interface local: a senha de dev (pace/pace) não pode ficar aberta para a rede.
-      - '127.0.0.1:5432:5432'
+      # Porta do host configurável (DB_PORT no .env) para quem já tem outro Postgres na 5432.
+      - '127.0.0.1:${DB_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/docker-init:/docker-entrypoint-initdb.d:ro
