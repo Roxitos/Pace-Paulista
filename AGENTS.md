@@ -2,7 +2,7 @@
 
 > Este arquivo é a fonte de verdade para qualquer agente (Claude, Copilot, Cursor etc.) que trabalhar neste repositório.
 > Leia inteiro antes de escrever código. Se algo aqui conflitar com o código, **pare e pergunte** em vez de adivinhar.
-> O `CLAUDE.md` só importa este arquivo (`@AGENTS.md`): edite aqui, não lá.
+> O `.claude/CLAUDE.md` só importa este arquivo (`@../AGENTS.md`): edite aqui, não lá.
 
 ---
 
@@ -69,12 +69,11 @@ A organização interna é **por módulo de domínio** (auth, groups, membership
 ```
 pace-paulista/
 ├── AGENTS.md                 ← este arquivo
-├── CLAUDE.md                 ← só importa o AGENTS.md
-├── CONVENTIONS.md            ← estilo de código, testes e git
 ├── .github/                  ← CI (lint + testes) e template de PR
-├── .claude/                  ← subagentes do pipeline e comando /pipeline
+├── .claude/                  ← CLAUDE.md (só importa o AGENTS.md), subagentes do pipeline e /pipeline
 ├── docs/
 │   ├── prototipo.html        ← protótipo original (referência visual; não editar)
+│   ├── CONVENTIONS.md        ← estilo de código, testes e git
 │   ├── MILESTONES.md, PENDENCIAS.md
 │   └── specs/, reports/, qa/ ← saídas do pipeline, numeradas NNN-slug.md
 ├── docker-compose.yml        ← Postgres local
@@ -441,7 +440,7 @@ O orquestrador registra a saída de cada etapa em `docs/reports/NNN-slug.md` e m
 | `hardener` | Segurança, autorização, bordas (teste antes da correção) | Mudar regra de produto |
 | `qa` | Verifica critérios, sem JS, 360 px, regressão | Corrigir código |
 
-Estilo de código e comentários: `CONVENTIONS.md`. Marcos M1–M8: `docs/MILESTONES.md`.
+Estilo de código e comentários: `docs/CONVENTIONS.md`. Marcos M1–M8: `docs/MILESTONES.md`.
 
 ---
 

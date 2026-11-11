@@ -32,7 +32,7 @@ Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 - **PostgreSQL 16** (Docker em dev) acessado com `pg` e SQL escrito à mão, sem ORM. Migrations são arquivos `.sql` numerados e imutáveis: o `migrate` confere o checksum de cada uma já aplicada.
 - **zod** para validação, **vitest** e **supertest** para testes, **ESLint** e **Prettier** para lint e formatação.
 
-As decisões de arquitetura completas estão em [`AGENTS.md`](AGENTS.md) (o [`CLAUDE.md`](CLAUDE.md) só o importa).
+As decisões de arquitetura completas estão em [`AGENTS.md`](AGENTS.md) (o [`.claude/CLAUDE.md`](.claude/CLAUDE.md) só o importa).
 
 ## Como rodar
 
@@ -92,11 +92,10 @@ docker-compose.yml       Postgres 16 local
 tests/domain             testes unitários (sem banco)
 tests/http               testes HTTP (supertest; leem o banco de teste)
 tests/db, tests/scripts  testes de banco, migrate e seed
-docs/                    protótipo, marcos, pendências, specs, relatórios e QA
-.claude/                 subagentes do pipeline e comando /pipeline
+docs/                    convenções, protótipo, marcos, pendências, specs, relatórios e QA
+.claude/                 CLAUDE.md, subagentes do pipeline e comando /pipeline
 .github/                 CI e template de PR
-AGENTS.md                fonte de verdade para agentes (CLAUDE.md importa)
-CONVENTIONS.md           estilo de código, testes e git
+AGENTS.md                fonte de verdade para agentes (.claude/CLAUDE.md importa)
 ```
 
 ## Como o trabalho é feito
@@ -112,7 +111,7 @@ Specifier → (OK humano) → Coder → Cleaner → Hardener → QA
 - [`docs/reports/`](docs/reports): o que cada etapa fez.
 - [`docs/PENDENCIAS.md`](docs/PENDENCIAS.md): riscos, pendências e perguntas abertas, organizados por marco.
 
-Convenções de código, testes e git estão em [`CONVENTIONS.md`](CONVENTIONS.md). Resumo:
+Convenções de código, testes e git estão em [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md). Resumo:
 - código em inglês;
 - interface, mensagens, commits e comentários em português;
 - Conventional Commits;
