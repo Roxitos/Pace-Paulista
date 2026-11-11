@@ -1,16 +1,30 @@
 import request from 'supertest';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { DEMO_GROUPS } from '../../db/seeds/demo-groups.js';
+import { pool } from '../../src/db/pool.js';
 import { getHomeData } from '../../src/modules/pages/pages.service.js';
+import { insertUser, migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const app = createApp();
+const DEMO_TAG =
+  '<span class="demo-tag" title="Grupo fictício para demonstração">Fictício · demo</span>';
 let html;
 
-beforeAll(async () => {
+async function getHome() {
   const res = await request(app).get('/');
   expect(res.status).toBe(200);
-  html = res.text;
+  return res.text;
+}
+
+beforeAll(async () => {
+  await migrateTestDb(pool);
+  await seedDemo(pool);
+  html = await getHome();
+});
+
+afterAll(async () => {
+  await pool.end();
 });
 
 describe('GET / (home)', () => {
@@ -61,9 +75,7 @@ describe('GET / (home)', () => {
     expect(carmo).toBeGreaterThan(-1);
     expect(oca).toBeGreaterThan(carmo);
     expect(pelotao).toBeGreaterThan(oca);
-    const demoTag =
-      '<span class="demo-tag" title="Grupo fictício para demonstração">Fictício · demo</span>';
-    expect(html.split(demoTag)).toHaveLength(4);
+    expect(html.split(DEMO_TAG)).toHaveLength(4);
     expect(html).toContain('<dd>Sáb · 6h30</dd>');
     expect(html).toContain('<dd>Seg, Qua, Sex · 6h</dd>');
     expect(html).toContain('<dd>Dom · 7h</dd>');
@@ -123,5 +135,77 @@ describe('group-card', () => {
     const out = await renderView('partials/group-card', { g });
     expect(out).not.toContain('<script>');
     expect(out.match(/&lt;script&gt;/g)).toHaveLength(3);
+  });
+});
+
+describe('home lendo do banco', () => {
+  beforeEach(async () => {
+    await seedDemo(pool);
+  });
+
+  it('soma as participações ao total do card (Pace da Oca com 1 participação → 57)', async () => {
+    const user = await insertUser(pool, 'Ana');
+    await pool.query(
+      `INSERT INTO memberships (user_id, group_id, nickname)
+       SELECT $1, id, 'Ana' FROM groups WHERE slug = 'pace-da-oca'`,
+      [user],
+    );
+    const out = await getHome();
+    const card = out.slice(out.indexOf('>Pace da Oca</a>'));
+    expect(card.slice(0, card.indexOf('</article>'))).toContain('<dd class="mono">57</dd>');
+    expect(out).not.toContain('<dd class="mono">56</dd>');
+  });
+
+  it.each(['pending', 'rejected'])(
+    'ignora grupo com status %s no total, zonas e destaques',
+    async (status) => {
+      await pool.query("UPDATE groups SET status = $1 WHERE slug = 'pelotao-paulista'", [status]);
+      const out = await getHome();
+      expect(out).toContain('<strong>10</strong>grupos cadastrados');
+      expect(out).toMatch(/href="\/grupos\?zona=centro">.*?<span>1 grupo<\/span>/s);
+      expect(out.match(/<article class="card"/g)).toHaveLength(2);
+      expect(out).not.toContain('Pelotão Paulista');
+    },
+  );
+
+  it('sem grupos publicados não mostra Infinity/NaN', async () => {
+    await pool.query("UPDATE groups SET status = 'pending'");
+    const out = await getHome();
+    expect(out).toContain('<strong>0</strong>grupos cadastrados');
+    expect(out).not.toMatch(/Infinity|NaN|undefined/);
+    expect(out).not.toContain('min/km de pace');
+    expect(out).not.toContain('<article class="card"');
+  });
+
+  it('sem grupos demo não mostra o aviso nem a etiqueta de demonstração', async () => {
+    await pool.query('UPDATE groups SET is_demo = false');
+    const out = await getHome();
+    expect(out).not.toContain('Versão de demonstração');
+    expect(out).not.toContain(DEMO_TAG);
+    expect(out).not.toContain('class="demo-tag"');
+  });
+
+  it('grupo real com dono mostra "Cadastrado por {nome}"; sem dono, nenhuma etiqueta', async () => {
+    const ana = await insertUser(pool, 'Ana');
+    await pool.query('UPDATE groups SET is_demo = false');
+    await pool.query("UPDATE groups SET owner_id = $1 WHERE slug = 'pace-da-oca'", [ana]);
+    const out = await getHome();
+    expect(out.match(/class="demo-tag"/g)).toHaveLength(1);
+    const card = out.slice(out.indexOf('>Pace da Oca</a>') - 400, out.indexOf('>Pace da Oca</a>'));
+    expect(card).toContain('<span class="demo-tag">Cadastrado por Ana</span>');
+  });
+
+  it('escapa nome, local e nome do dono vindos do banco', async () => {
+    const xss = '<script>alert(1)</script>';
+    const owner = await insertUser(pool, xss);
+    await pool.query(
+      `UPDATE groups SET name = $1, location = $2, is_demo = false, owner_id = $3
+        WHERE slug = 'pace-da-oca'`,
+      [xss, xss, owner],
+    );
+    const out = await getHome();
+    expect(out).not.toContain('<script>alert');
+    expect(out).toContain('Cadastrado por &lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(out.match(/&lt;script&gt;alert\(1\)&lt;\/script&gt;/g)).toHaveLength(3);
   });
 });

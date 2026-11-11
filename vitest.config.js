@@ -7,5 +7,8 @@ export default defineConfig({
     env: { NODE_ENV: 'test' },
     // Os testes de banco compartilham um único banco de teste e fazem TRUNCATE.
     fileParallelism: false,
+    // Postgres em Docker no Windows às vezes leva mais que os 5 s/10 s padrão (migrate, TRUNCATE).
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
 });

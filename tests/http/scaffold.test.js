@@ -1,9 +1,21 @@
 import { readFileSync } from 'node:fs';
 import request from 'supertest';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
+import { pool } from '../../src/db/pool.js';
+import { migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const app = createApp();
+
+// GET / lê os grupos do banco desde a spec 004.
+beforeAll(async () => {
+  await migrateTestDb(pool);
+  await seedDemo(pool);
+});
+
+afterAll(async () => {
+  await pool.end();
+});
 
 describe('GET /', () => {
   it('renderiza o layout com header e footer do protótipo', async () => {

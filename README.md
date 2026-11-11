@@ -22,7 +22,7 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
-> ⚠️ Por enquanto só a home funciona, e ela ainda lê os grupos demo do arquivo de seed (passa a ler do banco no M3). Os links para grupos, zonas, mapa e conta levam a uma página 404 até os próximos marcos.
+> ⚠️ Por enquanto só a home e `/zonas` funcionam, lendo os grupos do banco. Os links para grupos, mapa e conta levam a uma página 404 até os próximos marcos.
 
 ## Stack
 
@@ -47,6 +47,8 @@ npm run dev
 
 Abra http://localhost:3000.
 
+O site lê os grupos do banco: `npm run dev` e `npm start` **precisam do Postgres de pé**, com as migrations e o seed aplicados (`npm run db:up`, `npm run migrate`, `npm run seed`). Com o banco fora do ar, as páginas respondem "Algo deu errado".
+
 | Comando | O que faz |
 |---|---|
 | `npm run dev` | Sobe o servidor e reinicia a cada alteração (`node --watch`) |
@@ -58,7 +60,7 @@ Abra http://localhost:3000.
 | `npm run lint` | Roda ESLint e `prettier --check` |
 | `npm run format` | Formata o código com Prettier |
 
-Os testes usam um banco separado (`DATABASE_URL_TEST`, criado junto com o volume do Docker). Sem Docker, dá para rodar só os testes que não usam banco: `npx vitest run tests/domain tests/http tests/scripts`.
+Os testes usam um banco separado (`DATABASE_URL_TEST`, criado junto com o volume do Docker). Sem Docker, dá para rodar só os testes que não usam banco: `npx vitest run tests/domain tests/scripts` (os de `tests/http` leem os grupos do banco).
 
 Para apagar o banco local e recomeçar do zero: `docker compose down -v` (depois `npm run db:up`, `npm run migrate` e `npm run seed`).
 
@@ -83,7 +85,8 @@ db/migrations/           migrations .sql numeradas (001–005)
 db/seeds/                grupos de demonstração
 db/docker-init/          cria o banco de teste no primeiro docker compose up
 docker-compose.yml       Postgres 16 local
-tests/domain, tests/http testes unitários e HTTP (sem banco)
+tests/domain             testes unitários (sem banco)
+tests/http               testes HTTP (supertest; leem o banco de teste)
 tests/db, tests/scripts  testes de banco, migrate e seed
 docs/                    protótipo, specs, relatórios de QA e do pipeline
 ```
