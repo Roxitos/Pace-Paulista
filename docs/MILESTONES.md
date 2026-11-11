@@ -12,3 +12,4 @@ Cada marco passa pelo pipeline (`/pipeline Mx`). O Specifier pode quebrar um mar
 | **M6** Escrita | cadastrar grupo, participar/sair, `/meus`, excluir conta | Fluxo criar conta → cadastrar → participar → sair → excluir passa |
 | **M7** Melhorias de JS | filtros ao vivo (`/api/grupos`), modal de participar, toast, menu mobile | Igual ao protótipo com JS; continua funcionando sem |
 | **M8** Produção | helmet/CSP, rate limit, revisão final de segurança, deploy | QA aprova em ambiente publicado |
+| **M9** Conteúdo real | curadoria de grupos reais, reivindicar grupo, edição pelo dono, `last_confirmed_at` + job de validade, "Informar problema", moderação. Detalhes em `PENDENCIAS.md` | Nenhum grupo demo publicado em produção; grupos sem confirmação há mais de 120 dias sinalizados ou fora da busca |
