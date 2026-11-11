@@ -33,11 +33,14 @@ As decisões de arquitetura completas estão em [`AGENTS.md`](AGENTS.md).
 
 ## Como rodar
 
-Requisitos: Node.js 22 ou mais novo. A partir do M2 também vai ser preciso o Docker, para o Postgres local.
+Requisitos: Node.js 22 ou mais novo e Docker (para o PostgreSQL 16 local).
 
 ```bash
 npm install
 cp .env.example .env
+npm run db:up
+npm run migrate
+npm run seed
 npm run dev
 ```
 
@@ -47,9 +50,16 @@ Abra http://localhost:3000.
 |---|---|
 | `npm run dev` | Sobe o servidor e reinicia a cada alteração (`node --watch`) |
 | `npm start` | Sobe o servidor |
-| `npm test` | Roda os testes (vitest) |
+| `npm run db:up` | Sobe o Postgres local (`docker compose`) e espera ele ficar saudável |
+| `npm run migrate` | Aplica as migrations pendentes de `db/migrations/` |
+| `npm run seed` | Insere os grupos de demonstração (idempotente; bloqueado em produção) |
+| `npm test` | Roda os testes (vitest); precisa do Postgres de pé (`npm run db:up`) |
 | `npm run lint` | Roda ESLint e `prettier --check` |
 | `npm run format` | Formata o código com Prettier |
+
+Os testes usam um banco separado (`DATABASE_URL_TEST`, criado junto com o volume do Docker). Sem Docker, dá para rodar só os testes que não usam banco: `npx vitest run tests/domain tests/http tests/scripts`.
+
+Para apagar o banco local e recomeçar do zero: `docker compose down -v` (depois `npm run db:up`, `npm run migrate` e `npm run seed`).
 
 Variáveis de ambiente: veja [`.env.example`](.env.example). `TZ_APP` precisa ser um fuso IANA válido (padrão `America/Sao_Paulo`).
 

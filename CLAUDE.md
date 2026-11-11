@@ -164,7 +164,7 @@ CREATE TABLE groups (
   base_participants  INT     NOT NULL DEFAULT 1 CHECK (base_participants BETWEEN 1 AND 999),
   description        TEXT    NOT NULL CHECK (char_length(description) BETWEEN 30 AND 400),
   profile_tags       TEXT[]  NOT NULL DEFAULT ARRAY['Novo na plataforma'],
-  contact            TEXT    NOT NULL,
+  contact            TEXT,   -- opcional: NULL nos grupos demo; o form de cadastro continua exigindo (spec 003)
   is_demo            BOOLEAN NOT NULL DEFAULT false,
   status             TEXT    NOT NULL DEFAULT 'published'
                        CHECK (status IN ('pending','published','rejected')), -- moderação: v2
@@ -383,6 +383,7 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 NODE_ENV=development
 PORT=3000
 DATABASE_URL=postgres://pace:pace@localhost:5432/pace_paulista
+DATABASE_URL_TEST=postgres://pace:pace@localhost:5432/pace_paulista_test
 SESSION_SECRET=troque-por-uma-string-longa-e-aleatoria
 TZ_APP=America/Sao_Paulo
 ```
@@ -391,10 +392,10 @@ Scripts esperados no `package.json`:
 ```
 npm run dev        # node --watch src/server.js
 npm start          # node src/server.js
-npm run db:up      # docker compose up -d db
+npm run db:up      # docker compose up -d --wait db (Postgres só em 127.0.0.1:5432; cria também pace_paulista_test)
 npm run migrate    # node scripts/migrate.js
-npm run seed       # node scripts/seed.js
-npm test           # vitest run (usa banco de teste: DATABASE_URL_TEST)
+npm run seed       # node scripts/seed.js (bloqueado com NODE_ENV=production)
+npm test           # vitest run (usa banco de teste: DATABASE_URL_TEST; precisa do Postgres de pé)
 npm run lint
 ```
 

@@ -1,0 +1,22 @@
+services:
+  db:
+    # Debian, não alpine: a collation do musl ordena nomes acentuados diferente do Postgres gerenciado.
+    image: postgres:16
+    environment:
+      POSTGRES_USER: pace
+      POSTGRES_PASSWORD: pace
+      POSTGRES_DB: pace_paulista
+    ports:
+      # Só na interface local: a senha de dev (pace/pace) não pode ficar aberta para a rede.
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/docker-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'pace', '-d', 'pace_paulista']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pgdata:
