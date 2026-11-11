@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+docs/
+public/css/app.css
+*.ejs
+package-lock.json
+# Documentação mantida à mão (fora do escopo da formatação de código)
+*.md
+.claude/

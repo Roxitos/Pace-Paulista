@@ -1,0 +1,22 @@
+<% const cur = (key) => nav === key ? ' aria-current="page"' : ''; -%>
+<header class="hdr" id="hdr">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Pace Paulista, início">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#5E9A22"/><path d="M13 31V9h8.5a7 7 0 0 1 0 14H13" fill="none" stroke="#fff" stroke-width="4.2" stroke-linejoin="round"/><path d="M7 31V9" stroke="#fff" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><circle cx="31" cy="31" r="2.6" fill="#E8B923"/></svg>
+      <span class="brand-name">PACE <b>PAULISTA</b></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Principal">
+      <a href="/" data-nav="inicio"<%- cur('inicio') %>>Início</a>
+      <a href="/grupos" data-nav="grupos"<%- cur('grupos') %>>Encontrar grupos</a>
+      <a href="/zonas" data-nav="zonas"<%- cur('zonas') %>>Explorar zonas</a>
+      <a href="/sobre" data-nav="sobre"<%- cur('sobre') %>>Sobre</a>
+      <div class="mob-ctas"><a class="btn btn-primary btn-sm" href="/encontrar">Encontrar meu grupo</a><a class="btn btn-light btn-sm" href="/grupos/novo">Cadastrar grupo</a></div>
+    </nav>
+    <div class="hdr-actions">
+      <a class="btn btn-light btn-sm" href="/grupos/novo">Cadastrar grupo</a>
+      <a class="btn btn-primary btn-sm" href="/encontrar">Encontrar meu grupo</a>
+      <a class="icon-btn" href="/meus" aria-label="Meus grupos" title="Meus grupos" id="meusBtn"><%- ic('user') %></a>
+      <button class="icon-btn menu-btn" data-act="menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav"><%- ic('menu') %></button>
+    </div>
+  </div>
+</header>
