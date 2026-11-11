@@ -1,6 +1,19 @@
 /* Base herdada do invólucro do protótipo (linha 1) */
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
 
+/* Acréscimos do site, fora do <style> do protótipo (o bloco abaixo do marcador "Layout" é cópia literal e é testado).
+   Os seletores têm especificidade maior que os do protótipo, então valem mesmo vindo antes. */
+/* Busca (spec 005): toggles de zona como checkbox, com o mesmo visual do aria-pressed, funcionando sem JS. */
+.ztog:has(input:checked){background:var(--z);border-color:var(--z);color:var(--zon)}
+.ztog:has(input:checked)::before{background:currentColor}
+.ztog:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+a.achip{text-decoration:none}
+/* Sem JS, o link "Filtros" aponta para #filters e o :target mostra o painel. */
+@media (max-width:900px){ .filters:target{display:grid} }
+/* Ao rolar até #filters, o topo do painel para abaixo do cabeçalho fixo (68px + 3px de borda) com folga.
+   A safe-area já entra pelo scroll-padding-top do html, que se soma a este valor. */
+.filters{scroll-margin-top:84px}
+
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{
   --verde:#5E9A22; --verde-hover:#4F8519; --roxo:#7A3FA0; --laranja:#E8892B; --vermelho:#C8402F; --azul:#3A78C2;

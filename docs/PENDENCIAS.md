@@ -2,11 +2,12 @@
 
 Riscos aceitos, pendências e perguntas abertas levantadas pelo pipeline. **O Specifier lê este arquivo antes de cada spec** e incorpora (ou responde) os itens do marco. Ao resolver um item, marque `[x]` e cite a spec.
 
-Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md).
+Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md).
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
-- [ ] **M3 (005)** — P2: botão "Aplicar filtros" no form sem JS; manter "Os resultados atualizam na hora." antes do M7? (004)
+- [ ] **M3 (005)** — P2: botão "Aplicar filtros" no form sem JS; manter "Os resultados atualizam na hora." antes do M7? (004) — spec 005 seguiu o default (botão "Aplicar filtros", texto literal); confirmar o texto ou trocá-lo até o M7. (005)
+- [ ] **M3+** — Sem JS, a URL após enviar o form leva campos vazios (`&local=&dia=…`). Redirecionar para a URL limpa? (005, QA)
 - [ ] **M3 (006)** — P6: texto do 404 de grupo ("Esse grupo não foi encontrado. Ele pode ter sido removido."); P7: manter "Confirmações por encontro dependem do banco de dados."? (004)
 - [ ] **M3 (007)** — P8: `/mapa/<slug inexistente>` → 404 (protótipo caía no padrão); P9: seleção padrão do mapa = primeiro da ordem (Cantareira Trail) ou fixar Correria do Carmo? (004)
 - [ ] **M3+** — Rodapé diz sempre "Os grupos marcados como “Fictício · demo”…", mesmo sem demos publicados. Condicionar a `hasDemo` como o aviso da home? (004, QA)
@@ -24,14 +25,17 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Docker Desktop instalado mas ainda não inicializado na máquina (abrir o app, aceitar termos, talvez WSL2 + reinício). — `docker info` responde; spec 003, CA1
 
 ## M3 — Leitura
-- [ ] SQL parametrizado; `ILIKE` com `%` e `_` escapados (005). `23505`/`23514` e `tx()` só existem com escrita → movidos para o M6 (spec 004). (001)
+- [x] SQL parametrizado; `ILIKE` com `%` e `_` escapados (005). `23505`/`23514` e `tx()` só existem com escrita → movidos para o M6 (spec 004). (001) — spec 005, CA5/CA9
 - [x] `src/` deixa de importar `db/seeds/demo-groups.js` e passa a ler do banco. (002) — spec 004, CA2
-- [ ] Formato de `PACE_FAIXAS` diverge: AGENTS.md `[min,max]` × protótipo `{nome,min,max}` — spec 005 decide `{nome,min,max}`; atualizar CLAUDE.md §6 junto com a 005. (Specifier 001, 004)
+- [x] Formato de `PACE_FAIXAS` diverge: AGENTS.md `[min,max]` × protótipo `{nome,min,max}` — spec 005 decide `{nome,min,max}`. (Specifier 001, 004) — spec 005
+- [x] Atualizar CLAUDE.md **e** AGENTS.md: §6 `PACE_FAIXAS` `{nome,min,max}`; §3 `filters.js` normaliza a query (o `WHERE` fica no repo) e novo partial `filter-options`; §8 checkboxes de zona no lugar de `aria-pressed` (P3). (005) — atualizados com OK do usuário
 - [ ] Slugs continuam `[a-z0-9-]` (já há `encodeURIComponent` nos links). Não há CHECK em `groups.slug`; 006 valida o formato na rota. (002, 004)
 - [x] `pg` devolve BIGINT como string (`id`) e `start_time` como `'06:30:00'` — tratar no repo/views (`fmtHora` já aceita `HH:MM:SS`). (003) — spec 004, CA6: `id` não sai do repo; `to_char(…,'HH24:MI')`
 - [x] A partir do M3, `npm run dev` passa a precisar do Postgres de pé; documentar no README. (003) — spec 004
 - [ ] Exibição do `contact` na página do grupo, inclusive quando NULL (demos). (003) — decidido (P4, usuário): **deslogado não vê**; linha "Contato" no fim da "Ficha do treino", texto puro, oculta quando vazia. Ajustar spec 006; exibição para logado entra no M5.
-- [ ] Spec 005: toggles de zona viram checkboxes com o mesmo visual (P3 aprovado pelo usuário); atualizar CLAUDE.md §8 (`aria-pressed`) e §3 (`domain/filters.js` normaliza a query; `WHERE` no repo) junto com a 005. (004)
+- [x] Spec 005: toggles de zona viram checkboxes com o mesmo visual (P3 aprovado pelo usuário). (004) — spec 005, CA7
+- [x] Sem JS, ≤ 900 px: "Filtros" rola até `#filters` e o título/"Limpar filtros" ficam ~70 px atrás do cabeçalho fixo (toque acerta `/meus`). (005, QA) — spec 005: `.filters{scroll-margin-top:84px}` (a safe-area já vem do `scroll-padding-top` do `html`), reverificado pelo QA
+- [ ] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005)
 - [ ] Spec 007: `/sobre` mantém o título "Status do protótipo" (P10, usuário); banco ATIVO, login PENDENTE, item "navegador" removido. (004)
 
 ## M4 — Compatibilidade / cadastro
@@ -53,6 +57,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Tratar `23505`/`23514` e usar `tx()` em escritas múltiplas (movido do M3). (001, 004)
 - [ ] `start_time = '24:00'` é aceito pelo Postgres e derruba `/` (e `/grupos`) via `fmtHora`: migration nova `CHECK (start_time < '24:00')` + zod `([01]\d|2[0-3]):[0-5]\d`. Corrige o item do M2 "CHECKs garantem start_time". (004, Hardener)
 - [ ] Zod: deduplicar `days` ("Sáb, Sáb"); `.trim()` em `name`/`location`/`contact`/`apelido` antes do tamanho. (004, Hardener)
+- [ ] Normalizar para NFC também na escrita (`name`, `location`): a busca normaliza a entrada, mas um nome gravado em NFD não seria achado. (005, Hardener)
+- [ ] `start_time = '24:00'` também derruba `/grupos` (cai em `periodo=noite` e em `fmtHora`), com ou sem filtro — mesma correção do item acima. (005, Hardener)
 - [ ] Registrar `/grupos/novo` antes de `/grupos/:slug`; reservar slugs `novo` e `zona`. (004, Specifier)
 
 ## M8 — Produção
@@ -66,6 +72,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Healthcheck `pg_isready` sem `-h` pode responder "healthy" durante o init do volume; avaliar `-h 127.0.0.1`. (003, QA)
 - [ ] Pool da app sem `statement_timeout`: lock longo em `groups` (ex.: migration travada) pendura `/` e `/zonas` até 300 s. Avaliar só no pool da app (`createPool` também serve migrate/seed). (004, Hardener)
 - [ ] Favicon ausente → 404 no console (desde 001). (004, QA)
+- [ ] `/grupos` sem rate limit nem cache: cada GET faz consulta completa (entrada limitada pelo Node, 431, e pelos 1000 pares do querystring). Agrava o pool sem `statement_timeout`. (005, Hardener)
+- [ ] `ESCAPE '\'` depende de `standard_conforming_strings=on` (padrão desde PG 9.1); conferir no Postgres de produção ou trocar por `ESCAPE E'\\'`. (005, Hardener)
 - [ ] Deploy automático a cada push na `main` com `npm run migrate` no release. Dados não exigem deploy: SSR lê o banco a cada request. (conteúdo)
 
 ## M9 — Conteúdo real (manter os grupos atualizados)
@@ -92,3 +100,9 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - Ordem dos locais em `/zonas` depende da collation de `citext` (desempate por slug). (004)
 - `tests/http` exige Postgres (exceto `banco-indisponivel.test.js`); `testTimeout`/`hookTimeout` 30 s por causa do Docker no Windows. (004)
 - QA em worktree usa o Postgres do checkout principal; `db:up` no worktree disputaria a porta 5432 — fixar `name:` no `docker-compose.yml`? (004, QA)
+- Busca não ignora acentos (`pelotao` não acha "Pelotão"), igual ao protótipo; caracteres invisíveis (U+200B) não são removidos pelo `trim()` — só geram 0 resultados e chip "Nome: " aparentemente vazio. (005)
+- `activeChips` e `buildWhere` assumem a saída de `parseFilters`; um chamador interno com `null` ou zona fora de `ZONAS` derruba a requisição (hoje o único chamador é `searchGroups`). (005)
+- Valor repetido usa o primeiro (`?dia=xyz&dia=sab` fica sem filtro de dia), conforme a spec. (005)
+- `:has()` exige navegador ≥ 2023; sem ele o filtro funciona, só some o destaque da zona marcada. Em ≤ 900 px o painel de filtros volta fechado após "Aplicar filtros". (005)
+- Ordem dos cards em `/grupos` = zona + nome (AGENTS §6), diferente do array `DEMO` do protótipo — intencional, não "corrigir". (005, QA)
+- Em 404 sob `/grupos/...` (ex.: `/grupos/zona/marte`) o header marca "Encontrar grupos" com `aria-current` (`currentNav` usa `startsWith('/grupos/')`). Cosmético. (005, Hardener)

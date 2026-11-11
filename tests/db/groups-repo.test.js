@@ -1,5 +1,6 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { pool } from '../../src/db/pool.js';
+import { parseFilters } from '../../src/domain/filters.js';
 import { listPublished } from '../../src/modules/groups/groups.repo.js';
 import { insertUser, migrateTestDb, seedDemo } from '../helpers/db.js';
 
@@ -159,5 +160,167 @@ describe('groupsRepo.listPublished', () => {
   it('devolve lista vazia quando não há grupos publicados', async () => {
     await pool.query("UPDATE groups SET status = 'pending'");
     expect(await listPublished()).toEqual([]);
+  });
+});
+
+const LESTE_E_SUL = [
+  'correria-do-carmo',
+  'tiete-em-movimento',
+  'pace-da-oca',
+  'primeiro-km-ibira',
+  'represa-run-club',
+];
+
+// Tabela "Resultados esperados" da spec 005, com a query como o Express 5 a entrega.
+const SEARCH_CASES = [
+  ['(nenhum)', {}, REPO_ORDER],
+  ['zona=sul', { zona: 'sul' }, ['pace-da-oca', 'primeiro-km-ibira', 'represa-run-club']],
+  ['zona=leste&zona=sul', { zona: ['leste', 'sul'] }, LESTE_E_SUL],
+  ['zona=sul&zona=leste', { zona: ['sul', 'leste'] }, LESTE_E_SUL],
+  ['nome=pace', { nome: 'pace' }, ['juventude-em-pace', 'pace-da-oca']],
+  ['nome=PACE', { nome: 'PACE' }, ['juventude-em-pace', 'pace-da-oca']],
+  ['nome=%20pace%20', { nome: ' pace ' }, ['juventude-em-pace', 'pace-da-oca']],
+  ['nome=pelotão', { nome: 'pelotão' }, ['pelotao-paulista']],
+  ['nome=%25', { nome: '%' }, []],
+  ['nome=_', { nome: '_' }, []],
+  ['nome=%5C', { nome: '\\' }, []],
+  ['local=ibirapuera', { local: 'ibirapuera' }, ['pace-da-oca', 'primeiro-km-ibira']],
+  ['dia=sab', { dia: 'sab' }, ['raia-usp', 'correria-do-carmo', 'primeiro-km-ibira']],
+  [
+    'periodo=cedo',
+    { periodo: 'cedo' },
+    ['villa-lobos-runners', 'correria-do-carmo', 'pace-da-oca'],
+  ],
+  [
+    'periodo=manha',
+    { periodo: 'manha' },
+    ['cantareira-trail', 'raia-usp', 'pelotao-paulista', 'primeiro-km-ibira', 'represa-run-club'],
+  ],
+  ['periodo=tarde', { periodo: 'tarde' }, []],
+  [
+    'periodo=noite',
+    { periodo: 'noite' },
+    ['juventude-em-pace', 'minhocao-noturno', 'tiete-em-movimento'],
+  ],
+  ['pace=ate5', { pace: 'ate5' }, ['raia-usp', 'pelotao-paulista', 'pace-da-oca']],
+  [
+    'pace=5a6',
+    { pace: '5a6' },
+    [
+      'villa-lobos-runners',
+      'minhocao-noturno',
+      'pelotao-paulista',
+      'correria-do-carmo',
+      'represa-run-club',
+    ],
+  ],
+  [
+    'pace=6a7',
+    { pace: '6a7' },
+    [
+      'cantareira-trail',
+      'juventude-em-pace',
+      'correria-do-carmo',
+      'tiete-em-movimento',
+      'represa-run-club',
+    ],
+  ],
+  [
+    'pace=mais7',
+    { pace: 'mais7' },
+    ['cantareira-trail', 'tiete-em-movimento', 'primeiro-km-ibira'],
+  ],
+  [
+    'nivel=iniciante',
+    { nivel: 'iniciante' },
+    ['juventude-em-pace', 'tiete-em-movimento', 'primeiro-km-ibira'],
+  ],
+  ['zona=sul&nivel=avancado', { zona: 'sul', nivel: 'avancado' }, ['pace-da-oca']],
+  [
+    'zona=marte&dia=xyz&pace=constructor&nivel=__proto__',
+    { zona: 'marte', dia: 'xyz', pace: 'constructor', nivel: '__proto__' },
+    REPO_ORDER,
+  ],
+];
+
+describe('groupsRepo.listPublished com filtros', () => {
+  it.each(SEARCH_CASES)('%s', async (_label, query, expected) => {
+    const groups = await listPublished(parseFilters(query));
+    expect(groups.map((g) => g.slug)).toEqual(expected);
+  });
+
+  it('pace exige cruzar a faixa: encostar na borda não basta', async () => {
+    const slugsOf = async (pace) =>
+      (await listPublished(parseFilters({ pace }))).map((g) => g.slug);
+    expect(await slugsOf('ate5')).not.toContain('minhocao-noturno');
+    expect(await slugsOf('6a7')).not.toContain('minhocao-noturno');
+    expect(await slugsOf('6a7')).not.toContain('primeiro-km-ibira');
+    expect(await slugsOf('mais7')).not.toContain('juventude-em-pace');
+  });
+
+  it('combina filtros com E e continua ignorando grupos não publicados', async () => {
+    await pool.query("UPDATE groups SET status = 'pending' WHERE slug = 'primeiro-km-ibira'");
+    const groups = await listPublished(parseFilters({ zona: 'sul', local: 'ibirapuera' }));
+    expect(groups.map((g) => g.slug)).toEqual(['pace-da-oca']);
+  });
+
+  it('trata %, _ e \\ do termo como literais', async () => {
+    await pool.query("UPDATE groups SET name = $1 WHERE slug = 'pace-da-oca'", [
+      'Pace 100% _Oca\\',
+    ]);
+    for (const nome of ['100%', '% _', '_Oca', 'Oca\\']) {
+      const groups = await listPublished(parseFilters({ nome }));
+      expect(groups.map((g) => g.slug)).toEqual(['pace-da-oca']);
+    }
+  });
+
+  it('não depende de parseFilters para chaves perigosas de pace e período', async () => {
+    const filters = { ...parseFilters({}), pace: 'constructor', periodo: '__proto__' };
+    expect(await listPublished(filters)).toHaveLength(11);
+  });
+
+  it('envia todo valor de filtro como parâmetro, nunca no texto do SQL', async () => {
+    const spy = vi.spyOn(pool, 'query');
+    try {
+      await listPublished(
+        parseFilters({
+          zona: 'sul',
+          nome: "x' OR 1=1 --",
+          local: 'ibirapuera',
+          dia: 'sab',
+          periodo: 'manha',
+          pace: 'mais7',
+          nivel: 'iniciante',
+        }),
+      );
+      const [sql, params] = spy.mock.calls[0];
+      for (const value of [
+        "x' OR 1=1",
+        'ibirapuera',
+        'sab',
+        '07:00',
+        '12:00',
+        '420',
+        '9999',
+        'iniciante',
+      ]) {
+        expect(sql).not.toContain(value);
+      }
+      expect(sql).not.toMatch(/'sul'/);
+      expect(params).toEqual([
+        expect.any(Array),
+        ['sul'],
+        "%x' OR 1=1 --%",
+        '%ibirapuera%',
+        'sab',
+        '07:00',
+        '12:00',
+        9999,
+        420,
+        'iniciante',
+      ]);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
