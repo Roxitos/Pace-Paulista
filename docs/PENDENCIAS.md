@@ -2,13 +2,15 @@
 
 Riscos aceitos, pendências e perguntas abertas levantadas pelo pipeline. **O Specifier lê este arquivo antes de cada spec** e incorpora (ou responde) os itens do marco. Ao resolver um item, marque `[x]` e cite a spec.
 
-Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md).
+Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md).
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
 - [ ] **M3 (005)** — P2: botão "Aplicar filtros" no form sem JS; manter "Os resultados atualizam na hora." antes do M7? (004) — spec 005 seguiu o default (botão "Aplicar filtros", texto literal); confirmar o texto ou trocá-lo até o M7. (005)
 - [ ] **M3+** — Sem JS, a URL após enviar o form leva campos vazios (`&local=&dia=…`). Redirecionar para a URL limpa? (005, QA)
-- [ ] **M3 (006)** — P6: texto do 404 de grupo ("Esse grupo não foi encontrado. Ele pode ter sido removido."); P7: manter "Confirmações por encontro dependem do banco de dados."? (004)
+- [x] **M3 (006)** — P6: texto do 404 de grupo ("Esse grupo não foi encontrado. Ele pode ter sido removido."); P7: manter "Confirmações por encontro dependem do banco de dados."? (004) — spec 006: defaults aceitos pelo usuário
+- [ ] **Futuro** — Contato do grupo vira link (Instagram/site/e-mail) com validação de URL; hoje é texto puro (P4). (006, usuário)
+- [ ] **M3+** — A 320 px todas as páginas têm 3 px de scroll horizontal (largura 323), já na HEAD; a meta do AGENTS é 360 px. Importa suportar 320 px? (006, QA)
 - [ ] **M3 (007)** — P8: `/mapa/<slug inexistente>` → 404 (protótipo caía no padrão); P9: seleção padrão do mapa = primeiro da ordem (Cantareira Trail) ou fixar Correria do Carmo? (004)
 - [ ] **M3+** — Rodapé diz sempre "Os grupos marcados como “Fictício · demo”…", mesmo sem demos publicados. Condicionar a `hasDemo` como o aviso da home? (004, QA)
 - [ ] **M5** — `display_name` fica público ("Cadastrado por …"); avisar no cadastro de conta. Bloquear nomes que imitem a marca (ex.: "Equipe Pace Paulista")? (004, Hardener)
@@ -29,10 +31,10 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] `src/` deixa de importar `db/seeds/demo-groups.js` e passa a ler do banco. (002) — spec 004, CA2
 - [x] Formato de `PACE_FAIXAS` diverge: AGENTS.md `[min,max]` × protótipo `{nome,min,max}` — spec 005 decide `{nome,min,max}`. (Specifier 001, 004) — spec 005
 - [x] Atualizar CLAUDE.md **e** AGENTS.md: §6 `PACE_FAIXAS` `{nome,min,max}`; §3 `filters.js` normaliza a query (o `WHERE` fica no repo) e novo partial `filter-options`; §8 checkboxes de zona no lugar de `aria-pressed` (P3). (005) — atualizados com OK do usuário
-- [ ] Slugs continuam `[a-z0-9-]` (já há `encodeURIComponent` nos links). Não há CHECK em `groups.slug`; 006 valida o formato na rota. (002, 004)
+- [x] Slugs continuam `[a-z0-9-]` (já há `encodeURIComponent` nos links). Não há CHECK em `groups.slug`; 006 valida o formato na rota. (002, 004) — spec 006, CA3: `^[a-z0-9-]{1,60}$` na rota, 404 sem consultar o banco
 - [x] `pg` devolve BIGINT como string (`id`) e `start_time` como `'06:30:00'` — tratar no repo/views (`fmtHora` já aceita `HH:MM:SS`). (003) — spec 004, CA6: `id` não sai do repo; `to_char(…,'HH24:MI')`
 - [x] A partir do M3, `npm run dev` passa a precisar do Postgres de pé; documentar no README. (003) — spec 004
-- [ ] Exibição do `contact` na página do grupo, inclusive quando NULL (demos). (003) — decidido (P4, usuário): **deslogado não vê**; linha "Contato" no fim da "Ficha do treino", texto puro, oculta quando vazia. Ajustar spec 006; exibição para logado entra no M5.
+- [x] Exibição do `contact` na página do grupo, inclusive quando NULL (demos). (003) — decidido (P4, usuário): **deslogado não vê**; linha "Contato" no fim da "Ficha do treino", texto puro, oculta quando vazia. Ajustar spec 006; exibição para logado entra no M5. — spec 006, CA4: serviço zera `contact` sem `viewer` e a view exige `locals.user`; reconfirmado pelo usuário em 2026-11-11
 - [x] Spec 005: toggles de zona viram checkboxes com o mesmo visual (P3 aprovado pelo usuário). (004) — spec 005, CA7
 - [x] Sem JS, ≤ 900 px: "Filtros" rola até `#filters` e o título/"Limpar filtros" ficam ~70 px atrás do cabeçalho fixo (toque acerta `/meus`). (005, QA) — spec 005: `.filters{scroll-margin-top:84px}` (a safe-area já vem do `scroll-padding-top` do `html`), reverificado pelo QA
 - [ ] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005)
@@ -47,7 +49,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Rate limit em `/conta/entrar` e `/conta/criar`. (001)
 - [ ] Ao montar body-parser: `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
 - [ ] Excluir conta: cascata e sessão destruída. (001)
-- [ ] Mostrar o contato do grupo só para logado (P4). (004)
+- [ ] Mostrar o contato do grupo só para logado (P4). (004) — a 006 já deixou pronto: a sessão só precisa preencher `res.locals.user`; o QA do M5 repete o CA4 da 006 com sessão real. (006)
+- [ ] Página do grupo com contato para logado: responder com `Cache-Control: private` (ou `Vary: Cookie`) para um CDN/proxy não servir a versão com contato a deslogado. (006, Hardener)
 - [ ] `.trim()` no zod antes de `min()` em `display_name` (só espaços passa no CHECK). (004, Hardener)
 - [ ] LGPD: nunca logar `err.detail` do pg (no `23505` vem `Key (email)=(…)`); registrar só `code`/`constraint`. (004, Hardener)
 - [ ] `connect-pg-simple` com `createTableIfMissing: false` (tabela vem da migration 005). (003)
@@ -59,7 +62,12 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Zod: deduplicar `days` ("Sáb, Sáb"); `.trim()` em `name`/`location`/`contact`/`apelido` antes do tamanho. (004, Hardener)
 - [ ] Normalizar para NFC também na escrita (`name`, `location`): a busca normaliza a entrada, mas um nome gravado em NFD não seria achado. (005, Hardener)
 - [ ] `start_time = '24:00'` também derruba `/grupos` (cai em `periodo=noite` e em `fmtHora`), com ou sem filtro — mesma correção do item acima. (005, Hardener)
-- [ ] Registrar `/grupos/novo` antes de `/grupos/:slug`; reservar slugs `novo` e `zona`. (004, Specifier)
+- [ ] Registrar `/grupos/novo` antes de `/grupos/:slug`; reservar slugs `novo` e `zona`. (004, Specifier) — hoje `/grupos/novo` e `/grupos/zona` dão o 404 com a mensagem do grupo. (006)
+- [ ] `start_time = '24:00'` também derruba `/grupos/:slug` (`proximos`/`fmtHora`) — mesma correção dos itens acima. (006, Hardener)
+- [ ] Cards de `/grupos` com nome de 50 caracteres sem espaço abrem scroll horizontal a 360 px (já na HEAD da 005): `overflow-wrap` no card ou limite no zod. (006, QA)
+
+## M7 — Melhorias de JS
+- [ ] `listPublished` devolve `contact` de todos os grupos (contrato `Group`): `GET /api/grupos` (e qualquer JSON enviado ao cliente) precisa remover `contact` para deslogado, senão o P4 vaza. (006, Hardener)
 
 ## M8 — Produção
 - [ ] helmet + CSP (`self`, fonts.googleapis.com, fonts.gstatic.com). `style="--z:…"`, `style="font-size:14px"` e o `extra` do 404/500 exigem `style-src-attr 'unsafe-inline'` ou classes CSS. (001, 002)
@@ -105,4 +113,7 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - Valor repetido usa o primeiro (`?dia=xyz&dia=sab` fica sem filtro de dia), conforme a spec. (005)
 - `:has()` exige navegador ≥ 2023; sem ele o filtro funciona, só some o destaque da zona marcada. Em ≤ 900 px o painel de filtros volta fechado após "Aplicar filtros". (005)
 - Ordem dos cards em `/grupos` = zona + nome (AGENTS §6), diferente do array `DEMO` do protótipo — intencional, não "corrigir". (005, QA)
+- `proximos` num horário que o relógio pula (se o horário de verão voltar, 0h–1h em SP) cai no dia anterior; `fmtEncontro` exige ICU completo (padrão no Node 22; teste pega small-icu). (006, Hardener)
+- Encontros da página do grupo em ≤ 560 px: pace desce para baixo do texto (2 colunas) — desvio intencional do protótipo aprovado pelo usuário; acima disso igual ao protótipo. (006, QA)
+- Ambiente local roda Node 24; AGENTS pede 22 (CI usa 22). (006, QA)
 - Em 404 sob `/grupos/...` (ex.: `/grupos/zona/marte`) o header marca "Encontrar grupos" com `aria-current` (`currentNav` usa `startsWith('/grupos/')`). Cosmético. (005, Hardener)

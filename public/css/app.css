@@ -13,6 +13,11 @@ a.achip{text-decoration:none}
 /* Ao rolar até #filters, o topo do painel para abaixo do cabeçalho fixo (68px + 3px de borda) com folga.
    A safe-area já entra pelo scroll-padding-top do html, que se soma a este valor. */
 .filters{scroll-margin-top:84px}
+/* Detalhe (spec 006): texto do organizador sem espaço (nome, local, descrição, tags) não pode abrir scroll horizontal em 360 px. */
+.detail-head h1,.detail-head .sub span,.sessions li > span,.detail-grid .panel p,.detail-grid .tag{overflow-wrap:anywhere}
+/* Detalhe (spec 006, desvio intencional do protótipo só no celular): com 3 colunas sobram ~63 px para o texto do encontro a 360 px
+   e as palavras quebram no meio. Abaixo de 560 px o pace desce para baixo do texto, e a data ocupa as duas linhas. */
+@media (max-width:560px){ul.sessions li{grid-template-columns:auto minmax(0,1fr);row-gap:4px}ul.sessions li > .date-box{grid-row:span 2}ul.sessions li > .mono{grid-column:2}}
 
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{

@@ -1,5 +1,5 @@
 # 006 — Detalhe do grupo `/grupos/:slug` com próximos encontros no fuso de SP
-Marco: M3 · Status: pronta para Coder após resposta a **P4** (P5–P7 têm default; ver "Perguntas em aberto")
+Marco: M3 · Status: pronta para Coder (P4–P7 respondidas em 2026-11-11: defaults aceitos; ver "Respostas" no fim)
 Depende de: 004-leitura-banco-home-zonas (usa o router de grupos criado na 005; se a 005 ainda não tiver entrado, criar `groups.routes.js` aqui)
 Ordem no M3: 004 → 005 → **006** → 007
 
@@ -74,10 +74,10 @@ HTML e classes de `PageDetalhe` (linhas 726–763), com `<%= %>` em todo dado do
 - [ ] CA1 — `GET /grupos/pace-da-oca` → 200, título "Pace da Oca · Pace Paulista", com nome, chip "Zona Sul", etiqueta "Grupo fictício · demonstração", "Segunda, Quarta e Sexta · 6h", "4:15–5:00 min/km", descrição, tags de perfil, ponto de encontro e distância "10 a 14 km" literais do `DEMO`, nível "Avançado", participantes 56 (57 com uma membership) e o painel da Zona Sul com selo e "Outros grupos da Zona Sul" → `/grupos?zona=sul`.
 - [ ] CA2 — Com o relógio fixado em **2026-11-14T09:00:00Z** (sábado 6h00 em SP), `/grupos/correria-do-carmo` (sáb 6h30) lista 4 encontros: 14, 21 e 28 de nov e 5 de dez, todos "Sábado, 6h30"; com **2026-11-14T09:31:00Z** lista 3 (21/nov, 28/nov, 5/dez).
 - [ ] CA3 — `/grupos/nao-existe` e um grupo com `status='pending'` → 404 com "Esse grupo não foi encontrado. Ele pode ter sido removido."; `/grupos/ABC`, `/grupos/a%20b`, `/grupos/<61 caracteres>` → 404 sem consulta ao banco.
-- [ ] CA4 — Grupo com `contact = '@grupo_teste'` mostra a linha "Contato" com esse texto (escapado); grupo demo (`contact` NULL) não tem a linha "Contato".
+- [ ] CA4 — (P4, só logado) Deslogado nunca vê a linha "Contato" nem o valor do contato (o serviço não o envia à view). Logado (`res.locals.user`, preenchido pelo M5) vê a linha com `@grupo_teste` escapado; grupo demo (`contact` NULL) ou contato vazio não têm a linha.
 - [ ] CA5 — Grupo não demo com dono "Ana" mostra "Cadastrado por Ana" no cabeçalho; sem dono, nenhuma etiqueta.
 - [ ] CA6 — Links: "Voltar para os grupos" → `/grupos`; "Entrar no grupo" → `/conta/entrar?next=/grupos/<slug>%23participar`; "Ver rota no mapa" → `/mapa/<slug>`; nenhum `href="#`, nenhum `data-act="entrar"`/`"sair"`.
-- [ ] CA7 — Nome, local, descrição, tags, ponto, distância, contato e `owner_name` com `<script>` aparecem escapados.
+- [ ] CA7 — Nome, local, descrição, tags, ponto, distância, contato (logado) e `owner_name` com `<script>` aparecem escapados; deslogado, o contato não aparece nem escapado.
 - [ ] CA8 — Funciona sem JS; em 360 px o `.detail-grid` vira uma coluna, sem scroll horizontal (inclusive com nome longo de 50 caracteres e contato de 80); `aria-current="page"` em "Encontrar grupos" no header.
 - [ ] CA9 — `proximos` não depende do fuso do processo: os testes unitários passam com `TZ=UTC` e com `TZ=Asia/Tokyo`.
 - [ ] CA10 — SQL só no repo, parametrizado; `npm test` e `npm run lint` passam.
@@ -107,3 +107,8 @@ HTML e classes de `PageDetalhe` (linhas 726–763), com `<%= %>` em todo dado do
 - `/grupos/novo` (M6) precisa ser registrado antes de `/grupos/:slug`; e o gerador de slug do M6 deve impedir slugs reservados (`novo`, `zona`), senão um grupo chamado "Novo" ficaria inacessível. Registrar no `PENDENCIAS.md` (M6).
 - O cálculo de fuso com `Intl` depende do ICU completo do Node (padrão no Node 22). Imagens "small-icu" dariam nomes de mês/dia em inglês; o teste de `fmtEncontro` pega isso.
 - A página faz 1 consulta por request (`findPublishedBySlug`); `proximos` é calculado a cada request (sem cache), o que mantém as datas corretas sem job.
+
+### Respostas (2026-11-11)
+- **P4**: linha "Contato" no fim da "Ficha do treino", texto puro, oculta quando vazia e **só para usuário logado** (decisão anterior do usuário, reconfirmada em 2026-11-11; registrada em `PENDENCIAS.md`). Até o M5 não há sessão, então ninguém vê a linha. No futuro o contato deve virar link (Instagram/site/e-mail) com validação de URL; registrar em `PENDENCIAS.md`.
+- **P5, P6, P7**: defaults aceitos.
+- **Encontros em tela estreita** (usuário, 2026-11-11, após REPROVADO do QA): em telas estreitas, a faixa de pace de cada item de "Próximos encontros" desce para baixo do texto (data à esquerda; dia/hora, local · distância e pace empilhados à direita). Nenhuma palavra do seed pode quebrar no meio a 360 px, e um local de 80 caracteres sem espaço não pode abrir scroll horizontal. Desvio intencional do protótipo, só no mobile.

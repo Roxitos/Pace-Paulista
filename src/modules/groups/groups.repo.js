@@ -27,6 +27,13 @@ const SELECT_PUBLISHED = `
     LEFT JOIN users u ON u.id = g.owner_id
     LEFT JOIN memberships m ON m.group_id = g.id`;
 
+// O GROUP BY acompanha os JOINs de SELECT_PUBLISHED; fica aqui para as consultas não divergirem.
+function selectPublished(where) {
+  return `${SELECT_PUBLISHED}
+   WHERE ${where}
+   GROUP BY g.id, u.display_name`;
+}
+
 // Só o texto das condições é montado aqui; todo valor de filtro vai como parâmetro $n.
 // filters vem de parseFilters, mas as chaves de PACE_FAIXAS/PERIODOS são conferidas de novo
 // porque este é o último ponto antes do SQL.
@@ -60,10 +67,15 @@ function buildWhere(filters, params) {
 
 export async function listPublished(filters = EMPTY_FILTERS) {
   const params = [ZONA_ORDEM];
-  const sql = `${SELECT_PUBLISHED}
-   WHERE ${buildWhere(filters, params)}
-   GROUP BY g.id, u.display_name
+  const sql = `${selectPublished(buildWhere(filters, params))}
    ORDER BY array_position($1::text[], g.zone), g.name, g.slug`;
   const { rows } = await pool.query(sql, params);
   return rows;
+}
+
+export async function findPublishedBySlug(slug) {
+  const { rows } = await pool.query(selectPublished("g.slug = $1 AND g.status = 'published'"), [
+    slug,
+  ]);
+  return rows[0] ?? null;
 }

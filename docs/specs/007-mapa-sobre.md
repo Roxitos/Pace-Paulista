@@ -1,5 +1,5 @@
 # 007 — Mapa esquemático `/mapa` e `/mapa/:slug` sem JS, e `/sobre`
-Marco: M3 · Status: pronta para Coder após resposta a **P10** (P8 e P9 têm default; ver "Perguntas em aberto")
+Marco: M3 · Status: pronta para Coder (P8–P10 respondidas em 2026-11-11: defaults aceitos; ver "Respostas" no fim)
 Depende de: 004-leitura-banco-home-zonas
 Ordem no M3: 004 → 005 → 006 → **007** (última do M3)
 
@@ -103,3 +103,6 @@ Literal de `PageSobre` (`page-head` "Sobre" / "O que é o Pace Paulista" / texto
 - Até o M7, selecionar outro grupo no mapa recarrega a página (custo: uma consulta de lista por clique). Aceitável para o tamanho do dataset.
 - `inline style` (`style="--z:…"`, `font-size`) continua no HTML como no protótipo; a CSP do M8 já registra essa pendência.
 - Após esta spec, o orquestrador pode marcar no `PENDENCIAS.md` (M8) que nenhum link da home leva mais a 404 **exceto** `/encontrar` (M4), `/grupos/novo`, `/meus` e `/conta/entrar` (M5/M6).
+
+### Respostas (2026-11-11)
+- **P8, P9, P10**: defaults aceitos (título "Status do protótipo" mantido).

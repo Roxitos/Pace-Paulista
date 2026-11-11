@@ -1,0 +1,46 @@
+<%
+  const z = ZONAS[group.zone];
+  const faixa = fmtFaixa(group.pace_min_s, group.pace_max_s);
+  const hora = fmtHora(group.start_time);
+  const dias = fmtDiasLongo(group.days);
+  const slugUrl = encodeURIComponent(group.slug);
+  const headTag = group.is_demo ? 'Grupo fictício · demonstração' : group.owner_name && `Cadastrado por ${group.owner_name}`;
+-%>
+<section class="detail-head" style="<%= zstyle(group.zone) %>"><div class="wrap">
+    <a class="back" href="/grupos"><%- ic('back', 'ico-sm') %> Voltar para os grupos</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><%- include('../partials/zone-chip', { zone: group.zone }) -%><% if (headTag) { %><span class="demo-tag" style="color:inherit;border-color:currentColor"><%= headTag %></span><% } %></div>
+    <h1 class="display"><%= group.name %></h1>
+    <div class="sub"><span><%- ic('pin', 'ico-sm') %><%= group.location %></span><span><%- ic('cal', 'ico-sm') %><%= dias %> · <%= hora %></span><span class="mono"><%- ic('gauge', 'ico-sm') %><%= faixa %></span></div>
+  </div></section>
+  <div class="wrap"><div class="detail-grid" style="<%= zstyle(group.zone) %>">
+    <div>
+      <div class="panel"><h2>Sobre o grupo</h2><p><%= group.description %></p></div>
+      <div class="panel"><h2>Perfil da comunidade</h2><div class="tags"><% for (const t of group.profile_tags) { %><span class="tag"><%= t %></span><% } %></div></div>
+      <div class="panel"><h2>Próximos encontros</h2>
+        <ul class="sessions"><% for (const s of sessions) { %><li><span class="date-box"><b><%= s.dia %></b><small><%= s.mes %></small></span><span><b><%= s.semana %>, <%= hora %></b><br><small style="color:var(--muted)"><%= group.location %> · <%= group.distance || 'distância combinada no grupo' %></small></span><span class="mono" style="font-size:13px;color:var(--muted)"><%= faixa %></span></li><% } %></ul>
+        <p style="color:var(--muted);font-size:13px;margin-top:10px">Datas calculadas a partir da agenda fixa do grupo. Confirmações por encontro dependem do banco de dados.</p>
+      </div>
+      <div class="panel"><h2>Antes do primeiro treino</h2><ul class="rules"><li>Chegue 10 minutos antes para o aquecimento.</li><li>Leve água; nos treinos longos, combine hidratação com o grupo.</li><li>Corra sempre pela calçada ou área de pedestres e respeite quem caminha.</li><li>Se o pace estiver puxado, avise: o grupo ajusta.</li></ul></div>
+    </div>
+    <aside>
+      <div class="panel">
+        <h2>Ficha do treino</h2>
+        <dl class="spec">
+          <div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= group.location %></dd></div>
+          <div><dt><%- ic('door', 'ico-sm') %>Ponto de encontro</dt><dd style="font-weight:500"><%= group.meeting_point %></dd></div>
+          <div><dt><%- ic('cal', 'ico-sm') %>Dias</dt><dd><%= dias %></dd></div>
+          <div><dt><%- ic('clock', 'ico-sm') %>Horário</dt><dd class="mono"><%= hora %></dd></div>
+          <div><dt><%- ic('gauge', 'ico-sm') %>Pace</dt><dd class="mono"><%= faixa %></dd></div>
+          <div><dt><%- ic('ruler', 'ico-sm') %>Distância</dt><dd class="mono"><%= group.distance || '—' %></dd></div>
+          <div><dt><%- ic('bars', 'ico-sm') %>Nível</dt><dd><%- include('../partials/level-meter', { level: group.level }) -%></dd></div>
+          <div><dt><%- ic('users', 'ico-sm') %>Participantes</dt><dd class="mono"><%= group.participants %></dd></div>
+          <% if (locals.user && group.contact) { %><div><dt><%- ic('ext', 'ico-sm') %>Contato</dt><dd><%= group.contact %></dd></div><% } %>
+        </dl>
+        <div class="stack" style="margin-top:16px">
+          <a class="btn btn-primary btn-lg" href="/conta/entrar?next=/grupos/<%= slugUrl %>%23participar"><%- ic('plus') %> Entrar no grupo</a>
+          <a class="btn btn-outline" href="/mapa/<%= slugUrl %>"><%- ic('map', 'ico-sm') %> Ver rota no mapa</a>
+        </div>
+      </div>
+      <div class="panel"><h2><%= z.nome %></h2><div style="display:flex;gap:14px;align-items:center"><span style="background:var(--z);color:var(--zon);border-radius:50%;display:grid;place-items:center;width:72px;height:72px;flex:none"><%- seal(group.zone, 56) %></span><p style="color:var(--muted);font-size:14.5px"><%= z.desc %></p></div><a class="link" href="/grupos?zona=<%= group.zone %>" style="display:inline-block;margin-top:12px">Outros grupos da <%= z.nome %></a></div>
+    </aside>
+  </div></div>

@@ -17,7 +17,7 @@ import {
   ZONAS,
 } from './domain/constants.js';
 import { fmtFaixa, fmtPace } from './domain/pace.js';
-import { fmtDiasCurto, fmtHora } from './domain/schedule.js';
+import { fmtDiasCurto, fmtDiasLongo, fmtHora } from './domain/schedule.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,6 +44,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
     fmtFaixa,
     fmtHora,
     fmtDiasCurto,
+    fmtDiasLongo,
   });
 
   app.use(express.static(path.join(root, '..', 'public')));

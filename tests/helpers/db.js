@@ -63,3 +63,11 @@ export async function insertUser(
   );
   return rows[0].id;
 }
+
+export async function insertMembership(pool, userId, slug, nickname) {
+  await pool.query(
+    `INSERT INTO memberships (user_id, group_id, nickname)
+     SELECT $1, id, $3 FROM groups WHERE slug = $2`,
+    [userId, slug, nickname],
+  );
+}
