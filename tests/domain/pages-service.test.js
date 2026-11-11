@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { DEMO_GROUPS } from '../../db/seeds/demo-groups.js';
 import { ZONA_ORDEM } from '../../src/domain/constants.js';
-import { getHomeData, getZonesData } from '../../src/modules/pages/pages.service.js';
+import { pinPos } from '../../src/domain/map.js';
+import { getHomeData, getMapData, getZonesData } from '../../src/modules/pages/pages.service.js';
 
 // Mesmo formato que o groups.repo devolve: participants já calculado.
 const GROUPS = DEMO_GROUPS.map((g) => ({ ...g, participants: g.base_participants }));
@@ -119,4 +120,47 @@ describe('getZonesData', () => {
       expect(zones.flatMap((z) => z.locations)).toEqual(['Parque Ecológico do Tietê']);
     },
   );
+});
+
+describe('getMapData', () => {
+  it('sem slug seleciona o 1º da lista (ordem padrão: Cantareira Trail)', () => {
+    const { groups, selected } = getMapData(REPO_ORDER);
+    expect(groups).toHaveLength(11);
+    expect(selected.slug).toBe('cantareira-trail');
+    expect(groups.map((g) => g.slug)).toEqual(REPO_ORDER.map((g) => g.slug));
+  });
+
+  it('com slug seleciona aquele grupo', () => {
+    expect(getMapData(REPO_ORDER, 'pace-da-oca').selected.slug).toBe('pace-da-oca');
+  });
+
+  it('slug que não está na lista devolve selected null', () => {
+    expect(getMapData(REPO_ORDER, 'nao-existe').selected).toBeNull();
+  });
+
+  it('lista vazia devolve selected null', () => {
+    expect(getMapData([])).toEqual({ groups: [], selected: null });
+    expect(getMapData([], 'pace-da-oca')).toEqual({ groups: [], selected: null });
+  });
+
+  it('cada grupo ganha pin, pelo map_pin ou pela zona', () => {
+    const groups = REPO_ORDER.map((g) => (g.slug === 'raia-usp' ? { ...g, map_pin: null } : g));
+    const data = getMapData(groups);
+    for (const g of data.groups) expect(g.pin).toEqual(pinPos(g));
+    expect(data.groups.find((g) => g.slug === 'pace-da-oca').pin).toEqual([200, 246]);
+  });
+
+  it('tira o contato de todos os grupos, inclusive do selecionado (P4)', () => {
+    const groups = REPO_ORDER.map((g) => ({ ...g, contact: '@contato-do-grupo' }));
+    const data = getMapData(groups, 'pace-da-oca');
+    for (const g of [...data.groups, data.selected]) expect(g).not.toHaveProperty('contact');
+    expect(JSON.stringify(data)).not.toContain('@contato-do-grupo');
+  });
+
+  it('não altera os grupos recebidos', () => {
+    const groups = REPO_ORDER.map((g) => ({ ...g, contact: '@contato' }));
+    const snapshot = structuredClone(groups);
+    getMapData(groups, 'pace-da-oca');
+    expect(groups).toEqual(snapshot);
+  });
 });

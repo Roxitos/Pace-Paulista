@@ -14,7 +14,7 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 |---|---|---|
 | **M1** Scaffold | Express + EJS, layout, CSS do protótipo, 404/500 e home estática | ✅ concluído |
 | **M2** Banco | Postgres, migrations e seed dos grupos demo | ✅ concluído |
-| **M3** Leitura | `/grupos` com filtros, detalhe, zonas, mapa e sobre; home lendo do banco | ⏳ em andamento |
+| **M3** Leitura | `/grupos` com filtros, detalhe, zonas, mapa e sobre; home lendo do banco | ✅ concluído |
 | **M4** Compatibilidade | `/encontrar` | — |
 | **M5** Contas | Criar conta, entrar e sair, sessão | — |
 | **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | — |

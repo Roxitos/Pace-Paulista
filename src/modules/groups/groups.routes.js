@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { ZONA_ORDEM } from '../../domain/constants.js';
+import { isSlug } from '../../domain/slug.js';
 import { renderNotFound } from '../../middlewares/notFound.js';
 import { getGroupDetail, searchGroups } from './groups.service.js';
 
 export const groupsRouter = Router();
 
-// Slugs são gerados só com [a-z0-9-]; fora disso nem vale a ida ao banco.
-const SLUG_RE = /^[a-z0-9-]{1,60}$/;
 const GROUP_NOT_FOUND = 'Esse grupo não foi encontrado. Ele pode ter sido removido.';
 
 groupsRouter.get('/grupos', async (req, res) => {
@@ -25,7 +24,7 @@ groupsRouter.get('/grupos/zona/:zona', async (req, res) => {
 
 groupsRouter.get('/grupos/:slug', async (req, res) => {
   const { slug } = req.params;
-  if (!SLUG_RE.test(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
+  if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
   // res.locals.user é preenchido pela sessão a partir do M5; até lá fica ausente.
   const detail = await getGroupDetail(slug, new Date(), { viewer: res.locals.user });
   if (!detail) return renderNotFound(res, GROUP_NOT_FOUND);

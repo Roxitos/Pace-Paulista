@@ -1,0 +1,32 @@
+<%- include('../partials/page-head', {
+  kicker: 'Mapa e rotas',
+  title: 'Pontos de encontro',
+  text: 'Selecione um grupo para ver onde ele se encontra e abrir a rota até lá no Google Maps.',
+}) %>
+<%# Sem JS: pins e itens da lista são links para /mapa/<slug>#mapDetail e o painel já sai pronto do servidor. -%>
+<% const selectedSlug = selected?.slug; -%>
+  <div class="wrap"><div class="map-layout">
+    <div class="map-box">
+      <svg viewBox="0 0 400 380" role="group" aria-label="Esquema das zonas de São Paulo com os grupos">
+        <% for (const z of ZONA_ORDEM) { %><path d="<%= ZPOLY[z] %>" fill="<%= ZONAS[z].cor %>" fill-opacity=".14" stroke="<%= ZONAS[z].cor %>" stroke-width="1.6"/><% } %>
+        <% for (const z of ZONA_ORDEM) { %><text x="<%= ZLABEL[z][0] %>" y="<%= ZLABEL[z][1] %>" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="<%= z === 'centro' ? 11 : 13 %>" letter-spacing=".6" fill="<%= ZONAS[z].cor %>"><%= ZONAS[z].nome.toUpperCase() %></text><% } %>
+        <path d="M40 128 C120 150 260 120 380 150" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="5 5" opacity=".6"/>
+        <path d="M115 330 C120 260 100 180 70 120" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="5 5" opacity=".6"/>
+        <g id="pins"><% for (const g of groups) { const sel = g.slug === selectedSlug; const cor = ZONAS[g.zone].cor; %><a class="pin" href="/mapa/<%= encodeURIComponent(g.slug) %>#mapDetail" aria-label="<%= g.name %>, <%= g.location %>" data-act="map-select" data-id="<%= g.slug %>" transform="translate(<%= g.pin[0] %> <%= g.pin[1] %>)"><circle class="ring" r="<%= sel ? 14 : 0 %>" fill="none" stroke="<%= cor %>" stroke-width="2" stroke-dasharray="3 3"/><circle class="dot" r="<%= sel ? 8 : 6 %>" fill="<%= cor %>" stroke="var(--surface)" stroke-width="2.5"/></a><% } %></g>
+      </svg>
+      <p class="map-note"><%- ic('info', 'ico-sm') %><span>Esquema ilustrativo das zonas, não um mapa real. As posições indicam apenas a zona do grupo. O endereço e a rota abrem no Google Maps. Mapa interativo previsto para a próxima versão.</span></p>
+    </div>
+    <div>
+      <div id="mapDetail" class="map-detail"><% if (selected) { const g = selected; %><div class="panel" style="<%= zstyle(g.zone) %>;border-color:var(--z)">
+    <div class="card-top"><%- include('../partials/zone-chip', { zone: g.zone }) -%><%- include('../partials/demo-tag', { g }) -%></div>
+    <h2 style="margin:10px 0 6px;font-size:28px"><%= g.name %></h2>
+    <dl class="spec"><div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= g.location %></dd></div><div><dt><%- ic('door', 'ico-sm') %>Encontro</dt><dd style="font-weight:500"><%= g.meeting_point %></dd></div><div><dt><%- ic('cal', 'ico-sm') %>Quando</dt><dd><%= fmtDiasCurto(g.days) %> · <%= fmtHora(g.start_time) %></dd></div><div><dt><%- ic('gauge', 'ico-sm') %>Pace</dt><dd class="mono"><%= fmtFaixa(g.pace_min_s, g.pace_max_s) %></dd></div></dl>
+    <div class="row2" style="margin-top:14px;gap:8px">
+      <a class="btn btn-primary btn-sm" href="<%= gmapsRota(g.location) %>" target="_blank" rel="noopener"><%- ic('route', 'ico-sm') %> Traçar rota</a>
+      <a class="btn btn-outline btn-sm" href="<%= gmapsBusca(g.location) %>" target="_blank" rel="noopener"><%- ic('ext', 'ico-sm') %> Abrir no Maps</a>
+    </div>
+    <a class="link" href="/grupos/<%= encodeURIComponent(g.slug) %>" style="display:inline-block;margin-top:12px">Ver detalhes do grupo</a>
+  </div><% } %></div>
+      <ul class="map-list"><% for (const g of groups) { %><li><a class="map-item" href="/mapa/<%= encodeURIComponent(g.slug) %>#mapDetail" style="<%= zstyle(g.zone) %>" data-act="map-select" data-id="<%= g.slug %>" aria-current="<%= g.slug === selectedSlug %>"><span class="dotz"></span><span><b><%= g.name %></b><small><%= g.location %></small></span><span class="mono" style="font-size:12px;color:var(--muted)"><%= fmtDiasCurto(g.days) %></span></a></li><% } %></ul>
+    </div>
+  </div></div>
