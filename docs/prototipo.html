@@ -1,0 +1,1122 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pace Paulista (Copy)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
+:root{
+  --verde:#5E9A22; --verde-hover:#4F8519; --roxo:#7A3FA0; --laranja:#E8892B; --vermelho:#C8402F; --azul:#3A78C2;
+  --amarelo:#E8B923; --pista:#B3262E; --asfalto:#17171A; --concreto:#F7F4EC;
+  --bg:#F7F4EC; --surface:#FFFDF8; --surface-2:#EEEADF; --ink:#17171A; --muted:#5A574F; --line:#DCD6C6;
+  --green-ink:#4A7C17; --focus:#3A78C2; --danger:#B3262E; --ok-bg:#E7F1DA;
+  --f-display:'Anton','Bebas Neue',Impact,'Arial Narrow Bold',sans-serif;
+  --f-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:10px; --r-sm:6px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#17171A; --surface:#1F1F23; --surface-2:#29292E; --ink:#F7F4EC; --muted:#AAA699; --line:#37373D;
+  --green-ink:#8CC650; --focus:#82B4EE; --danger:#F07A6E; --ok-bg:#24321A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#17171A; --surface:#1F1F23; --surface-2:#29292E; --ink:#F7F4EC; --muted:#AAA699; --line:#37373D;
+  --green-ink:#8CC650; --focus:#82B4EE; --danger:#F07A6E; --ok-bg:#24321A; color-scheme:dark }
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
+a{color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin-inline:auto;padding-inline:20px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.display{font-family:var(--f-display);font-weight:400;letter-spacing:.01em;text-transform:uppercase;line-height:1.02}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+.ico{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ico-sm{width:16px;height:16px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Header */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--asfalto);color:var(--concreto);border-bottom:3px solid var(--pista)}
+.hdr .wrap{display:flex;align-items:center;gap:20px;min-height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;padding:6px 4px 6px 0;flex:none}
+.brand-name{font-family:var(--f-display);font-size:24px;letter-spacing:.02em;line-height:1}
+.brand-name b{font-weight:400;color:var(--verde)}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav a{white-space:nowrap;font-family:var(--f-display);text-transform:uppercase;font-size:16px;letter-spacing:.04em;text-decoration:none;padding:8px 12px;border-radius:6px;color:#D9D5CB;transition:background .15s,color .15s}
+.nav a:hover{background:#26262B;color:#fff}
+.nav a[aria-current="page"]{color:#fff;box-shadow:inset 0 -3px 0 var(--amarelo)}
+.hdr-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.icon-btn{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:8px;border:1px solid #3A3A40;background:transparent;color:var(--concreto);cursor:pointer;text-decoration:none;position:relative}
+.icon-btn:hover{background:#26262B}
+.badge-count{position:absolute;top:-5px;right:-5px;background:var(--amarelo);color:var(--asfalto);font:700 11px/1 var(--f-mono);padding:3px 5px;border-radius:9px}
+.menu-btn{display:none}
+@media (max-width:1240px){
+  .nav,.hdr-actions .btn{display:none}
+  .menu-btn{display:inline-grid}
+  .hdr.open .nav{display:flex;position:absolute;left:0;right:0;top:100%;flex-direction:column;background:var(--asfalto);padding:8px 20px 16px;border-bottom:3px solid var(--pista);margin:0}
+  .hdr.open .nav a{padding:12px}
+  .hdr.open .nav .mob-ctas{display:flex}
+}
+.mob-ctas{display:none;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* Buttons */
+.btn{--b:var(--verde);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.04em;font-size:16px;line-height:1;padding:13px 18px;border-radius:8px;border:2px solid transparent;cursor:pointer;text-decoration:none;transition:background .15s,color .15s,border-color .15s,transform .1s;white-space:nowrap}
+.btn:active{transform:translateY(1px) scale(.985)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn-primary{background:var(--verde);color:#fff}
+.btn-primary:hover{background:var(--verde-hover)}
+.btn-outline{background:transparent;color:var(--ink);border-color:var(--ink)}
+.btn-outline:hover{background:var(--ink);color:var(--bg)}
+.btn-light{background:transparent;color:var(--concreto);border-color:#C9C4B8}
+.btn-light:hover{background:var(--concreto);color:var(--asfalto)}
+.btn-quiet{background:var(--surface-2);color:var(--ink)}
+.btn-quiet:hover{background:var(--line)}
+.btn-lg{font-size:20px;padding:16px 24px}
+.btn-sm{font-size:14px;padding:10px 12px}
+.btn-block{width:100%}
+.link{color:var(--green-ink);font-weight:600;text-decoration:underline;text-underline-offset:3px;background:none;border:0;cursor:pointer;font:inherit;padding:0}
+
+/* Hero */
+.hero{background:var(--asfalto);color:var(--concreto);overflow:hidden;position:relative}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:24px;align-items:center;padding-block:56px 48px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#BEB9AC}
+.hero h1{font-size:clamp(46px,7.4vw,96px);margin:14px 0 18px}
+.hero h1 .g{color:var(--verde)}
+.hero h1 .u{background:linear-gradient(var(--amarelo),var(--amarelo)) 0 92%/100% .09em no-repeat;padding-bottom:.04em}
+.hero p.lead{font-size:18px;max-width:52ch;color:#DCD8CE}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.hero-stats{display:flex;flex-wrap:wrap;gap:22px;margin-top:34px;font-family:var(--f-mono);font-size:13px;color:#BEB9AC}
+.hero-stats strong{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;color:var(--concreto);line-height:1.1}
+.hero-art{position:relative;min-height:360px;align-self:stretch;margin-block:-56px -48px}
+.hero-art svg{position:absolute;right:-140px;bottom:0;width:calc(100% + 140px);height:100%}
+.route-dash{stroke-dasharray:10 12;animation:dash 2.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-44}}
+@media (max-width:860px){
+  .hero .wrap{grid-template-columns:1fr;padding-block:40px 0}
+  .hero-art{min-height:220px;margin:8px -20px 0}
+  .hero-art svg{right:0;width:100%}
+}
+
+.notice{background:var(--surface-2);border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
+.notice .wrap{display:flex;gap:10px;align-items:center;padding-block:10px}
+.notice strong{color:var(--ink)}
+
+/* Sections */
+main{display:block;min-height:60vh}
+.section{padding-block:64px}
+.section + .section{padding-top:0}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.sec-head h2{font-size:clamp(34px,4.6vw,52px)}
+.sec-head p{color:var(--muted);max-width:56ch;margin-top:8px}
+.kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--green-ink);display:flex;align-items:center;gap:8px}
+.kicker::before{content:"";width:22px;height:0;border-top:2px dashed currentColor}
+
+/* Zone cards (home strip) */
+.zone-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+@media (max-width:980px){.zone-strip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;margin-inline:-20px;padding-inline:20px}.zone-strip > *{flex:0 0 220px;scroll-snap-align:start}}
+.zcard{background:var(--z);color:var(--zon);border-radius:var(--r);padding:18px;text-decoration:none;display:flex;flex-direction:column;gap:12px;min-height:220px;position:relative;overflow:hidden;transition:transform .15s}
+.zcard:hover{transform:translateY(-3px)}
+.zcard .seal{width:64px;height:64px}
+.zcard h3{font-family:var(--f-display);font-weight:400;font-size:28px;text-transform:uppercase;line-height:1}
+.zcard .zmeta{font-family:var(--f-mono);font-size:12px;margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.zcard::after{content:"";position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;border:2px dashed currentColor;opacity:.25}
+
+/* Group cards */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;transition:border-color .15s,transform .15s;animation:rise .25s ease both}
+.card:hover{border-color:var(--z);transform:translateY(-2px)}
+@keyframes rise{from{transform:translateY(6px)}to{transform:none}}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.zchip{display:inline-flex;align-items:center;gap:6px;background:var(--z);color:var(--zon);font-family:var(--f-display);text-transform:uppercase;font-size:13px;letter-spacing:.06em;padding:5px 9px;border-radius:5px;line-height:1}
+.demo-tag{font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px dashed var(--line);padding:3px 7px;border-radius:5px}
+.card h3{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:28px;line-height:1.05}
+.card h3 a{text-decoration:none}
+.card h3 a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.card-desc{color:var(--muted);font-size:15px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin:0;padding:14px 0;border-block:1px dashed var(--line)}
+.facts div{min-width:0}
+.facts dt{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.facts dd{margin:2px 0 0;font-weight:600;font-size:15px;overflow-wrap:anywhere}
+.facts dd.mono{font-weight:500;font-size:14px}
+.level{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.level-bars{display:inline-flex;gap:3px;align-items:flex-end}
+.level-bars i{display:block;width:6px;border-radius:2px;background:var(--line)}
+.level-bars i:nth-child(1){height:8px}.level-bars i:nth-child(2){height:12px}.level-bars i:nth-child(3){height:16px}
+.level-bars i.on{background:var(--z,var(--verde))}
+.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.card-actions > :first-child{grid-column:1 / -1}
+.joined-pill{display:inline-flex;align-items:center;gap:6px;background:var(--ok-bg);color:var(--green-ink);font-weight:600;font-size:13px;padding:4px 9px;border-radius:20px}
+
+/* How it works: lanes */
+.lanes{display:grid;gap:0;border-radius:var(--r);overflow:hidden;background:var(--pista)}
+.lane{display:grid;grid-template-columns:90px minmax(0,1fr);align-items:center;gap:20px;padding:22px 24px;color:#fff;border-bottom:2px solid rgba(255,255,255,.85)}
+.lane:last-child{border-bottom:0}
+.lane-n{font-family:var(--f-display);font-size:64px;line-height:1;text-align:center;border-right:2px dashed rgba(255,255,255,.6);padding-right:18px}
+.lane h3{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:26px}
+.lane p{color:#F5E3E1;max-width:62ch}
+@media (max-width:560px){.lane{grid-template-columns:56px minmax(0,1fr);gap:14px;padding:18px}.lane-n{font-size:44px;padding-right:10px}}
+
+.cta-band{background:var(--verde);color:#fff;border-radius:var(--r);padding:36px;display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;position:relative;overflow:hidden}
+.cta-band h2{font-size:clamp(30px,4vw,44px)}
+.cta-band p{max-width:52ch;margin-top:8px;color:#EEF6E4}
+.cta-band .btn{background:var(--asfalto);color:#fff}
+.cta-band .btn:hover{background:#000}
+
+/* Footer */
+.ftr{background:var(--asfalto);color:#CFCABF;margin-top:72px;border-top:6px solid var(--pista);position:relative}
+.ftr::before{content:"";position:absolute;left:0;right:0;top:-6px;border-top:2px dashed rgba(255,255,255,.7);transform:translateY(2px)}
+.ftr .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;padding-block:44px}
+.ftr h4{font-family:var(--f-display);font-weight:400;text-transform:uppercase;color:#fff;font-size:18px;letter-spacing:.04em;margin:0 0 10px}
+.ftr ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ftr a{text-decoration:none}.ftr a:hover{color:#fff;text-decoration:underline}
+.ftr .small{font-size:13px;color:#9A968B;margin-top:14px}
+.ftr-slogan{font-family:var(--f-display);font-size:22px;color:#fff;line-height:1.1;margin-top:14px;text-transform:uppercase}
+@media (max-width:760px){.ftr .wrap{grid-template-columns:1fr 1fr}.ftr .wrap > :first-child{grid-column:1/-1}}
+
+/* Page head */
+.page-head{background:var(--asfalto);color:var(--concreto);position:relative;overflow:hidden}
+.page-head .wrap{padding-block:40px 34px;position:relative}
+.page-head h1{font-size:clamp(40px,6vw,68px);margin-top:8px}
+.page-head p{color:#D2CEC3;max-width:60ch;margin-top:10px}
+.page-head .lanes-deco{position:absolute;right:-60px;top:-40px;width:340px;height:240px;opacity:.9}
+@media (max-width:700px){.page-head .lanes-deco{opacity:.35}}
+.back{display:inline-flex;align-items:center;gap:6px;color:#D2CEC3;text-decoration:none;font-size:14px;font-weight:600}
+.back:hover{color:#fff}
+
+/* Search layout */
+.search-layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:28px;align-items:start;padding-top:32px}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);display:grid;gap:18px}
+.filters h2{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:22px;display:flex;justify-content:space-between;align-items:center}
+.field{display:grid;gap:6px;min-width:0}
+.field > label,.field > .lbl{font-size:13px;font-weight:600;letter-spacing:.02em}
+.field .hint{font-size:12.5px;color:var(--muted)}
+.input,.select,textarea.input{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;transition:border-color .15s}
+.input:hover,.select:hover{border-color:var(--muted)}
+.input:focus,.select:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 25%,transparent)}
+.input[aria-invalid="true"],.select[aria-invalid="true"]{border-color:var(--danger)}
+.with-ico{position:relative}
+.with-ico .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.with-ico .input{padding-left:38px}
+.zone-toggles{display:flex;flex-wrap:wrap;gap:6px}
+.ztog{--z:var(--verde);display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:600 13px/1 var(--f-body);padding:8px 10px;border-radius:20px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.ztog::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--z)}
+.ztog:hover{border-color:var(--z)}
+.ztog[aria-pressed="true"]{background:var(--z);border-color:var(--z);color:var(--zon)}
+.ztog[aria-pressed="true"]::before{background:currentColor}
+.results-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.results-bar .count{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+.active-chips{display:flex;flex-wrap:wrap;gap:6px}
+.achip{display:inline-flex;align-items:center;gap:4px;background:var(--surface-2);border:0;color:var(--ink);font:500 13px var(--f-body);padding:5px 8px 5px 10px;border-radius:20px;cursor:pointer}
+.achip:hover{background:var(--line)}
+.filters-toggle{display:none}
+@media (max-width:900px){
+  .search-layout{grid-template-columns:1fr}
+  .filters{position:static;display:none}
+  .filters.open{display:grid}
+  .filters-toggle{display:inline-flex}
+}
+.skeleton{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:12px}
+.sk{height:14px;border-radius:4px;background:linear-gradient(90deg,var(--surface-2),var(--line),var(--surface-2));background-size:200% 100%;animation:shimmer 1s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.empty{border:2px dashed var(--line);border-radius:var(--r);padding:40px 24px;text-align:center;display:grid;gap:12px;justify-items:center}
+.empty h3{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:28px}
+.empty p{color:var(--muted);max-width:44ch}
+
+/* Detail */
+.detail-head{background:var(--z);color:var(--zon)}
+.detail-head .wrap{padding-block:30px 36px;display:grid;gap:14px}
+.detail-head .back{color:inherit;opacity:.9}
+.detail-head h1{font-size:clamp(44px,7vw,84px)}
+.detail-head .sub{display:flex;flex-wrap:wrap;gap:8px 20px;font-weight:600}
+.detail-head .sub span{display:inline-flex;align-items:center;gap:6px}
+.detail-head .zchip{background:var(--zon);color:var(--z)}
+.detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:32px;align-items:start;padding-top:32px}
+@media (max-width:900px){.detail-grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.panel + .panel{margin-top:18px}
+.panel h2{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:24px;margin-bottom:12px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{background:var(--surface-2);border-radius:20px;padding:6px 12px;font-size:14px;font-weight:500}
+.sessions{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.sessions li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+.sessions li:last-child{border-bottom:0}
+.date-box{width:58px;text-align:center;border:2px solid var(--z);border-radius:8px;padding:5px 0;line-height:1}
+.date-box b{display:block;font-family:var(--f-display);font-weight:400;font-size:26px}
+.date-box small{font-family:var(--f-mono);font-size:11px;text-transform:uppercase}
+.spec{display:grid;gap:0;margin:0}
+.spec div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.spec div:last-child{border-bottom:0}
+.spec dt{color:var(--muted);display:flex;gap:6px;align-items:center;font-size:14px}
+.spec dd{margin:0;font-weight:600;text-align:right}
+.stack{display:grid;gap:10px}
+.rules{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--muted)}
+
+/* Zones page */
+.zone-rows{display:grid;gap:18px;padding-top:32px}
+.zrow{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.zrow-seal{background:var(--z);color:var(--zon);align-self:stretch;display:grid;place-items:center;padding:24px}
+.zrow-seal svg{width:120px;height:120px}
+.zrow-body{padding-block:22px;display:grid;gap:8px;min-width:0}
+.zrow-body h2{font-family:var(--f-display);font-weight:400;font-size:36px;text-transform:uppercase}
+.zrow-body p{color:var(--muted);max-width:62ch}
+.zrow-meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px}
+.zrow-meta span{display:inline-flex;gap:6px;align-items:center}
+.zrow-cta{padding:22px 22px 22px 0}
+@media (max-width:820px){.zrow{grid-template-columns:1fr;gap:0}.zrow-seal{padding:20px;justify-items:start}.zrow-seal svg{width:80px;height:80px}.zrow-body{padding:20px 20px 10px}.zrow-cta{padding:0 20px 20px}}
+
+/* Map */
+.map-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;padding-top:32px;align-items:start}
+@media (max-width:900px){.map-layout{grid-template-columns:1fr}}
+.map-layout > *,.detail-grid > *,.form-layout > *,.search-layout > *{min-width:0}
+.spec dd{overflow-wrap:anywhere}
+.map-item span{min-width:0}
+.map-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;position:relative}
+.map-box > svg{width:100%;height:auto;display:block}
+.map-note{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted);padding:10px 4px 2px}
+.pin{cursor:pointer}
+.pin circle.dot{transition:r .15s}
+.pin:hover circle.dot,.pin:focus circle.dot{r:9}
+.pin:focus{outline:none}
+.pin:focus-visible circle.ring{stroke:var(--focus);stroke-width:3}
+.map-list{display:grid;gap:8px;max-height:560px;overflow:auto;padding-right:4px}
+.map-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;font:inherit;color:inherit}
+.map-item:hover{border-color:var(--z)}
+.map-item[aria-current="true"]{border-color:var(--z);box-shadow:inset 4px 0 0 var(--z)}
+.map-item .dotz{width:12px;height:12px;border-radius:50%;background:var(--z)}
+.map-item b{display:block;font-weight:600}
+.map-item small{color:var(--muted)}
+.map-detail{margin-bottom:16px}
+
+/* Forms pages */
+.form-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start;padding-top:32px}
+@media (max-width:900px){.form-layout{grid-template-columns:1fr}}
+.form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px;display:grid;gap:20px}
+.form fieldset{border:0;margin:0;padding:0;display:grid;gap:10px;min-width:0}
+.form legend{font-size:13px;font-weight:600;padding:0;margin-bottom:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:560px){.row2{grid-template-columns:1fr}}
+.choice-row{display:flex;flex-wrap:wrap;gap:8px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.choice span{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:20px;padding:8px 12px;font-size:14px;font-weight:600;transition:all .15s}
+.choice input:hover + span{border-color:var(--muted)}
+.choice input:focus-visible + span{outline:3px solid var(--focus);outline-offset:2px}
+.choice input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.choice.z input:checked + span{background:var(--z);border-color:var(--z);color:var(--zon)}
+.choice.z span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--z)}
+.choice.z input:checked + span::before{background:currentColor}
+.err{color:var(--danger);font-size:13px;font-weight:600;display:flex;gap:5px;align-items:center}
+.err:empty{display:none}
+.form-alert{border-radius:8px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.form-alert.bad{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--ink);border:1px solid var(--danger)}
+.form-alert.good{background:var(--ok-bg);border:1px solid var(--verde)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--verde);flex:none}
+.side-note{background:var(--surface-2);border-radius:var(--r);padding:20px;display:grid;gap:10px;font-size:14.5px}
+.side-note h3{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:20px}
+.side-note ul{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--muted)}
+.match{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.match-score{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:24px;background:conic-gradient(var(--z) calc(var(--p)*1%),var(--surface-2) 0);position:relative}
+.match-score::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface)}
+.match-score span{position:relative}
+.why{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:3px;font-size:13.5px;color:var(--muted)}
+.why li{display:flex;gap:6px;align-items:center}
+.why .ico{color:var(--green-ink)}
+
+/* Modal + toast */
+.modal-bg{position:fixed;inset:0;background:rgba(10,10,12,.62);z-index:80;display:grid;place-items:center;padding:16px;animation:fade .15s ease}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--surface);color:var(--ink);border-radius:12px;width:min(480px,100%);max-height:calc(100vh - 32px);overflow:auto;position:relative;animation:pop .18s ease}
+@keyframes pop{from{transform:translateY(10px) scale(.98)}}
+.modal-top{background:var(--z);color:var(--zon);padding:22px 56px 20px 22px;border-radius:12px 12px 0 0}
+.modal-top h2{font-family:var(--f-display);font-weight:400;font-size:32px;text-transform:uppercase;line-height:1.05;margin-top:8px}
+.modal-body{padding:22px;display:grid;gap:16px}
+.modal-x{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:8px;border:0;background:rgba(0,0,0,.18);color:var(--zon);display:grid;place-items:center;cursor:pointer}
+.modal-x:hover{background:rgba(0,0,0,.3)}
+.success{display:grid;justify-items:center;text-align:center;gap:12px;padding:10px 0}
+.success-ico{width:72px;height:72px;border-radius:50%;background:var(--verde);color:#fff;display:grid;place-items:center;animation:pop .3s ease}
+.success-ico .ico{width:38px;height:38px;stroke-width:2.4}
+.success h3{font-family:var(--f-display);font-weight:400;font-size:30px;text-transform:uppercase}
+.spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--asfalto);color:#fff;padding:12px 16px;border-radius:8px;z-index:90;display:flex;gap:10px;align-items:center;font-size:14.5px;border-left:4px solid var(--verde);max-width:calc(100% - 32px);animation:pop .2s ease}
+
+/* About */
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;padding-top:32px}
+@media (max-width:800px){.about{grid-template-columns:1fr}}
+.about .panel p + p{margin-top:10px}
+.status-list{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.status-list li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;font-size:14.5px}
+.st{font-family:var(--f-mono);font-size:11px;padding:3px 7px;border-radius:4px;font-weight:700;white-space:nowrap}
+.st.on{background:var(--ok-bg);color:var(--green-ink)}
+.st.off{background:var(--surface-2);color:var(--muted)}
+</style>
+
+<header class="hdr" id="hdr">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Pace Paulista, início">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#5E9A22"/><path d="M13 31V9h8.5a7 7 0 0 1 0 14H13" fill="none" stroke="#fff" stroke-width="4.2" stroke-linejoin="round"/><path d="M7 31V9" stroke="#fff" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><circle cx="31" cy="31" r="2.6" fill="#E8B923"/></svg>
+      <span class="brand-name">PACE <b>PAULISTA</b></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Principal">
+      <a href="#inicio" data-nav="inicio">Início</a>
+      <a href="#grupos" data-nav="grupos">Encontrar grupos</a>
+      <a href="#zonas" data-nav="zonas">Explorar zonas</a>
+      <a href="#sobre" data-nav="sobre">Sobre</a>
+      <div class="mob-ctas"><a class="btn btn-primary btn-sm" href="#encontrar">Encontrar meu grupo</a><a class="btn btn-light btn-sm" href="#cadastrar">Cadastrar grupo</a></div>
+    </nav>
+    <div class="hdr-actions">
+      <a class="btn btn-light btn-sm" href="#cadastrar">Cadastrar grupo</a>
+      <a class="btn btn-primary btn-sm" href="#encontrar">Encontrar meu grupo</a>
+      <a class="icon-btn" href="#meus" aria-label="Meus grupos" title="Meus grupos" id="meusBtn"></a>
+      <button class="icon-btn menu-btn" data-act="menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav"></button>
+    </div>
+  </div>
+</header>
+
+<main id="view" tabindex="-1"></main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div>
+      <a class="brand" href="#inicio" style="color:#fff">
+        <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#5E9A22"/><path d="M13 31V9h8.5a7 7 0 0 1 0 14H13" fill="none" stroke="#fff" stroke-width="4.2" stroke-linejoin="round"/><path d="M7 31V9" stroke="#fff" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><circle cx="31" cy="31" r="2.6" fill="#E8B923"/></svg>
+        <span class="brand-name">PACE <b>PAULISTA</b></span>
+      </a>
+      <p class="ftr-slogan">Encontre seu grupo.<br>Encontre seu ritmo.</p>
+      <p class="small">Protótipo. Os grupos exibidos são fictícios e servem apenas para demonstrar a plataforma. Nenhum dado é enviado a servidores.</p>
+    </div>
+    <div>
+      <h4>Navegar</h4>
+      <ul><li><a href="#inicio">Início</a></li><li><a href="#grupos">Encontrar grupos</a></li><li><a href="#zonas">Explorar zonas</a></li><li><a href="#mapa">Mapa de encontros</a></li><li><a href="#sobre">Sobre</a></li></ul>
+    </div>
+    <div>
+      <h4>Para corredores</h4>
+      <ul><li><a href="#encontrar">Encontrar meu grupo</a></li><li><a href="#cadastrar">Cadastrar grupo</a></li><li><a href="#meus">Meus grupos</a></li></ul>
+      <p class="small mono">v0.1 · São Paulo · <span id="yr"></span></p>
+    </div>
+  </div>
+</footer>
+
+<div id="modalRoot"></div>
+<div id="toastRoot" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   PACE PAULISTA — protótipo
+   Organização (equivalente aos módulos de um projeto React):
+   1. constants  2. icons  3. data (demo)  4. store/api (trocar por Supabase)
+   5. utils/format  6. components  7. pages  8. router/events
+   ========================================================= */
+
+/* ---------- 1. constants ---------- */
+const ZONAS = {
+  norte:{nome:'Zona Norte',curto:'Norte',cor:'#5E9A22',on:'#FFFFFF',marco:'Serra da Cantareira',
+    desc:'Trilhas, subidas e muito verde no pé da Cantareira. Treinos com altimetria para quem gosta de terreno variado.'},
+  oeste:{nome:'Zona Oeste',curto:'Oeste',cor:'#7A3FA0',on:'#FFFFFF',marco:'Ponte Estaiada',
+    desc:'Parques planos e retas longas às margens do Pinheiros. Boa para treinos de ritmo e longões.'},
+  centro:{nome:'Centro',curto:'Centro',cor:'#E8892B',on:'#17171A',marco:'Avenida Paulista',
+    desc:'Asfalto, prédios e avenidas abertas para pedestres. Corridas urbanas no coração da cidade.'},
+  leste:{nome:'Zona Leste',curto:'Leste',cor:'#C8402F',on:'#FFFFFF',marco:'Arena Corinthians',
+    desc:'Parques enormes e comunidades de bairro muito unidas. Do Carmo ao Tietê, tem pace para todo mundo.'},
+  sul:{nome:'Zona Sul',curto:'Sul',cor:'#3A78C2',on:'#FFFFFF',marco:'Oca do Ibirapuera',
+    desc:'O Ibirapuera é o ponto mais movimentado da corrida paulistana, com grupos de todos os níveis e a represa mais ao sul.'}
+};
+const ZONA_ORDEM = ['norte','oeste','centro','leste','sul'];
+const DIAS = {dom:'Domingo',seg:'Segunda',ter:'Terça',qua:'Quarta',qui:'Quinta',sex:'Sexta',sab:'Sábado'};
+const DIAS_CURTO = {dom:'Dom',seg:'Seg',ter:'Ter',qua:'Qua',qui:'Qui',sex:'Sex',sab:'Sáb'};
+const DIA_IDX = {dom:0,seg:1,ter:2,qua:3,qui:4,sex:5,sab:6};
+const DIA_ORDEM = ['seg','ter','qua','qui','sex','sab','dom'];
+const NIVEIS = {iniciante:{nome:'Iniciante',n:1},intermediario:{nome:'Intermediário',n:2},avancado:{nome:'Avançado',n:3}};
+const PERIODOS = {cedo:'Antes das 7h',manha:'Das 7h às 12h',tarde:'Das 12h às 18h',noite:'A partir das 18h'};
+const PACE_FAIXAS = {ate5:{nome:'Até 5:00 min/km',min:0,max:300},'5a6':{nome:'5:00 a 6:00 min/km',min:300,max:360},'6a7':{nome:'6:00 a 7:00 min/km',min:360,max:420},mais7:{nome:'Acima de 7:00 min/km',min:420,max:9999}};
+
+/* ---------- 2. icons (traço fino, estilo Tabler) ---------- */
+const P = {
+  pin:'<path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>',
+  cal:'<path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M16 3v4M8 3v4M4 11h16"/>',
+  clock:'<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/>',
+  users:'<path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>',
+  run:'<path d="M12 4a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M4 17l5 1l.75 -1.5"/><path d="M15 21l0 -4l-4 -3l1 -6"/><path d="M7 12l0 -3l5 -1l3 3l3 1"/>',
+  search:'<path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/>',
+  x:'<path d="M18 6l-12 12M6 6l12 12"/>',
+  route:'<path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4z"/><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"/>',
+  arrow:'<path d="M5 12h14M13 18l6 -6M13 6l6 6"/>',
+  check:'<path d="M5 12l5 5l10 -10"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
+  user:'<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>',
+  back:'<path d="M15 6l-6 6l6 6"/>',
+  ext:'<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/><path d="M11 13l9 -9M15 4h5v5"/>',
+  info:'<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01M11 12h1v4h1"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  gauge:'<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M13.41 10.59l2.59 -2.59"/><path d="M7 12a5 5 0 0 1 5 -5"/>',
+  bars:'<path d="M4 20h16"/><path d="M5 16v4M10 12v8M15 8v12M20 4v16"/>',
+  map:'<path d="M3 7l6 -3l6 3l6 -3v13l-6 3l-6 -3l-6 3v-13"/><path d="M9 4v13M15 7v13"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/>',
+  ruler:'<path d="M5 4h14a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-7a1 1 0 0 0 -1 1v7a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1"/><path d="M4 8h2M4 12h3M4 16h2M8 4v2M12 4v3M16 4v2"/>',
+  door:'<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/><path d="M9 12h12l-3 -3M18 15l3 -3"/>',
+  heart:'<path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/>'
+};
+const ic = (n, cls='') => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+
+/* Selos das zonas: traço branco/escuro sobre a cor da zona, sem misturar cores */
+const SEAL = {
+  norte:'<path d="M6 46 L22 20 L31 33 L39 23 L58 46 Z"/><path d="M16 46v-6l-3 0 3-5-2 0 3-5 3 5-2 0 3 5-3 0v6"/><path d="M47 46v-5h-3l3-5h-2l3-5 3 5h-2l3 5h-3v5"/><path d="M4 50h56" stroke-dasharray="3 3"/>',
+  oeste:'<path d="M32 8 L26 44 M32 8 L38 44"/><path d="M28.5 30h7"/><path d="M4 44h56"/><path d="M31 14 L8 44M31 18 L16 44M33 14 L56 44M33 18 L48 44"/><path d="M4 50h56" stroke-dasharray="3 3"/>',
+  centro:'<path d="M8 50V30h8v20M18 50V20h9v30M29 50V26h8v24M39 50V14h9v36M50 50V32h7v18"/><path d="M43.5 14V6M41 9h5"/><path d="M4 50h56"/><path d="M21 25h3M21 31h3M21 37h3M42 20h3M42 26h3M42 32h3"/>',
+  leste:'<path d="M6 44c4-14 14-22 26-22s22 8 26 22"/><path d="M6 44h52"/><path d="M12 44c3-9 10-15 20-15s17 6 20 15"/><path d="M18 31v13M26 26v18M38 26v18M46 31v13"/><path d="M4 50h56" stroke-dasharray="3 3"/>',
+  sul:'<path d="M8 46a24 24 0 0 1 48 0"/><path d="M4 46h56"/><circle cx="20" cy="38" r="2.2"/><circle cx="28" cy="31" r="2.2"/><circle cx="36" cy="31" r="2.2"/><circle cx="44" cy="38" r="2.2"/><circle cx="32" cy="40" r="2.2"/><path d="M4 52h56" stroke-dasharray="3 3"/>'
+};
+const seal = (z, size=64) => `<svg class="seal" width="${size}" height="${size}" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Selo da ${ZONAS[z].nome}, inspirado em ${ZONAS[z].marco}"><circle cx="32" cy="32" r="31" stroke-width="1.6" opacity=".55"/>${SEAL[z]}</svg>`;
+
+/* ---------- 3. data (DEMONSTRAÇÃO — grupos fictícios em locais públicos reais) ---------- */
+const DEMO = [
+  {id:'correria-do-carmo',nome:'Correria do Carmo',zona:'leste',local:'Parque do Carmo',ponto:'Combinado no grupo, próximo à entrada principal do parque',dias:['sab'],horario:'06:30',paceMin:330,paceMax:390,distancia:'8 a 12 km',nivel:'intermediario',participantes:48,
+   descricao:'Grupo de bairro que se encontra aos sábados de manhã cedo para rodar entre 8 e 12 km pelas alamedas do parque. Ritmo constante, conversa no caminho e café depois.',
+   perfil:['Ritmo de conversa','Café pós-treino','Treino em grupo único','Recebe quem vem de outros bairros'],pin:[330,222]},
+  {id:'tiete-em-movimento',nome:'Tietê em Movimento',zona:'leste',local:'Parque Ecológico do Tietê',ponto:'Combinado no grupo, na área de estacionamento',dias:['ter','qui'],horario:'19:00',paceMin:360,paceMax:450,distancia:'5 a 7 km',nivel:'iniciante',participantes:31,
+   descricao:'Para quem está começando ou voltando a correr. Alternamos corrida e caminhada e ninguém fica para trás: sempre tem alguém fechando o pelotão.',
+   perfil:['Corrida e caminhada','Ninguém fica para trás','Ideal para retomar'],pin:[300,160]},
+  {id:'pelotao-paulista',nome:'Pelotão Paulista',zona:'centro',local:'Avenida Paulista',ponto:'Combinado no grupo, em frente a um ponto de referência da avenida',dias:['dom'],horario:'07:00',paceMin:285,paceMax:345,distancia:'10 km',nivel:'intermediario',participantes:72,
+   descricao:'Domingo com a avenida aberta para pedestres: ida e volta pela Paulista em ritmo firme. Subgrupos por pace para ninguém correr sozinho.',
+   perfil:['Subgrupos por pace','Asfalto plano','Fotos no fim do treino'],pin:[205,178]},
+  {id:'minhocao-noturno',nome:'Minhocão Noturno',zona:'centro',local:'Elevado Presidente João Goulart (Minhocão)',ponto:'Combinado no grupo, em um dos acessos do elevado',dias:['qua'],horario:'20:30',paceMin:300,paceMax:360,distancia:'6 a 8 km',nivel:'intermediario',participantes:39,
+   descricao:'Corrida no meio da semana para fechar o dia em cima do elevado. Percurso de ida e volta, ritmo moderado e muita luz da cidade.',
+   perfil:['Treino noturno','Pós-expediente','Percurso de ida e volta'],pin:[186,150]},
+  {id:'pace-da-oca',nome:'Pace da Oca',zona:'sul',local:'Parque Ibirapuera',ponto:'Combinado no grupo, nas imediações da Oca',dias:['seg','qua','sex'],horario:'06:00',paceMin:255,paceMax:300,distancia:'10 a 14 km',nivel:'avancado',participantes:56,
+   descricao:'Treinos estruturados três vezes por semana: tiros às segundas, fartlek às quartas e rodagem às sextas. Para quem já corre provas e quer baixar tempo.',
+   perfil:['Planilha de treino','Tiros e fartlek','Foco em provas'],pin:[200,246]},
+  {id:'primeiro-km-ibira',nome:'Primeiro Km Ibira',zona:'sul',local:'Parque Ibirapuera',ponto:'Combinado no grupo, perto de um dos portões do parque',dias:['sab'],horario:'08:00',paceMin:420,paceMax:510,distancia:'3 a 5 km',nivel:'iniciante',participantes:64,
+   descricao:'O grupo para o seu primeiro quilômetro. Começamos com aquecimento guiado e progressão de distância semana a semana.',
+   perfil:['Aquecimento guiado','Progressão semanal','Primeira corrida'],pin:[222,262]},
+  {id:'represa-run-club',nome:'Represa Run Club',zona:'sul',local:'Parque Guarapiranga',ponto:'Combinado no grupo, na entrada do parque',dias:['dom'],horario:'07:30',paceMin:330,paceMax:405,distancia:'8 a 15 km',nivel:'intermediario',participantes:22,
+   descricao:'Longões de domingo com vista para a represa. Grupo pequeno, ritmo confortável e percursos que variam a cada semana.',
+   perfil:['Longões','Grupo pequeno','Percurso variado'],pin:[172,334]},
+  {id:'villa-lobos-runners',nome:'Villa-Lobos Runners',zona:'oeste',local:'Parque Villa-Lobos',ponto:'Combinado no grupo, perto do estacionamento',dias:['ter','qui'],horario:'06:15',paceMin:300,paceMax:360,distancia:'6 a 10 km',nivel:'intermediario',participantes:45,
+   descricao:'Treino antes do trabalho no circuito do parque. Pista plana, ótima para manter ritmo e medir evolução.',
+   perfil:['Antes do trabalho','Circuito plano','Controle de ritmo'],pin:[92,182]},
+  {id:'raia-usp',nome:'Raia Olímpica',zona:'oeste',local:'Cidade Universitária (USP)',ponto:'Combinado no grupo, próximo à raia',dias:['sab'],horario:'07:00',paceMin:240,paceMax:285,distancia:'12 a 18 km',nivel:'avancado',participantes:27,
+   descricao:'Longões rápidos na Cidade Universitária para quem treina meia e maratona. Ritmo forte e hidratação combinada.',
+   perfil:['Meia e maratona','Ritmo forte','Hidratação combinada'],pin:[112,220]},
+  {id:'cantareira-trail',nome:'Cantareira Trail',zona:'norte',local:'Parque Estadual Alberto Löfgren (Horto Florestal)',ponto:'Combinado no grupo, na entrada do Horto',dias:['dom'],horario:'07:00',paceMin:390,paceMax:480,distancia:'6 a 10 km',nivel:'intermediario',participantes:33,
+   descricao:'Corrida com subidas, sombra e terra. Pace mais lento por causa da altimetria, mas exige preparo. Ideal para quem quer começar no trail.',
+   perfil:['Altimetria','Iniciação ao trail','Natureza'],pin:[188,56]},
+  {id:'juventude-em-pace',nome:'Juventude em Pace',zona:'norte',local:'Parque da Juventude',ponto:'Combinado no grupo, perto da pista de caminhada',dias:['ter','qui'],horario:'19:30',paceMin:360,paceMax:420,distancia:'5 a 8 km',nivel:'iniciante',participantes:41,
+   descricao:'Grupo acolhedor de começo de noite. Treinos curtos, educativos de corrida e muita resenha depois.',
+   perfil:['Educativos de corrida','Começo de noite','Acolhedor'],pin:[222,100]}
+];
+const DESTAQUES = ['correria-do-carmo','pace-da-oca','pelotao-paulista'];
+
+/* ---------- 4. store / api ----------
+   Hoje: tudo fica no navegador (localStorage).
+   Futuro: trocar o corpo destas funções por chamadas ao Supabase
+   (tabelas groups e memberships — ver supabase-schema.sql). */
+const store = {
+  get(k,d){try{const v=localStorage.getItem('pacepaulista:'+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('pacepaulista:'+k,JSON.stringify(v))}catch(e){}}
+};
+const state = {
+  custom: store.get('custom',[]),   // grupos cadastrados neste navegador
+  joined: store.get('joined',{}),   // {groupId:{apelido,data}}
+  filters: {zonas:[],nome:'',local:'',dia:'',periodo:'',pace:'',nivel:''},
+  filtersOpen:false
+};
+const api = {
+  listGroups(){ return [...DEMO, ...state.custom]; },
+  getGroup(id){ return api.listGroups().find(g=>g.id===id); },
+  createGroup(g){ state.custom.push(g); store.set('custom',state.custom); return g; },
+  join(id,apelido){ state.joined[id]={apelido,data:new Date().toISOString()}; store.set('joined',state.joined); },
+  leave(id){ delete state.joined[id]; store.set('joined',state.joined); },
+  resetLocal(){ state.custom=[]; state.joined={}; store.set('custom',[]); store.set('joined',{}); }
+};
+
+/* ---------- 5. utils / format ---------- */
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtPace = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const fmtFaixa = g => `${fmtPace(g.paceMin)}–${fmtPace(g.paceMax)} min/km`;
+const parsePace = str => { const m=String(str).trim().match(/^(\d{1,2}):([0-5]\d)$/); if(!m) return null; const s=+m[1]*60+ +m[2]; return (s<180||s>720)?null:s; };
+const fmtHora = h => { const [a,b]=h.split(':'); return `${+a}h${b==='00'?'':b}`; };
+const sortDias = d => [...d].sort((a,b)=>DIA_ORDEM.indexOf(a)-DIA_ORDEM.indexOf(b));
+const listaPt = arr => arr.length<2?arr.join(''):arr.slice(0,-1).join(', ')+' e '+arr[arr.length-1];
+const fmtDiasCurto = d => sortDias(d).map(x=>DIAS_CURTO[x]).join(', ');
+const fmtDiasLongo = d => listaPt(sortDias(d).map(x=>DIAS[x]));
+const periodoDe = h => { const x=+h.split(':')[0]; return x<7?'cedo':x<12?'manha':x<18?'tarde':'noite'; };
+const participantes = g => g.participantes + (state.joined[g.id]?1:0);
+const zstyle = z => `--z:${ZONAS[z].cor};--zon:${ZONAS[z].on}`;
+const gmapsBusca = g => 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(g.local+', São Paulo, SP');
+const gmapsRota = g => 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(g.local+', São Paulo, SP');
+function proximos(g,n=4){
+  const out=[], now=new Date(), [hh,mm]=g.horario.split(':').map(Number), idx=g.dias.map(d=>DIA_IDX[d]);
+  for(let i=0;i<28&&out.length<n;i++){ const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,hh,mm); if(idx.includes(d.getDay())&&d>now) out.push(d); }
+  return out;
+}
+const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+
+/* ---------- 6. components ---------- */
+const LevelMeter = nivel => { const n=NIVEIS[nivel].n; return `<span class="level"><span class="level-bars" aria-hidden="true"><i class="${n>=1?'on':''}"></i><i class="${n>=2?'on':''}"></i><i class="${n>=3?'on':''}"></i></span>${NIVEIS[nivel].nome}</span>`; };
+const DemoTag = g => g.demo===false ? `<span class="demo-tag">Cadastrado por você</span>` : `<span class="demo-tag" title="Grupo fictício para demonstração">Fictício · demo</span>`;
+const ZoneChip = z => `<span class="zchip">${ZONAS[z].nome}</span>`;
+
+function GroupCard(g){
+  const j = state.joined[g.id];
+  return `<article class="card" style="${zstyle(g.zona)}">
+    <div class="card-top">${ZoneChip(g.zona)}${j?`<span class="joined-pill">${ic('check','ico-sm')}Você participa</span>`:DemoTag(g)}</div>
+    <h3><a href="#grupo-${g.id}">${esc(g.nome)}</a></h3>
+    <p class="card-desc">${esc(g.descricao)}</p>
+    <dl class="facts">
+      <div><dt>${ic('pin','ico-sm')}Local</dt><dd>${esc(g.local)}</dd></div>
+      <div><dt>${ic('cal','ico-sm')}Quando</dt><dd>${fmtDiasCurto(g.dias)} · ${fmtHora(g.horario)}</dd></div>
+      <div><dt>${ic('gauge','ico-sm')}Pace</dt><dd class="mono">${fmtFaixa(g)}</dd></div>
+      <div><dt>${ic('users','ico-sm')}Participantes</dt><dd class="mono">${participantes(g)}</dd></div>
+    </dl>
+    ${LevelMeter(g.nivel)}
+    <div class="card-actions">
+      ${j?`<a class="btn btn-quiet" href="#grupo-${g.id}">${ic('check','ico-sm')} No grupo · ver encontros</a>`
+         :`<button class="btn btn-primary" data-act="entrar" data-id="${g.id}">${ic('plus','ico-sm')} Entrar no grupo</button>`}
+      <a class="btn btn-outline btn-sm" href="#grupo-${g.id}">Ver detalhes</a>
+      <a class="btn btn-outline btn-sm" href="#mapa-${g.id}">${ic('route','ico-sm')} Ver rota</a>
+    </div>
+  </article>`;
+}
+
+const TrackDeco = () => `<svg class="lanes-deco" viewBox="0 0 340 240" aria-hidden="true"><g fill="none"><circle cx="340" cy="240" r="170" stroke="#B3262E" stroke-width="120"/>${[115,145,175,205,225].map(r=>`<circle cx="340" cy="240" r="${r}" stroke="#fff" stroke-width="1.5" opacity=".8"/>`).join('')}<circle cx="340" cy="240" r="160" stroke="#E8B923" stroke-width="2" class="route-dash"/></g></svg>`;
+
+function PageHead(kicker,title,text,extra=''){
+  return `<section class="page-head">${TrackDeco()}<div class="wrap"><span class="eyebrow">${kicker}</span><h1 class="display">${title}</h1>${text?`<p>${text}</p>`:''}${extra}</div></section>`;
+}
+
+/* ---------- 7. pages ---------- */
+function PageHome(){
+  const gs = api.listGroups();
+  const paces = gs.flatMap(g=>[g.paceMin,g.paceMax]);
+  const count = z => gs.filter(g=>g.zona===z).length;
+  return `
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">São Paulo · 5 zonas · grupos de corrida</span>
+        <h1 class="display">Encontre seu grupo. <span class="g">Encontre seu <span class="u">ritmo.</span></span></h1>
+        <p class="lead">Do Parque do Carmo ao Ibirapuera, da Cantareira à Paulista: diga onde você corre, em que pace e quando tem tempo. A gente mostra os grupos que combinam com você, seja no seu primeiro quilômetro ou na próxima maratona.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="#grupos">Explorar grupos ${ic('arrow')}</a>
+          <a class="btn btn-light btn-lg" href="#encontrar">Encontrar meu grupo</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>${gs.length}</strong>grupos no protótipo</div>
+          <div><strong>5</strong>zonas da cidade</div>
+          <div><strong>${fmtPace(Math.min(...paces))}–${fmtPace(Math.max(...paces))}</strong>min/km de pace</div>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="140 60 420 420" preserveAspectRatio="xMaxYMax slice">
+          <circle cx="560" cy="480" r="150" fill="#5E9A22"/>
+          <circle cx="560" cy="480" r="150" fill="none" stroke="#4A7C17" stroke-width="1" stroke-dasharray="4 8"/>
+          <circle cx="560" cy="480" r="265" fill="none" stroke="#B3262E" stroke-width="230"/>
+          ${[150,188,226,264,302,340,380].map(r=>`<circle cx="560" cy="480" r="${r}" fill="none" stroke="#F7F4EC" stroke-width="${r===150||r===380?3:1.8}"/>`).join('')}
+          ${[1,2,3,4,5,6].map((n,i)=>{const r=169+i*38,a=Math.PI*1.12;return `<text x="${560+r*Math.cos(a)}" y="${480+r*Math.sin(a)}" fill="#F7F4EC" font-family="Anton, Impact, sans-serif" font-size="22" text-anchor="middle" dominant-baseline="middle" transform="rotate(-70 ${560+r*Math.cos(a)} ${480+r*Math.sin(a)})">${n}</text>`}).join('')}
+          <circle cx="560" cy="480" r="245" fill="none" stroke="#E8B923" stroke-width="3" class="route-dash"/>
+          <g transform="translate(${560+245*Math.cos(Math.PI*1.32)} ${480+245*Math.sin(Math.PI*1.32)})"><circle r="11" fill="#E8B923"/><circle r="4.5" fill="#17171A"/></g>
+        </svg>
+      </div>
+    </div>
+  </section>
+  <div class="notice"><div class="wrap">${ic('info')}<span><strong>Versão de demonstração.</strong> Os grupos exibidos são fictícios, em locais públicos reais da cidade, criados para mostrar como a plataforma funciona.</span></div></div>
+
+  <section class="section"><div class="wrap">
+    <div class="sec-head"><div><span class="kicker">Explorar zonas</span><h2 class="display">Cinco zonas, um mapa de ritmos</h2><p>Cada região tem sua cor e seu marco. Escolha a sua para ver os grupos que treinam por perto.</p></div><a class="btn btn-outline" href="#zonas">Ver todas as zonas ${ic('arrow','ico-sm')}</a></div>
+    <div class="zone-strip">
+      ${ZONA_ORDEM.map(z=>`<a class="zcard" style="${zstyle(z)}" href="#grupos-${z}">${seal(z)}<h3>${ZONAS[z].nome}</h3><span style="font-size:14px">${ZONAS[z].marco}</span><span class="zmeta"><span>${count(z)} ${count(z)===1?'grupo':'grupos'}</span>${ic('arrow','ico-sm')}</span></a>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="sec-head"><div><span class="kicker">Em destaque</span><h2 class="display">Grupos para conhecer</h2><p>Três estilos de treino diferentes: rodagem de bairro, treino de performance e corrida urbana de domingo.</p></div><a class="btn btn-outline" href="#grupos">Ver todos os grupos ${ic('arrow','ico-sm')}</a></div>
+    <div class="grid-cards">${DESTAQUES.map(id=>GroupCard(api.getGroup(id))).join('')}</div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="sec-head"><div><span class="kicker">Como funciona</span><h2 class="display">Da raia 1 à linha de chegada</h2></div></div>
+    <div class="lanes">
+      <div class="lane"><span class="lane-n">1</span><div><h3>Conte seu ritmo e sua região</h3><p>Informe sua zona, seu pace aproximado, os dias livres e seu nível. Sem cadastro para começar.</p></div></div>
+      <div class="lane"><span class="lane-n">2</span><div><h3>Compare os grupos compatíveis</h3><p>Veja local de encontro, horários, faixa de pace e o perfil de cada comunidade, com a compatibilidade calculada para você.</p></div></div>
+      <div class="lane"><span class="lane-n">3</span><div><h3>Entre e apareça no próximo treino</h3><p>Entre no grupo, confira os próximos encontros e abra a rota até o ponto de encontro.</p></div></div>
+    </div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="cta-band"><div><h2 class="display">Organiza um grupo de corrida?</h2><p>Cadastre seu grupo e apareça para corredores da sua região que procuram exatamente o seu ritmo.</p></div><a class="btn btn-lg" href="#cadastrar">${ic('plus')} Cadastrar grupo</a></div>
+  </div></section>`;
+}
+
+/* ---- Busca ---- */
+function filtrar(gs,f){
+  const n=f.nome.trim().toLowerCase(), l=f.local.trim().toLowerCase();
+  return gs.filter(g=>
+    (!f.zonas.length || f.zonas.includes(g.zona)) &&
+    (!n || g.nome.toLowerCase().includes(n)) &&
+    (!l || g.local.toLowerCase().includes(l)) &&
+    (!f.dia || g.dias.includes(f.dia)) &&
+    (!f.periodo || periodoDe(g.horario)===f.periodo) &&
+    (!f.pace || (g.paceMin < PACE_FAIXAS[f.pace].max && g.paceMax > PACE_FAIXAS[f.pace].min)) &&
+    (!f.nivel || g.nivel===f.nivel));
+}
+function PageGrupos(){
+  const f=state.filters;
+  const opt=(obj,val,todos)=>`<option value="">${todos}</option>`+Object.entries(obj).map(([k,v])=>`<option value="${k}" ${val===k?'selected':''}>${typeof v==='string'?v:v.nome}</option>`).join('');
+  return PageHead('Encontrar grupos','Grupos de corrida em SP','Filtre por zona, dia, horário, pace e nível. Os resultados atualizam na hora.') + `
+  <div class="wrap"><div class="search-layout">
+    <aside class="filters ${state.filtersOpen?'open':''}" id="filters" aria-label="Filtros">
+      <h2>Filtros <button class="link" data-act="clear" style="font-family:var(--f-body);font-size:14px;text-transform:none">Limpar filtros</button></h2>
+      <div class="field"><span class="lbl" id="lbl-z">Zona</span><div class="zone-toggles" role="group" aria-labelledby="lbl-z">
+        ${ZONA_ORDEM.map(z=>`<button class="ztog" style="${zstyle(z)}" data-act="toggle-zona" data-z="${z}" aria-pressed="${f.zonas.includes(z)}">${ZONAS[z].curto}</button>`).join('')}
+      </div></div>
+      <div class="field"><label for="f-nome">Nome do grupo</label><div class="with-ico">${ic('search')}<input class="input" id="f-nome" data-f="nome" type="search" placeholder="Ex.: Correria" value="${esc(f.nome)}" autocomplete="off"></div></div>
+      <div class="field"><label for="f-local">Local de encontro</label><div class="with-ico">${ic('pin')}<input class="input" id="f-local" data-f="local" type="search" placeholder="Ex.: Ibirapuera" value="${esc(f.local)}" autocomplete="off"></div></div>
+      <div class="field"><label for="f-dia">Dia da semana</label><select class="select" id="f-dia" data-f="dia">${opt(Object.fromEntries(DIA_ORDEM.map(d=>[d,DIAS[d]])),f.dia,'Qualquer dia')}</select></div>
+      <div class="field"><label for="f-periodo">Horário da corrida</label><select class="select" id="f-periodo" data-f="periodo">${opt(PERIODOS,f.periodo,'Qualquer horário')}</select></div>
+      <div class="field"><label for="f-pace">Faixa de pace</label><select class="select mono" id="f-pace" data-f="pace">${opt(PACE_FAIXAS,f.pace,'Qualquer pace')}</select><span class="hint">Mostra grupos cuja faixa cruza a escolhida.</span></div>
+      <div class="field"><label for="f-nivel">Nível de experiência</label><select class="select" id="f-nivel" data-f="nivel">${opt(NIVEIS,f.nivel,'Todos os níveis')}</select></div>
+    </aside>
+    <section aria-label="Resultados">
+      <div class="results-bar">
+        <span class="count" id="count" aria-live="polite"></span>
+        <button class="btn btn-outline btn-sm filters-toggle" data-act="filters-toggle" aria-controls="filters" aria-expanded="${state.filtersOpen}">${ic('filter','ico-sm')} ${state.filtersOpen?'Ocultar filtros':'Filtros'}</button>
+      </div>
+      <div class="active-chips" id="chips" style="margin-bottom:16px"></div>
+      <div id="results"></div>
+    </section>
+  </div></div>`;
+}
+let searchTimer=null;
+function updateResults(withLoading=true){
+  const res=document.getElementById('results'); if(!res) return;
+  const run=()=>{
+    const list=filtrar(api.listGroups(),state.filters);
+    document.getElementById('count').textContent = `${list.length} ${list.length===1?'grupo encontrado':'grupos encontrados'}`;
+    res.innerHTML = list.length ? `<div class="grid-cards">${list.map(GroupCard).join('')}</div>`
+      : `<div class="empty">${ic('run')}<h3>Nenhum grupo nesse ritmo</h3><p>Nenhum grupo atende a todos os filtros. Tente ampliar a faixa de pace, escolher outro dia ou incluir mais zonas.</p><button class="btn btn-primary" data-act="clear">Limpar filtros</button></div>`;
+    renderChips();
+  };
+  if(!withLoading){ run(); return; }
+  res.innerHTML = `<div class="grid-cards" aria-busy="true">${[1,2,3].map(()=>`<div class="skeleton"><div class="sk" style="width:35%"></div><div class="sk" style="height:26px;width:70%"></div><div class="sk"></div><div class="sk" style="width:80%"></div><div class="sk" style="height:40px"></div></div>`).join('')}</div>`;
+  clearTimeout(searchTimer); searchTimer=setTimeout(run,260);
+}
+function renderChips(){
+  const f=state.filters, c=[];
+  f.zonas.forEach(z=>c.push(['zona',z,ZONAS[z].nome]));
+  if(f.nome) c.push(['nome','',`Nome: ${f.nome}`]);
+  if(f.local) c.push(['local','',`Local: ${f.local}`]);
+  if(f.dia) c.push(['dia','',DIAS[f.dia]]);
+  if(f.periodo) c.push(['periodo','',PERIODOS[f.periodo]]);
+  if(f.pace) c.push(['pace','',PACE_FAIXAS[f.pace].nome]);
+  if(f.nivel) c.push(['nivel','',NIVEIS[f.nivel].nome]);
+  const el=document.getElementById('chips');
+  el.innerHTML = c.map(([k,v,t])=>`<button class="achip" data-act="rm-filter" data-k="${k}" data-v="${v}" aria-label="Remover filtro ${esc(t)}">${esc(t)} ${ic('x','ico-sm')}</button>`).join('');
+}
+
+/* ---- Detalhe ---- */
+function PageDetalhe(id){
+  const g=api.getGroup(id);
+  if(!g) return NotFound('Esse grupo não foi encontrado. Ele pode ter sido removido deste navegador.');
+  const j=state.joined[g.id], z=ZONAS[g.zona], prox=proximos(g);
+  return `
+  <section class="detail-head" style="${zstyle(g.zona)}"><div class="wrap">
+    <a class="back" href="#grupos">${ic('back','ico-sm')} Voltar para os grupos</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${ZoneChip(g.zona)}<span class="demo-tag" style="color:inherit;border-color:currentColor">${g.demo===false?'Cadastrado por você':'Grupo fictício · demonstração'}</span></div>
+    <h1 class="display">${esc(g.nome)}</h1>
+    <div class="sub"><span>${ic('pin','ico-sm')}${esc(g.local)}</span><span>${ic('cal','ico-sm')}${fmtDiasLongo(g.dias)} · ${fmtHora(g.horario)}</span><span class="mono">${ic('gauge','ico-sm')}${fmtFaixa(g)}</span></div>
+  </div></section>
+  <div class="wrap"><div class="detail-grid" style="${zstyle(g.zona)}">
+    <div>
+      <div class="panel"><h2>Sobre o grupo</h2><p>${esc(g.descricao)}</p></div>
+      <div class="panel"><h2>Perfil da comunidade</h2><div class="tags">${g.perfil.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div>
+      <div class="panel"><h2>Próximos encontros</h2>
+        <ul class="sessions">${prox.map(d=>`<li><span class="date-box"><b>${d.getDate()}</b><small>${d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}</small></span><span><b>${d.toLocaleDateString('pt-BR',{weekday:'long'}).replace(/^./,c=>c.toUpperCase())}, ${fmtHora(g.horario)}</b><br><small style="color:var(--muted)">${esc(g.local)} · ${esc(g.distancia||'distância combinada no grupo')}</small></span><span class="mono" style="font-size:13px;color:var(--muted)">${fmtFaixa(g)}</span></li>`).join('')}</ul>
+        <p style="color:var(--muted);font-size:13px;margin-top:10px">Datas calculadas a partir da agenda fixa do grupo. Confirmações por encontro dependem do banco de dados.</p>
+      </div>
+      <div class="panel"><h2>Antes do primeiro treino</h2><ul class="rules"><li>Chegue 10 minutos antes para o aquecimento.</li><li>Leve água; nos treinos longos, combine hidratação com o grupo.</li><li>Corra sempre pela calçada ou área de pedestres e respeite quem caminha.</li><li>Se o pace estiver puxado, avise: o grupo ajusta.</li></ul></div>
+    </div>
+    <aside>
+      <div class="panel">
+        <h2>Ficha do treino</h2>
+        <dl class="spec">
+          <div><dt>${ic('pin','ico-sm')}Local</dt><dd>${esc(g.local)}</dd></div>
+          <div><dt>${ic('door','ico-sm')}Ponto de encontro</dt><dd style="font-weight:500">${esc(g.ponto||'Combinado no grupo')}</dd></div>
+          <div><dt>${ic('cal','ico-sm')}Dias</dt><dd>${fmtDiasLongo(g.dias)}</dd></div>
+          <div><dt>${ic('clock','ico-sm')}Horário</dt><dd class="mono">${fmtHora(g.horario)}</dd></div>
+          <div><dt>${ic('gauge','ico-sm')}Pace</dt><dd class="mono">${fmtFaixa(g)}</dd></div>
+          <div><dt>${ic('ruler','ico-sm')}Distância</dt><dd class="mono">${esc(g.distancia||'—')}</dd></div>
+          <div><dt>${ic('bars','ico-sm')}Nível</dt><dd>${LevelMeter(g.nivel)}</dd></div>
+          <div><dt>${ic('users','ico-sm')}Participantes</dt><dd class="mono">${participantes(g)}</dd></div>
+        </dl>
+        <div class="stack" style="margin-top:16px">
+          ${j?`<div class="form-alert good">${ic('check')}<span>Você entrou como <b>${esc(j.apelido)}</b>. Te esperamos no próximo encontro.</span></div><button class="btn btn-outline" data-act="sair" data-id="${g.id}">Sair do grupo</button>`
+             :`<button class="btn btn-primary btn-lg" data-act="entrar" data-id="${g.id}">${ic('plus')} Entrar no grupo</button>`}
+          <a class="btn btn-outline" href="#mapa-${g.id}">${ic('map','ico-sm')} Ver rota no mapa</a>
+        </div>
+      </div>
+      <div class="panel"><h2>${z.nome}</h2><div style="display:flex;gap:14px;align-items:center"><span style="background:var(--z);color:var(--zon);border-radius:50%;display:grid;place-items:center;width:72px;height:72px;flex:none">${seal(g.zona,56)}</span><p style="color:var(--muted);font-size:14.5px">${z.desc}</p></div><a class="link" href="#grupos-${g.zona}" style="display:inline-block;margin-top:12px">Outros grupos da ${z.nome}</a></div>
+    </aside>
+  </div></div>`;
+}
+
+/* ---- Zonas ---- */
+function PageZonas(){
+  const gs=api.listGroups();
+  return PageHead('Explorar zonas','As cinco zonas de São Paulo','Cada região tem uma cor e um selo inspirado em um marco da cidade. As cores identificam os grupos em todo o site.') + `
+  <div class="wrap"><div class="zone-rows">
+    ${ZONA_ORDEM.map(z=>{const list=gs.filter(g=>g.zona===z);const locais=[...new Set(list.map(g=>g.local))];
+      return `<article class="zrow" style="${zstyle(z)}"><div class="zrow-seal">${seal(z,120)}</div>
+      <div class="zrow-body"><span class="kicker" style="color:var(--muted)">${ZONAS[z].marco}</span><h2>${ZONAS[z].nome}</h2><p>${ZONAS[z].desc}</p>
+      <div class="zrow-meta"><span>${ic('users','ico-sm')}<b>${list.length}</b>&nbsp;${list.length===1?'grupo':'grupos'}</span><span>${ic('pin','ico-sm')}${esc(locais.join(' · ')||'Nenhum local ainda')}</span></div></div>
+      <div class="zrow-cta"><a class="btn btn-primary" href="#grupos-${z}">Explorar grupos ${ic('arrow','ico-sm')}</a></div></article>`}).join('')}
+  </div></div>`;
+}
+
+/* ---- Mapa ---- */
+const ZPOLY = {
+  norte:'M70 20 L330 20 L350 110 L250 135 L150 135 L60 110 Z',
+  oeste:'M60 110 L150 135 L165 210 L120 270 L30 240 L20 150 Z',
+  centro:'M150 135 L250 135 L255 200 L200 220 L165 210 Z',
+  leste:'M250 135 L350 110 L385 200 L360 280 L255 250 L255 200 Z',
+  sul:'M120 270 L165 210 L200 220 L255 200 L255 250 L240 365 L150 368 L110 320 Z'
+};
+const ZLABEL = {norte:[200,40],oeste:[62,232],centro:[212,205],leste:[345,250],sul:[160,292]};
+const ZCENTRO = {norte:[200,90],oeste:[90,200],centro:[205,180],leste:[320,200],sul:[195,300]};
+let mapSel=null;
+function PageMapa(selId){
+  const gs=api.listGroups();
+  mapSel = selId && api.getGroup(selId) ? selId : (mapSel && api.getGroup(mapSel) ? mapSel : gs[0].id);
+  return PageHead('Mapa e rotas','Pontos de encontro','Selecione um grupo para ver onde ele se encontra e abrir a rota até lá no Google Maps.') + `
+  <div class="wrap"><div class="map-layout">
+    <div class="map-box">
+      <svg viewBox="0 0 400 380" role="group" aria-label="Esquema das zonas de São Paulo com os grupos">
+        ${ZONA_ORDEM.map(z=>`<path d="${ZPOLY[z]}" fill="${ZONAS[z].cor}" fill-opacity=".14" stroke="${ZONAS[z].cor}" stroke-width="1.6"/>`).join('')}
+        ${ZONA_ORDEM.map(z=>`<text x="${ZLABEL[z][0]}" y="${ZLABEL[z][1]}" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="${z==='centro'?11:13}" letter-spacing=".6" fill="${ZONAS[z].cor}">${ZONAS[z].nome.toUpperCase()}</text>`).join('')}
+        <path d="M40 128 C120 150 260 120 380 150" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="5 5" opacity=".6"/>
+        <path d="M115 330 C120 260 100 180 70 120" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="5 5" opacity=".6"/>
+        <g id="pins">${gs.map(g=>{const [x,y]=pinPos(g);const sel=g.id===mapSel;return `<g class="pin" tabindex="0" role="button" aria-label="${esc(g.nome)}, ${esc(g.local)}" data-act="map-select" data-id="${g.id}" transform="translate(${x} ${y})"><circle class="ring" r="${sel?14:0}" fill="none" stroke="${ZONAS[g.zona].cor}" stroke-width="2" stroke-dasharray="3 3"/><circle class="dot" r="${sel?8:6}" fill="${ZONAS[g.zona].cor}" stroke="var(--surface)" stroke-width="2.5"/></g>`}).join('')}</g>
+      </svg>
+      <p class="map-note">${ic('info','ico-sm')}<span>Esquema ilustrativo das zonas, não um mapa real. As posições indicam apenas a zona do grupo. O endereço e a rota abrem no Google Maps. Mapa interativo previsto para a próxima versão.</span></p>
+    </div>
+    <div>
+      <div id="mapDetail" class="map-detail"></div>
+      <div class="map-list" role="list">${gs.map(g=>`<button class="map-item" role="listitem" style="${zstyle(g.zona)}" data-act="map-select" data-id="${g.id}" aria-current="${g.id===mapSel}"><span class="dotz"></span><span><b>${esc(g.nome)}</b><small>${esc(g.local)}</small></span><span class="mono" style="font-size:12px;color:var(--muted)">${fmtDiasCurto(g.dias)}</span></button>`).join('')}</div>
+    </div>
+  </div></div>`;
+}
+function pinPos(g){ if(g.pin) return g.pin; const [cx,cy]=ZCENTRO[g.zona]; let h=0; for(const c of g.id) h=(h*31+c.charCodeAt(0))%997; return [cx+(h%40)-20, cy+((h>>3)%30)-15]; }
+function renderMapDetail(){
+  const g=api.getGroup(mapSel), el=document.getElementById('mapDetail'); if(!g||!el) return;
+  el.innerHTML=`<div class="panel" style="${zstyle(g.zona)};border-color:var(--z)">
+    <div class="card-top">${ZoneChip(g.zona)}${DemoTag(g)}</div>
+    <h2 style="margin:10px 0 6px;font-size:28px">${esc(g.nome)}</h2>
+    <dl class="spec"><div><dt>${ic('pin','ico-sm')}Local</dt><dd>${esc(g.local)}</dd></div><div><dt>${ic('door','ico-sm')}Encontro</dt><dd style="font-weight:500">${esc(g.ponto||'Combinado no grupo')}</dd></div><div><dt>${ic('cal','ico-sm')}Quando</dt><dd>${fmtDiasCurto(g.dias)} · ${fmtHora(g.horario)}</dd></div><div><dt>${ic('gauge','ico-sm')}Pace</dt><dd class="mono">${fmtFaixa(g)}</dd></div></dl>
+    <div class="row2" style="margin-top:14px;gap:8px">
+      <a class="btn btn-primary btn-sm" href="${gmapsRota(g)}" target="_blank" rel="noopener">${ic('route','ico-sm')} Traçar rota</a>
+      <a class="btn btn-outline btn-sm" href="${gmapsBusca(g)}" target="_blank" rel="noopener">${ic('ext','ico-sm')} Abrir no Maps</a>
+    </div>
+    <a class="link" href="#grupo-${g.id}" style="display:inline-block;margin-top:12px">Ver detalhes do grupo</a>
+  </div>`;
+}
+function selectOnMap(id){
+  mapSel=id;
+  document.querySelectorAll('.map-item').forEach(b=>b.setAttribute('aria-current',String(b.dataset.id===id)));
+  document.querySelectorAll('#pins .pin').forEach(p=>{const s=p.dataset.id===id;p.querySelector('.ring').setAttribute('r',s?14:0);p.querySelector('.dot').setAttribute('r',s?8:6);});
+  renderMapDetail();
+}
+
+/* ---- Encontrar meu grupo ---- */
+let matchResult=null;
+function PageEncontrar(){
+  return PageHead('Encontrar meu grupo','Qual é o seu ritmo?','Responda quatro perguntas e veja os grupos mais compatíveis com você. Nada é salvo nem enviado.') + `
+  <div class="wrap"><div class="form-layout">
+    <form class="form" id="matchForm" novalidate>
+      <div id="matchAlert"></div>
+      <fieldset><legend>Em qual zona você prefere correr? *</legend><div class="choice-row">
+        ${ZONA_ORDEM.map(z=>`<label class="choice z" style="${zstyle(z)}"><input type="radio" name="zona" value="${z}"><span>${ZONAS[z].nome}</span></label>`).join('')}
+        <label class="choice"><input type="radio" name="zona" value="qualquer"><span>Qualquer zona</span></label>
+      </div><span class="err" id="e-zona"></span></fieldset>
+      <div class="row2">
+        <div class="field"><label for="m-pace">Seu pace aproximado (min/km) *</label><input class="input mono" id="m-pace" name="pace" inputmode="numeric" placeholder="6:00" aria-describedby="e-pace h-pace"><span class="hint" id="h-pace">Formato minutos:segundos, entre 3:00 e 12:00.</span><span class="err" id="e-pace"></span></div>
+        <div class="field"><label for="m-periodo">Horário preferido</label><select class="select" id="m-periodo" name="periodo"><option value="">Qualquer horário</option>${Object.entries(PERIODOS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>
+      </div>
+      <fieldset><legend>Em quais dias você pode correr? *</legend><div class="choice-row">
+        ${DIA_ORDEM.map(d=>`<label class="choice"><input type="checkbox" name="dias" value="${d}"><span>${DIAS_CURTO[d]}</span></label>`).join('')}
+      </div><span class="err" id="e-dias"></span></fieldset>
+      <fieldset><legend>Seu nível de experiência *</legend><div class="choice-row">
+        ${Object.entries(NIVEIS).map(([k,v])=>`<label class="choice"><input type="radio" name="nivel" value="${k}"><span>${v.nome}</span></label>`).join('')}
+      </div><span class="err" id="e-nivel"></span></fieldset>
+      <button class="btn btn-primary btn-lg" type="submit">${ic('search')} Mostrar grupos compatíveis</button>
+    </form>
+    <aside class="side-note"><h3>Como calculamos</h3><ul><li>Pace dentro da faixa do grupo pesa mais.</li><li>Zona, dias em comum e nível ajustam a nota.</li><li>Mostramos até 6 grupos com compatibilidade a partir de 40%.</li></ul><p style="color:var(--muted)">Não sabe seu pace? Divida o tempo de uma corrida pela distância. 30 min em 5 km dá 6:00 min/km.</p></aside>
+  </div>
+  <div id="matchResults" style="margin-top:32px"></div></div>`;
+}
+function calcMatch(g,q){
+  let s=0,max=0; const why=[];
+  max+=30; if(q.zona==='qualquer'||q.zona===g.zona){s+=30; if(q.zona!=='qualquer') why.push(`Fica na ${ZONAS[g.zona].nome}`);}
+  max+=35; if(q.pace>=g.paceMin&&q.pace<=g.paceMax){s+=35;why.push('Seu pace está na faixa do grupo');}
+  else{const d=Math.min(Math.abs(q.pace-g.paceMin),Math.abs(q.pace-g.paceMax)); if(d<=30){s+=20;why.push('Seu pace está a até 30 s/km da faixa');} else if(d<=60){s+=8;}}
+  max+=20; const comuns=g.dias.filter(d=>q.dias.includes(d)); if(comuns.length){s+=20;why.push('Treina '+listaPt(sortDias(comuns).map(d=>DIAS[d].toLowerCase())));}
+  max+=15; const dn=Math.abs(NIVEIS[g.nivel].n-NIVEIS[q.nivel].n); if(!dn){s+=15;why.push('Mesmo nível que você');} else if(dn===1) s+=6;
+  if(q.periodo){max+=10; if(periodoDe(g.horario)===q.periodo){s+=10;why.push('No horário que você prefere');}}
+  return {pct:Math.round(s/max*100),why};
+}
+function submitMatch(form){
+  const fd=new FormData(form), errs={};
+  const zona=fd.get('zona'), paceTxt=(fd.get('pace')||'').trim(), dias=fd.getAll('dias'), nivel=fd.get('nivel'), periodo=fd.get('periodo');
+  if(!zona) errs.zona='Escolha uma zona ou "Qualquer zona".';
+  const pace=parsePace(paceTxt); if(!paceTxt) errs.pace='Informe seu pace aproximado.'; else if(pace===null) errs.pace='Use o formato 6:00, entre 3:00 e 12:00 min/km.';
+  if(!dias.length) errs.dias='Selecione pelo menos um dia.';
+  if(!nivel) errs.nivel='Escolha seu nível.';
+  showErrors(form,{zona:'e-zona',pace:'e-pace',dias:'e-dias',nivel:'e-nivel'},errs,'matchAlert',{pace:'m-pace'});
+  if(Object.keys(errs).length) return;
+  const q={zona,pace,dias,nivel,periodo};
+  const out=api.listGroups().map(g=>({g,...calcMatch(g,q)})).filter(r=>r.pct>=40).sort((a,b)=>b.pct-a.pct).slice(0,6);
+  const el=document.getElementById('matchResults');
+  el.innerHTML = `<div class="sec-head"><div><span class="kicker">Resultado</span><h2 class="display">${out.length?`${out.length} ${out.length===1?'grupo combina':'grupos combinam'} com você`:'Nenhum grupo compatível'}</h2><p>Pace ${fmtPace(pace)} min/km · ${zona==='qualquer'?'qualquer zona':ZONAS[zona].nome} · ${NIVEIS[nivel].nome.toLowerCase()}</p></div></div>` +
+    (out.length?`<div class="grid-cards">${out.map(r=>`<article class="card" style="${zstyle(r.g.zona)}"><div class="match"><span class="match-score" style="--p:${r.pct}"><span>${r.pct}%</span></span><div style="min-width:0">${ZoneChip(r.g.zona)}<h3 style="margin-top:8px"><a href="#grupo-${r.g.id}">${esc(r.g.nome)}</a></h3><ul class="why">${r.why.map(w=>`<li>${ic('check','ico-sm')}${esc(w)}</li>`).join('')}</ul></div></div>
+      <dl class="facts"><div><dt>${ic('pin','ico-sm')}Local</dt><dd>${esc(r.g.local)}</dd></div><div><dt>${ic('cal','ico-sm')}Quando</dt><dd>${fmtDiasCurto(r.g.dias)} · ${fmtHora(r.g.horario)}</dd></div><div><dt>${ic('gauge','ico-sm')}Pace</dt><dd class="mono">${fmtFaixa(r.g)}</dd></div><div><dt>${ic('bars','ico-sm')}Nível</dt><dd>${NIVEIS[r.g.nivel].nome}</dd></div></dl>
+      <div class="card-actions">${state.joined[r.g.id]?`<a class="btn btn-quiet" href="#grupo-${r.g.id}">${ic('check','ico-sm')} Você já participa</a>`:`<button class="btn btn-primary" data-act="entrar" data-id="${r.g.id}">${ic('plus','ico-sm')} Entrar no grupo</button>`}<a class="btn btn-outline btn-sm" href="#grupo-${r.g.id}">Ver detalhes</a><a class="btn btn-outline btn-sm" href="#mapa-${r.g.id}">${ic('route','ico-sm')} Ver rota</a></div></article>`).join('')}</div>`
+      :`<div class="empty">${ic('run')}<h3>Ainda não temos esse grupo</h3><p>Tente marcar mais dias ou escolher "Qualquer zona". Se você organiza treinos, pode ser o primeiro grupo desse perfil.</p><a class="btn btn-primary" href="#cadastrar">Cadastrar grupo</a></div>`);
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---- Cadastrar grupo ---- */
+function PageCadastrar(){
+  return PageHead('Cadastrar grupo','Coloque seu grupo no mapa','Preencha as informações do treino. Campos com * são obrigatórios.') + `
+  <div class="wrap"><div class="form-layout">
+    <div id="cadWrap">
+    <form class="form" id="cadForm" novalidate>
+      <div id="cadAlert"></div>
+      <div class="field"><label for="c-nome">Nome do grupo *</label><input class="input" id="c-nome" name="nome" maxlength="50" placeholder="Ex.: Correria do Carmo" aria-describedby="e-nome"><span class="err" id="e-nome"></span></div>
+      <fieldset><legend>Zona *</legend><div class="choice-row">${ZONA_ORDEM.map(z=>`<label class="choice z" style="${zstyle(z)}"><input type="radio" name="zona" value="${z}"><span>${ZONAS[z].nome}</span></label>`).join('')}</div><span class="err" id="e-czona"></span></fieldset>
+      <div class="row2">
+        <div class="field"><label for="c-local">Local de encontro *</label><input class="input" id="c-local" name="local" maxlength="80" placeholder="Ex.: Parque do Carmo" aria-describedby="e-local"><span class="err" id="e-local"></span></div>
+        <div class="field"><label for="c-ponto">Ponto de referência</label><input class="input" id="c-ponto" name="ponto" maxlength="100" placeholder="Ex.: portão principal"></div>
+      </div>
+      <fieldset><legend>Dias de treino *</legend><div class="choice-row">${DIA_ORDEM.map(d=>`<label class="choice"><input type="checkbox" name="dias" value="${d}"><span>${DIAS_CURTO[d]}</span></label>`).join('')}</div><span class="err" id="e-cdias"></span></fieldset>
+      <div class="row2">
+        <div class="field"><label for="c-hora">Horário *</label><input class="input mono" id="c-hora" name="horario" type="time" aria-describedby="e-hora"><span class="err" id="e-hora"></span></div>
+        <div class="field"><label for="c-dist">Distância habitual</label><input class="input mono" id="c-dist" name="distancia" maxlength="30" placeholder="Ex.: 8 a 12 km"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="c-pmin">Pace mais rápido (min/km) *</label><input class="input mono" id="c-pmin" name="paceMin" placeholder="5:30" inputmode="numeric" aria-describedby="e-pmin"><span class="err" id="e-pmin"></span></div>
+        <div class="field"><label for="c-pmax">Pace mais lento (min/km) *</label><input class="input mono" id="c-pmax" name="paceMax" placeholder="6:30" inputmode="numeric" aria-describedby="e-pmax"><span class="err" id="e-pmax"></span></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="c-nivel">Nível *</label><select class="select" id="c-nivel" name="nivel" aria-describedby="e-cnivel"><option value="">Selecione</option>${Object.entries(NIVEIS).map(([k,v])=>`<option value="${k}">${v.nome}</option>`).join('')}</select><span class="err" id="e-cnivel"></span></div>
+        <div class="field"><label for="c-part">Participantes hoje</label><input class="input mono" id="c-part" name="participantes" type="number" min="1" max="999" placeholder="Ex.: 15"></div>
+      </div>
+      <div class="field"><label for="c-desc">Descrição *</label><textarea class="input" id="c-desc" name="descricao" rows="4" maxlength="400" placeholder="Como é o treino, para quem é, o que acontece depois..." aria-describedby="e-desc h-desc"></textarea><span class="hint" id="h-desc"><span id="descCount">0</span>/400 · mínimo de 30 caracteres</span><span class="err" id="e-desc"></span></div>
+      <div class="field"><label for="c-contato">Contato público do grupo *</label><input class="input" id="c-contato" name="contato" maxlength="80" placeholder="@perfil, site ou e-mail do grupo" aria-describedby="e-contato h-contato"><span class="hint" id="h-contato">Use um canal do grupo, não um telefone pessoal.</span><span class="err" id="e-contato"></span></div>
+      <label class="check"><input type="checkbox" name="organizador" id="c-org"><span>Sou organizador(a) deste grupo e as informações estão corretas. *</span></label><span class="err" id="e-org"></span>
+      <button class="btn btn-primary btn-lg" type="submit">${ic('plus')} Cadastrar grupo</button>
+    </form>
+    </div>
+    <aside class="side-note"><h3>O que acontece depois</h3><ul><li>Neste protótipo, o grupo aparece na busca, no mapa e nas zonas apenas neste navegador.</li><li>Com o banco de dados conectado, o cadastro passará por uma revisão antes de ficar público.</li><li>Só pedimos dados do grupo. Nenhuma informação pessoal sua é necessária.</li></ul></aside>
+  </div></div>`;
+}
+function submitCad(form){
+  const fd=new FormData(form), v=k=>(fd.get(k)||'').toString().trim(), errs={};
+  if(v('nome').length<3) errs.nome='Informe um nome com pelo menos 3 caracteres.';
+  else if(api.listGroups().some(g=>g.nome.toLowerCase()===v('nome').toLowerCase())) errs.nome='Já existe um grupo com esse nome.';
+  if(!fd.get('zona')) errs.zona='Escolha a zona do grupo.';
+  if(v('local').length<3) errs.local='Informe o local de encontro.';
+  if(!fd.getAll('dias').length) errs.dias='Selecione pelo menos um dia.';
+  if(!/^\d{2}:\d{2}$/.test(v('horario'))) errs.horario='Informe o horário do treino.';
+  const pmin=parsePace(v('paceMin')), pmax=parsePace(v('paceMax'));
+  if(pmin===null) errs.pmin='Use o formato 5:30, entre 3:00 e 12:00.';
+  if(pmax===null) errs.pmax='Use o formato 6:30, entre 3:00 e 12:00.';
+  if(pmin!==null&&pmax!==null&&pmin>=pmax) errs.pmax='O pace mais lento precisa ser maior que o mais rápido.';
+  if(!v('nivel')) errs.nivel='Selecione o nível do grupo.';
+  if(v('descricao').length<30) errs.desc=`A descrição precisa de pelo menos 30 caracteres (faltam ${30-v('descricao').length}).`;
+  if(v('contato').length<3) errs.contato='Informe um contato público do grupo.';
+  if(!fd.get('organizador')) errs.org='Confirme que você organiza o grupo.';
+  showErrors(form,{nome:'e-nome',zona:'e-czona',local:'e-local',dias:'e-cdias',horario:'e-hora',pmin:'e-pmin',pmax:'e-pmax',nivel:'e-cnivel',desc:'e-desc',contato:'e-contato',org:'e-org'},errs,'cadAlert',
+    {nome:'c-nome',local:'c-local',horario:'c-hora',pmin:'c-pmin',pmax:'c-pmax',nivel:'c-nivel',desc:'c-desc',contato:'c-contato'});
+  if(Object.keys(errs).length) return;
+  let id=slug(v('nome'))||'grupo'; while(api.getGroup(id)) id+='-2';
+  const part=parseInt(v('participantes'),10);
+  const g=api.createGroup({id,nome:v('nome'),zona:fd.get('zona'),local:v('local'),ponto:v('ponto')||'Combinado no grupo',dias:fd.getAll('dias'),horario:v('horario'),paceMin:pmin,paceMax:pmax,distancia:v('distancia'),nivel:v('nivel'),participantes:part>0&&part<1000?part:1,descricao:v('descricao'),perfil:['Novo na plataforma'],contato:v('contato'),demo:false});
+  document.getElementById('cadWrap').innerHTML=`<div class="form" style="${zstyle(g.zona)}"><div class="success"><span class="success-ico">${ic('check')}</span><h3>Grupo cadastrado</h3><p style="color:var(--muted);max-width:44ch"><b style="color:var(--ink)">${esc(g.nome)}</b> já aparece na busca, no mapa e na ${ZONAS[g.zona].nome} deste navegador.</p><div class="choice-row" style="justify-content:center"><a class="btn btn-primary" href="#grupo-${g.id}">Ver página do grupo</a><a class="btn btn-outline" href="#grupos-${g.zona}">Ver na busca</a><button class="btn btn-quiet" data-act="cad-novo">Cadastrar outro</button></div></div></div>`;
+  toast(`Grupo “${g.nome}” cadastrado.`); updateMeusBadge();
+  document.getElementById('cadWrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---- Meus grupos ---- */
+function PageMeus(){
+  const gs=api.listGroups(), joined=gs.filter(g=>state.joined[g.id]), mine=state.custom;
+  return PageHead('Meus grupos','Seus treinos','Grupos em que você entrou e grupos que você cadastrou neste navegador.') + `
+  <div class="wrap">
+    <section class="section" style="padding-top:32px"><div class="sec-head"><h2 class="display" style="font-size:34px">Grupos em que você entrou</h2></div>
+      ${joined.length?`<div class="grid-cards">${joined.map(GroupCard).join('')}</div>`:`<div class="empty">${ic('users')}<h3>Você ainda não entrou em nenhum grupo</h3><p>Encontre um grupo com o seu pace e a sua região e entre com um clique.</p><a class="btn btn-primary" href="#encontrar">Encontrar meu grupo</a></div>`}
+    </section>
+    <section class="section" style="padding-top:0"><div class="sec-head"><h2 class="display" style="font-size:34px">Grupos que você cadastrou</h2></div>
+      ${mine.length?`<div class="grid-cards">${mine.map(GroupCard).join('')}</div>`:`<div class="empty">${ic('plus')}<h3>Nenhum grupo cadastrado</h3><p>Organiza treinos? Cadastre seu grupo para aparecer na busca.</p><a class="btn btn-outline" href="#cadastrar">Cadastrar grupo</a></div>`}
+    </section>
+    <div class="panel"><h2>Conta e dados</h2><p style="color:var(--muted)">Por enquanto não existe login: suas escolhas ficam salvas apenas neste navegador. A estrutura de conta (cadastro e login por e-mail) está prevista para quando o banco de dados for conectado.</p>
+      <div id="resetBox" style="margin-top:14px"><button class="btn btn-outline btn-sm" data-act="reset-ask">Apagar meus dados deste navegador</button></div></div>
+  </div>`;
+}
+
+/* ---- Sobre ---- */
+function PageSobre(){
+  return PageHead('Sobre','O que é o Pace Paulista','Uma plataforma para conectar corredores de São Paulo aos grupos certos para o seu ritmo e a sua região.') + `
+  <div class="wrap"><div class="about">
+    <div class="panel"><h2>A ideia</h2><p>Correr sozinho é ótimo. Correr com gente que tem o seu pace é melhor. Mas os grupos estão espalhados por perfis, conversas e indicações de amigos.</p><p>O Pace Paulista reúne os grupos de corrida das cinco zonas da cidade em um só lugar, com as informações que importam para decidir: onde, quando, em que ritmo e para qual nível.</p><p style="margin-top:16px"><a class="btn btn-primary" href="#grupos">Explorar grupos ${ic('arrow','ico-sm')}</a></p></div>
+    <div class="panel"><h2>Status do protótipo</h2><ul class="status-list">
+      <li><span class="st on">ATIVO</span><span>Busca com filtros, cards, páginas de detalhes, zonas, cálculo de compatibilidade, cadastro e entrada em grupos.</span></li>
+      <li><span class="st on">ATIVO</span><span>Dados salvos no seu navegador (grupos cadastrados e grupos em que você entrou).</span></li>
+      <li><span class="st off">PENDENTE</span><span>Banco de dados compartilhado (Supabase) para todos verem os mesmos grupos.</span></li>
+      <li><span class="st off">PENDENTE</span><span>Login e conta de usuário.</span></li>
+      <li><span class="st off">PENDENTE</span><span>Mapa interativo com coordenadas reais dos pontos de encontro.</span></li>
+      <li><span class="st off">PENDENTE</span><span>Notificações e confirmação de presença por encontro.</span></li>
+    </ul><p style="color:var(--muted);font-size:14px;margin-top:14px">Todos os grupos de demonstração são fictícios. Os locais citados são espaços públicos reais da cidade.</p></div>
+  </div></div>`;
+}
+
+function NotFound(msg){ return PageHead('Ops','Página não encontrada',msg||'Esse endereço não existe.', `<p style="margin-top:20px"><a class="btn btn-primary" href="#inicio">Voltar ao início</a></p>`); }
+
+/* ---------- shared: forms, modal, toast ---------- */
+function showErrors(form,map,errs,alertId,inputMap){
+  Object.entries(map).forEach(([k,id])=>{const e=document.getElementById(id); if(e) e.innerHTML=errs[k]?ic('alert','ico-sm')+esc(errs[k]):'';});
+  Object.entries(inputMap||{}).forEach(([k,id])=>{const i=document.getElementById(id); if(i) i.setAttribute('aria-invalid',errs[k]?'true':'false');});
+  const n=Object.keys(errs).length, al=document.getElementById(alertId);
+  al.innerHTML = n?`<div class="form-alert bad" role="alert">${ic('alert')}<span>${n===1?'Corrija 1 campo':`Corrija ${n} campos`} para continuar.</span></div>`:'';
+  if(n){ const first=Object.keys(map).find(k=>errs[k]); const target=(inputMap&&inputMap[first]&&document.getElementById(inputMap[first]))||document.getElementById(map[first])?.closest('fieldset')?.querySelector('input')||document.getElementById(map[first]); target?.focus?.(); }
+}
+let lastFocus=null;
+function openModal(html,z){
+  lastFocus=document.activeElement;
+  document.getElementById('modalRoot').innerHTML=`<div class="modal-bg" data-act="modal-bg"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" style="${zstyle(z)}"><button class="modal-x" data-act="close-modal" aria-label="Fechar">${ic('x')}</button>${html}</div></div>`;
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.querySelector('.modal input, .modal .btn')?.focus(),30);
+}
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; document.body.style.overflow=''; lastFocus?.focus?.(); }
+function openJoin(id){
+  const g=api.getGroup(id); if(!g) return;
+  const next=proximos(g,1)[0];
+  openModal(`<div class="modal-top">${ZoneChip(g.zona).replace('class="zchip"','class="zchip" style="background:var(--zon);color:var(--z)"')}<h2 id="mTitle">Entrar no ${esc(g.nome)}</h2></div>
+  <div class="modal-body" id="joinBody">
+    <dl class="spec"><div><dt>${ic('pin','ico-sm')}Local</dt><dd>${esc(g.local)}</dd></div><div><dt>${ic('cal','ico-sm')}Próximo treino</dt><dd>${next?next.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'})+' · '+fmtHora(g.horario):'—'}</dd></div><div><dt>${ic('gauge','ico-sm')}Pace</dt><dd class="mono">${fmtFaixa(g)}</dd></div></dl>
+    <form id="joinForm" data-id="${g.id}" novalidate class="stack">
+      <div class="field"><label for="j-nome">Como o grupo pode te chamar? *</label><input class="input" id="j-nome" name="apelido" maxlength="40" placeholder="Seu primeiro nome ou apelido" autocomplete="given-name" aria-describedby="e-jnome"><span class="err" id="e-jnome"></span></div>
+      <label class="check"><input type="checkbox" name="ok" id="j-ok"><span>Li as orientações: chegar no horário, levar água e respeitar o ritmo do grupo. *</span></label><span class="err" id="e-jok"></span>
+      <button class="btn btn-primary btn-lg btn-block" type="submit" id="joinBtn">Confirmar entrada</button>
+      <p style="font-size:12.5px;color:var(--muted)">Pedimos só um apelido. Neste protótipo ele fica salvo apenas no seu navegador.</p>
+    </form>
+  </div>`, g.zona);
+}
+function submitJoin(form){
+  const id=form.dataset.id, ap=form.apelido.value.trim(), ok=form.ok.checked, errs={};
+  if(ap.length<2) errs.n='Informe um nome ou apelido com pelo menos 2 letras.';
+  if(!ok) errs.ok='Confirme que leu as orientações.';
+  document.getElementById('e-jnome').innerHTML=errs.n?ic('alert','ico-sm')+errs.n:''; form.apelido.setAttribute('aria-invalid',errs.n?'true':'false');
+  document.getElementById('e-jok').innerHTML=errs.ok?ic('alert','ico-sm')+errs.ok:'';
+  if(errs.n){form.apelido.focus();return} if(errs.ok){form.ok.focus();return}
+  const btn=document.getElementById('joinBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Entrando…';
+  setTimeout(()=>{
+    api.join(id,ap); const g=api.getGroup(id), next=proximos(g,1)[0];
+    document.getElementById('joinBody').innerHTML=`<div class="success" role="status"><span class="success-ico">${ic('check')}</span><h3>Bem-vindo(a), ${esc(ap)}!</h3><p style="color:var(--muted)">Você agora faz parte do <b style="color:var(--ink)">${esc(g.nome)}</b>.${next?` Primeiro treino: <b style="color:var(--ink)">${next.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}, ${fmtHora(g.horario)}</b>.`:''}</p>
+      <div class="stack" style="width:100%"><a class="btn btn-primary btn-block" href="#mapa-${g.id}" data-act="close-modal-nav">${ic('route','ico-sm')} Ver rota até o encontro</a><a class="btn btn-outline btn-block" href="#grupo-${g.id}" data-act="close-modal-nav">Ver página do grupo</a></div></div>`;
+    document.querySelector('.modal .btn')?.focus();
+    updateMeusBadge(); refreshView(true);
+  },650);
+}
+function toast(msg){
+  const r=document.getElementById('toastRoot'); r.innerHTML=`<div class="toast">${ic('check')}<span>${esc(msg)}</span></div>`;
+  clearTimeout(toast.t); toast.t=setTimeout(()=>r.innerHTML='',3200);
+}
+function updateMeusBadge(){
+  const n=Object.keys(state.joined).length;
+  document.getElementById('meusBtn').innerHTML=ic('user')+(n?`<span class="badge-count">${n}</span>`:'');
+}
+
+/* ---------- 8. router / events ---------- */
+let currentRoute='';
+function routeHtml(r){
+  if(r==='inicio'||r==='') return ['inicio',PageHome()];
+  if(r==='grupos') return ['grupos',PageGrupos()];
+  const gz=r.match(/^grupos-(norte|sul|leste|oeste|centro)$/); if(gz){ state.filters={zonas:[gz[1]],nome:'',local:'',dia:'',periodo:'',pace:'',nivel:''}; return ['grupos',PageGrupos()]; }
+  if(r==='zonas') return ['zonas',PageZonas()];
+  if(r==='mapa') return ['mapa',PageMapa()];
+  if(r.startsWith('mapa-')) return ['mapa',PageMapa(r.slice(5))];
+  if(r.startsWith('grupo-')) return ['grupos',PageDetalhe(r.slice(6))];
+  if(r==='sobre') return ['sobre',PageSobre()];
+  if(r==='encontrar') return ['encontrar',PageEncontrar()];
+  if(r==='cadastrar') return ['cadastrar',PageCadastrar()];
+  if(r==='meus') return ['meus',PageMeus()];
+  return ['',NotFound()];
+}
+function render(){
+  const r=location.hash.slice(1)||'inicio';
+  const [nav,html]=routeHtml(r);
+  document.getElementById('view').innerHTML=html;
+  document.querySelectorAll('[data-nav]').forEach(a=>{ if(a.dataset.nav===nav) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  closeMenu();
+  if(nav==='grupos'&&!r.startsWith('grupo-')) updateResults(true);
+  if(nav==='mapa') renderMapDetail();
+  if(r!==currentRoute){ window.scrollTo(0,0); document.getElementById('view').focus({preventScroll:true}); }
+  currentRoute=r;
+  if(document.getElementById('c-desc')) document.getElementById('c-desc').addEventListener('input',e=>document.getElementById('descCount').textContent=e.target.value.length);
+}
+function refreshView(){ // re-render keeping scroll (after join/leave)
+  const y=window.scrollY, r=location.hash.slice(1)||'inicio';
+  if(r==='encontrar'||r==='cadastrar') return; // não perde formulário
+  const [,html]=routeHtml(r); document.getElementById('view').innerHTML=html;
+  if(r.startsWith('grupos')) updateResults(false);
+  if(r.startsWith('mapa')) renderMapDetail();
+  window.scrollTo(0,y);
+}
+function closeMenu(){ const h=document.getElementById('hdr'); h.classList.remove('open'); document.querySelector('.menu-btn').setAttribute('aria-expanded','false'); document.querySelector('.menu-btn').innerHTML=ic('menu'); }
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const a=t.dataset.act, id=t.dataset.id;
+  if(a==='menu'){ const h=document.getElementById('hdr'); const o=h.classList.toggle('open'); t.setAttribute('aria-expanded',o); t.innerHTML=ic(o?'x':'menu'); }
+  else if(a==='entrar'){ openJoin(id); }
+  else if(a==='sair'){ api.leave(id); toast('Você saiu do grupo.'); updateMeusBadge(); refreshView(); }
+  else if(a==='close-modal'){ closeModal(); }
+  else if(a==='modal-bg'){ if(e.target===t) closeModal(); }
+  else if(a==='close-modal-nav'){ document.getElementById('modalRoot').innerHTML=''; document.body.style.overflow=''; }
+  else if(a==='toggle-zona'){ const z=t.dataset.z, f=state.filters; f.zonas=f.zonas.includes(z)?f.zonas.filter(x=>x!==z):[...f.zonas,z]; t.setAttribute('aria-pressed',f.zonas.includes(z)); updateResults(); }
+  else if(a==='clear'){ state.filters={zonas:[],nome:'',local:'',dia:'',periodo:'',pace:'',nivel:''}; if(location.hash!=='#grupos') location.hash='grupos'; else render(); toast('Filtros limpos. Mostrando todos os grupos.'); }
+  else if(a==='rm-filter'){ const k=t.dataset.k; if(k==='zona') state.filters.zonas=state.filters.zonas.filter(z=>z!==t.dataset.v); else state.filters[k]=''; syncFilterInputs(); updateResults(); }
+  else if(a==='filters-toggle'){ state.filtersOpen=!state.filtersOpen; document.getElementById('filters').classList.toggle('open',state.filtersOpen); t.setAttribute('aria-expanded',state.filtersOpen); t.innerHTML=ic('filter','ico-sm')+(state.filtersOpen?' Ocultar filtros':' Filtros'); }
+  else if(a==='map-select'){ selectOnMap(id); if(window.innerWidth<900) document.getElementById('mapDetail').scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  else if(a==='cad-novo'){ render(); }
+  else if(a==='reset-ask'){ document.getElementById('resetBox').innerHTML=`<div class="form-alert bad">${ic('alert')}<span>Isso remove os grupos que você cadastrou e suas participações neste navegador. Não dá para desfazer.</span></div><div class="choice-row" style="margin-top:10px"><button class="btn btn-primary btn-sm" data-act="reset-do" style="background:var(--pista)">Apagar dados</button><button class="btn btn-outline btn-sm" data-act="reset-cancel">Cancelar</button></div>`; }
+  else if(a==='reset-cancel'){ document.getElementById('resetBox').innerHTML=`<button class="btn btn-outline btn-sm" data-act="reset-ask">Apagar meus dados deste navegador</button>`; }
+  else if(a==='reset-do'){ api.resetLocal(); updateMeusBadge(); render(); toast('Dados locais apagados.'); }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.querySelector('.modal')) closeModal();
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.pin')){ e.preventDefault(); selectOnMap(e.target.dataset.id); }
+  if(e.key==='Tab'&&document.querySelector('.modal')){ const f=[...document.querySelectorAll('.modal a,.modal button,.modal input')].filter(x=>!x.disabled); if(!f.length) return; const first=f[0],last=f[f.length-1]; if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()} else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()} }
+});
+let txtTimer=null;
+document.addEventListener('input',e=>{
+  const k=e.target.dataset?.f; if(!k) return;
+  state.filters[k]=e.target.value;
+  if(e.target.tagName==='SELECT') updateResults(); else { clearTimeout(txtTimer); txtTimer=setTimeout(()=>updateResults(),220); }
+});
+function syncFilterInputs(){ document.querySelectorAll('[data-f]').forEach(i=>i.value=state.filters[i.dataset.f]); document.querySelectorAll('.ztog').forEach(b=>b.setAttribute('aria-pressed',state.filters.zonas.includes(b.dataset.z))); }
+document.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(e.target.id==='matchForm') submitMatch(e.target);
+  else if(e.target.id==='cadForm') submitCad(e.target);
+  else if(e.target.id==='joinForm') submitJoin(e.target);
+});
+window.addEventListener('hashchange',render);
+
+document.getElementById('yr').textContent=new Date().getFullYear();
+updateMeusBadge();
+render();
+</script>
+
+</body></html>
