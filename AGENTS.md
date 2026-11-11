@@ -2,7 +2,7 @@
 
 > Este arquivo é a fonte de verdade para qualquer agente (Claude, Copilot, Cursor etc.) que trabalhar neste repositório.
 > Leia inteiro antes de escrever código. Se algo aqui conflitar com o código, **pare e pergunte** em vez de adivinhar.
-> Pode ser renomeado/copiado para `CLAUDE.md` se a ferramenta exigir.
+> O `CLAUDE.md` só importa este arquivo (`@AGENTS.md`): edite aqui, não lá.
 
 ---
 
@@ -69,8 +69,14 @@ A organização interna é **por módulo de domínio** (auth, groups, membership
 ```
 pace-paulista/
 ├── AGENTS.md                 ← este arquivo
+├── CLAUDE.md                 ← só importa o AGENTS.md
+├── CONVENTIONS.md            ← estilo de código, testes e git
+├── .github/                  ← CI (lint + testes) e template de PR
+├── .claude/                  ← subagentes do pipeline e comando /pipeline
 ├── docs/
-│   └── prototipo.html        ← protótipo original (referência visual; não editar)
+│   ├── prototipo.html        ← protótipo original (referência visual; não editar)
+│   ├── MILESTONES.md, PENDENCIAS.md
+│   └── specs/, reports/, qa/ ← saídas do pipeline, numeradas NNN-slug.md
 ├── docker-compose.yml        ← Postgres local
 ├── .env.example
 ├── package.json

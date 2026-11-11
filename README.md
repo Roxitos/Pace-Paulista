@@ -1,5 +1,7 @@
 # Pace Paulista
 
+[![CI](https://github.com/Roxitos/Site-Corrida/actions/workflows/ci.yml/badge.svg)](https://github.com/Roxitos/Site-Corrida/actions/workflows/ci.yml)
+
 > Encontre seu grupo. Encontre seu ritmo.
 
 O Pace Paulista ajuda corredores de São Paulo a achar grupos de corrida que combinam com a **zona da cidade**, o **pace**, os **dias e horários** e o **nível** de cada um.
@@ -12,7 +14,7 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 |---|---|---|
 | **M1** Scaffold | Express + EJS, layout, CSS do protótipo, 404/500 e home estática | ✅ concluído |
 | **M2** Banco | Postgres, migrations e seed dos grupos demo | ✅ concluído |
-| **M3** Leitura | `/grupos` com filtros, detalhe, zonas, mapa e sobre; home lendo do banco | ⏳ próximo |
+| **M3** Leitura | `/grupos` com filtros, detalhe, zonas, mapa e sobre; home lendo do banco | ⏳ em andamento |
 | **M4** Compatibilidade | `/encontrar` | — |
 | **M5** Contas | Criar conta, entrar e sair, sessão | — |
 | **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | — |
@@ -22,7 +24,7 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
-> ⚠️ Por enquanto só a home e `/zonas` funcionam, lendo os grupos do banco. Os links para grupos, mapa e conta levam a uma página 404 até os próximos marcos.
+> ⚠️ Por enquanto funcionam a home, `/zonas` e a busca `/grupos` (com filtros), lendo os grupos do banco. Detalhe do grupo, mapa e conta levam a uma página 404 até os próximos marcos.
 
 ## Stack
 
@@ -30,7 +32,7 @@ Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 - **PostgreSQL 16** (Docker em dev) acessado com `pg` e SQL escrito à mão, sem ORM. Migrations são arquivos `.sql` numerados e imutáveis: o `migrate` confere o checksum de cada uma já aplicada.
 - **zod** para validação, **vitest** e **supertest** para testes, **ESLint** e **Prettier** para lint e formatação.
 
-As decisões de arquitetura completas estão em [`AGENTS.md`](AGENTS.md).
+As decisões de arquitetura completas estão em [`AGENTS.md`](AGENTS.md) (o [`CLAUDE.md`](CLAUDE.md) só o importa).
 
 ## Como rodar
 
@@ -66,6 +68,8 @@ Para apagar o banco local e recomeçar do zero: `docker compose down -v` (depois
 
 O Postgres local só aceita conexões da própria máquina (`127.0.0.1:5432`, usuário e senha `pace`/`pace`).
 
+O CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) roda `npm run lint` e `npm test` com um Postgres 16 a cada push na `main` e em todo PR.
+
 Variáveis de ambiente: veja [`.env.example`](.env.example). `TZ_APP` precisa ser um fuso IANA válido (padrão `America/Sao_Paulo`).
 
 ## Estrutura
@@ -88,7 +92,11 @@ docker-compose.yml       Postgres 16 local
 tests/domain             testes unitários (sem banco)
 tests/http               testes HTTP (supertest; leem o banco de teste)
 tests/db, tests/scripts  testes de banco, migrate e seed
-docs/                    protótipo, specs, relatórios de QA e do pipeline
+docs/                    protótipo, marcos, pendências, specs, relatórios e QA
+.claude/                 subagentes do pipeline e comando /pipeline
+.github/                 CI e template de PR
+AGENTS.md                fonte de verdade para agentes (CLAUDE.md importa)
+CONVENTIONS.md           estilo de código, testes e git
 ```
 
 ## Como o trabalho é feito
