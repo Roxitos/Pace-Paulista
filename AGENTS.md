@@ -431,6 +431,8 @@ Todo trabalho passa por cinco subagentes em `.claude/agents/`, orquestrados por 
 Specifier → (OK humano) → Coder → Cleaner → Hardener → QA
    spec em docs/specs/                                  veredito em docs/qa/
 ```
+Cada etapa roda numa janela limpa: ao terminar, o agente grava o handoff em `.pipeline/state.md` (ignorado pelo git), **não chama o próximo** e pede ao usuário `/clear` + o próximo agente. Modelos fixos, esforço `default`: specifier=opus, coder=sonnet, cleaner=haiku, hardener=opus, qa=sonnet, orquestrador=sonnet.
+
 O orquestrador registra a saída de cada etapa em `docs/reports/NNN-slug.md` e mantém `docs/PENDENCIAS.md` (riscos, pendências e perguntas por marco), que o Specifier lê antes de cada spec.
 
 | Agente | Faz | Não faz |
