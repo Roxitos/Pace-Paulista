@@ -1,7 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { pool } from '../../src/db/pool.js';
 import { parseFilters } from '../../src/domain/filters.js';
-import { findPublishedBySlug, listPublished } from '../../src/modules/groups/groups.repo.js';
+import { DEMO_GROUPS } from '../../db/seeds/demo-groups.js';
+import {
+  findPublishedBySlug,
+  listPublished,
+  listPublishedByCreation,
+} from '../../src/modules/groups/groups.repo.js';
 import { insertMembership, insertUser, migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const GROUP_KEYS = [
@@ -363,5 +368,42 @@ describe('groupsRepo.findPublishedBySlug', () => {
     } finally {
       spy.mockRestore();
     }
+  });
+});
+
+describe('groupsRepo.listPublishedByCreation', () => {
+  // Nome começando com "A" e zona norte: na ordem padrão (zona, nome) viria em primeiro.
+  async function insertLateGroup(slug, status = 'published') {
+    await pool.query(
+      `INSERT INTO groups (slug, name, zone, location, days, start_time, pace_min_s, pace_max_s,
+                           level, description, status)
+       VALUES ($1, $2, 'norte', 'Parque da Água Branca', ARRAY['ter'], '19:00', 330, 390,
+               'iniciante', 'Grupo inserido depois do seed para testar a ordem.', $3)`,
+      [slug, `A ${slug}`, status],
+    );
+  }
+
+  it('devolve os grupos publicados na ordem de cadastro (ordem do DEMO no seed)', async () => {
+    const groups = await listPublishedByCreation();
+    expect(groups.map((g) => g.slug)).toEqual(DEMO_GROUPS.map((g) => g.slug));
+    for (const g of groups) expect(Object.keys(g).sort()).toEqual([...GROUP_KEYS].sort());
+  });
+
+  it('grupo inserido depois vem por último; pending e rejected ficam de fora', async () => {
+    await insertLateGroup('aaa-novo');
+    await insertLateGroup('aaa-pendente', 'pending');
+    await pool.query("UPDATE groups SET status = 'rejected' WHERE slug = 'pace-da-oca'");
+    const slugs = (await listPublishedByCreation()).map((g) => g.slug);
+    expect(slugs).toHaveLength(11);
+    expect(slugs.at(-1)).toBe('aaa-novo');
+    expect(slugs).not.toContain('aaa-pendente');
+    expect(slugs).not.toContain('pace-da-oca');
+  });
+
+  it('soma as participações como listPublished', async () => {
+    await insertMembership(pool, await createUser('Ana'), 'pace-da-oca', 'Ana');
+    const g = (await listPublishedByCreation()).find((x) => x.slug === 'pace-da-oca');
+    expect(g).toEqual(await bySlug('pace-da-oca'));
+    expect(g.participants).toBe(57);
   });
 });

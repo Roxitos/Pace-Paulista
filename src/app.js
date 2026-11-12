@@ -6,10 +6,12 @@ import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { pagesRouter } from './modules/pages/pages.routes.js';
 import { groupsRouter } from './modules/groups/groups.routes.js';
+import { matchingRouter } from './modules/matching/matching.routes.js';
 import { ic, seal, zstyle } from './views/helpers.js';
 import {
   DIA_ORDEM,
   DIAS,
+  DIAS_CURTO,
   NIVEIS,
   PACE_FAIXAS,
   PERIODOS,
@@ -38,6 +40,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
     ZONA_ORDEM,
     NIVEIS,
     DIAS,
+    DIAS_CURTO,
     DIA_ORDEM,
     PERIODOS,
     PACE_FAIXAS,
@@ -56,6 +59,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
   app.use(locals);
   app.use(pagesRouter);
   app.use(groupsRouter);
+  app.use(matchingRouter);
   if (beforeErrorHandlers) beforeErrorHandlers(app);
 
   app.use(notFound);
