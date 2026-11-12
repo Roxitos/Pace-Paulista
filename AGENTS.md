@@ -107,7 +107,7 @@ pace-paulista/
 │   │   ├── auth/             ← auth.routes.js, auth.service.js, users.repo.js, auth.schemas.js
 │   │   ├── groups/           ← groups.routes.js, groups.service.js, groups.repo.js, groups.schemas.js
 │   │   ├── memberships/      ← memberships.routes.js, memberships.service.js, memberships.repo.js
-│   │   ├── matching/         ← matching.routes.js (usa domain/match.js)
+│   │   ├── matching/         ← matching.routes.js, matching.service.js, matching.schemas.js (usa domain/match.js)
 │   │   └── pages/            ← pages.routes.js (home, zonas, mapa, sobre)
 │   ├── middlewares/
 │   │   ├── locals.js         ← res.locals.user, csrfToken, currentPath, flash, helpers de view
@@ -118,7 +118,7 @@ pace-paulista/
 │       ├── layout.ejs
 │       ├── partials/         ← header, footer, icons (função ic), seal, zone-chip, level-meter,
 │       │                        group-card, page-head, track-deco, empty-state, form-errors, flash,
-│       │                        filter-options
+│       │                        filter-options, match-card
 │       └── pages/            ← home, grupos, grupo-detalhe, zonas, mapa, encontrar, grupo-novo,
 │                                meus, sobre, conta-entrar, conta-criar, 404, 500
 ├── public/
@@ -218,7 +218,7 @@ URLs reais (sem `#hash`). Todas em português, iguais às do protótipo onde pos
 | `/grupos/:slug` | — | `PageDetalhe` | 404 se não existir ou não estiver `published` |
 | `/zonas` | — | `PageZonas` | |
 | `/mapa` e `/mapa/:slug` | — | `PageMapa` | `:slug` pré-seleciona o grupo |
-| `/encontrar` | — | `PageEncontrar` | Formulário de compatibilidade |
+| `/encontrar` | — | `PageEncontrar` | Formulário de compatibilidade via **query string** (GET, como `/grupos`; spec 008). Sem respostas → form vazio; respostas inválidas → 422 com o form preenchido; válidas → resultados calculados no servidor. Nada é salvo |
 | `/meus` | ✅ | `PageMeus` | Grupos em que entrei + grupos que cadastrei + "Conta e dados" |
 | `/sobre` | — | `PageSobre` | Atualizar "Status do protótipo": banco e login viram **ATIVO** |
 | `/conta/entrar` | só deslogado | novo | Aceita `?next=/caminho` (validar: só caminhos internos começando com `/`) |
@@ -230,7 +230,6 @@ URLs reais (sem `#hash`). Todas em português, iguais às do protótipo onde pos
 | `POST /grupos` | ✅ | Cria grupo. Erro → re-renderiza o form com valores e mensagens (status 422). Sucesso → redirect `/grupos/:slug?criado=1` (tela de sucesso do protótipo) |
 | `POST /grupos/:slug/participar` | ✅ | Body: `apelido`, `ok`. Idempotente (`ON CONFLICT DO NOTHING`) |
 | `POST /grupos/:slug/sair` | ✅ | Remove membership |
-| `POST /encontrar` | — | Calcula compatibilidade no servidor e re-renderiza `/encontrar` com resultados. Nada é salvo |
 | `POST /conta/criar` | — | Cria usuário, já loga, redirect `next` ou `/meus` |
 | `POST /conta/entrar` | — | Rate limit: 10 tentativas / 15 min por IP+email |
 | `POST /conta/sair` | ✅ | Destroi sessão (logout é sempre POST) |
@@ -302,6 +301,8 @@ Entrada `q = { zona | 'qualquer', pace (s), dias[], nivel, periodo? }`.
 | Período | 10 | só conta (no máximo) se `q.periodo` foi informado; 10 se bate |
 
 `pct = round(pontos / máximo * 100)`. Mostrar grupos com **pct ≥ 40**, ordenados desc, **no máximo 6**. Calcular em JS no servidor (dataset pequeno); não precisa ser SQL.
+
+Detalhes do protótipo que a tabela acima não mostra (spec 008, que segue o protótipo): são **5 motivos** (um por critério que pontua no máximo; pace a até 60 s e nível vizinho pontuam sem motivo), "dentro da faixa" **inclui as bordas** (diferente do filtro de pace da `/grupos`) e o **empate** é desfeito pela ordem de criação (`ORDER BY g.id`, ordenação estável), como no protótipo.
 
 ### Cadastro de grupo — validações e mensagens
 | Campo | Regra | Mensagem |

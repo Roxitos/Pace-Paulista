@@ -2,7 +2,7 @@
 
 Riscos aceitos, pendências e perguntas abertas levantadas pelo pipeline. **O Specifier lê este arquivo antes de cada spec** e incorpora (ou responde) os itens do marco. Ao resolver um item, marque `[x]` e cite a spec.
 
-Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md).
+Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md).
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
@@ -15,7 +15,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] **M3+** — Rodapé diz sempre "Os grupos marcados como “Fictício · demo”…", mesmo sem demos publicados. Condicionar a `hasDemo` como o aviso da home? (004, QA)
 - [ ] **M5** — `display_name` fica público ("Cadastrado por …"); avisar no cadastro de conta. Bloquear nomes que imitem a marca (ex.: "Equipe Pace Paulista")? (004, Hardener)
 - [ ] **M6/M9** — Destaques (`DESTAQUES`) buscados só pelo slug: se os demos saírem, quem cadastrar "Pace da Oca" vai para a home. Restringir a `is_demo`/curadoria ou reservar os slugs? (004, Hardener)
-- [ ] **M3+** — Corrigir "Selo da Centro" → "Selo do Centro"? (texto literal do protótipo; também "Outros grupos da Centro" — P11) (002, 004)
+- [ ] **M3+** — Corrigir "Selo da Centro" → "Selo do Centro"? (texto literal do protótipo; também "Outros grupos da Centro" — P11; e o motivo "Fica na Centro" do `/encontrar` — spec 008, P4) (002, 004, 008)
+- [x] **M4 (008)** — P1: `/encontrar` só GET com query string (sem POST/CSRF); P2: subtítulo "…Nada é salvo."; P3: empate pela ordem de criação (`g.id`); P4/P5: textos e `inputmode` literais do protótipo. — spec 008: defaults aceitos pelo usuário; AGENTS §3/§5/§6 atualizados
 - [ ] **M5/M6** — 4xx que não são 404 (400/413) usam a página genérica "Algo deu errado" mantendo o status. Querem texto próprio? (001)
 - [ ] **M6/M9** — Trazer "dono edita o próprio grupo" para a v1? Hoje está no roadmap (CLAUDE.md §12), mas sem isso os dados de grupos reais ficam desatualizados (horário/local mudam). (conteúdo)
 - [ ] **M6/M9** — Moderação: grupo novo nasce `pending` já no lançamento (evita spam) ou continua `published` como na v1? (conteúdo)
@@ -41,8 +42,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Spec 007: `/sobre` mantém o título "Status do protótipo" (P10, usuário); banco ATIVO, login PENDENTE, item "navegador" removido. (004) — spec 007, CA7
 - [ ] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5; compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007)
 
-## M4 — Compatibilidade / cadastro
-- [ ] zod no cadastro de grupo (`parsePace`, dias, horário) e `slug()` com geração/validação. (002)
+## M4 — Compatibilidade
+- O item "zod no cadastro de grupo" que estava aqui é do cadastro (`POST /grupos`) e foi para o M6 (spec 008).
 
 ## M5 — Contas
 - [ ] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`), `requireAuth`, `session.regenerate`. (001)
@@ -58,6 +59,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] `SESSION_SECRET=` vazio é aceito em dev/test; conferir quando o `express-session` entrar. (003)
 
 ## M6 — Escrita
+- [ ] zod no cadastro de grupo (`parsePace`, dias, horário) e `slug()` com geração/validação. (002; movido do M4 pela spec 008)
 - [ ] Tratar `23505`/`23514` e usar `tx()` em escritas múltiplas (movido do M3). (001, 004)
 - [ ] `start_time = '24:00'` é aceito pelo Postgres e derruba `/` (e `/grupos`) via `fmtHora`: migration nova `CHECK (start_time < '24:00')` + zod `([01]\d|2[0-3]):[0-5]\d`. Corrige o item do M2 "CHECKs garantem start_time". (004, Hardener)
 - [ ] Zod: deduplicar `days` ("Sáb, Sáb"); `.trim()` em `name`/`location`/`contact`/`apelido` antes do tamanho. (004, Hardener)
@@ -69,13 +71,14 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Cards de `/grupos` com nome de 50 caracteres sem espaço abrem scroll horizontal a 360 px (já na HEAD da 005): `overflow-wrap` no card ou limite no zod. (006, QA)
 
 ## M7 — Melhorias de JS
+- [ ] Testar em aparelho real (iPhone) o campo de pace com `inputmode="numeric"` (literal do protótipo): o teclado numérico pode não ter `:`, impedindo digitar "5:30". Vale para `/encontrar` (spec 008, P5) e para o cadastro do M6. (008)
 - [ ] `listPublished` devolve `contact` de todos os grupos (contrato `Group`): `GET /api/grupos` (e qualquer JSON enviado ao cliente) precisa remover `contact` para deslogado, senão o P4 vaza. (006, Hardener) — recomendação: separar `SELECT_LIST` sem `contact` (listagens) de `findPublishedBySlug` (mantém o campo) e ajustar o teste de contrato; o mapa já remove o campo no service. (007, Hardener)
 - [ ] `public/js/mapa.js`: selecionar no mapa sem recarregar (hoje cada clique recarrega `/mapa/<slug>`). (007)
 - [ ] Acessibilidade do mapa (vêm do protótipo): foco de teclado discreto nos pins não selecionados (anel `r=0`, só o ponto cresce) e alvo de toque de ~9 px a 360 px (WCAG 2.5.8 pede 24 px). (007, QA)
 
 ## M8 — Produção
 - [ ] helmet + CSP (`self`, fonts.googleapis.com, fonts.gstatic.com). `style="--z:…"`, `style="font-size:14px"` e o `extra` do 404/500 exigem `style-src-attr 'unsafe-inline'` ou classes CSS. (001, 002)
-- [ ] Não publicar antes de M3/M5: links da home levam a 404. (002)
+- [ ] Não publicar antes de M3/M5: links da home levam a 404. (002) — `/encontrar` deixa de ser um deles com a spec 008.
 - [x] Seed dos grupos demo **não roda** com `NODE_ENV=production` (ou demos removidos/despublicados antes de abrir o site). O aviso "Versão de demonstração" some sozinho quando não houver demo publicado (`hasDemo`). (conteúdo) — spec 003, CA6
 - [ ] **Pergunta**: ambiente publicado (staging/preview) com grupos demo antes do M9? Hoje o seed fica bloqueado com `NODE_ENV=production` sem flag. Opções: flag explícita (ex. `ALLOW_DEMO_SEED=1`) ou staging com outro `NODE_ENV`. (003)
 - [ ] Release exige `DATABASE_URL` e `SESSION_SECRET` ≥ 32 caracteres; conferir extensão `citext` no Postgres gerenciado. (003)
