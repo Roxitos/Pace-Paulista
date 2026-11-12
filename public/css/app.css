@@ -18,6 +18,10 @@ a.achip{text-decoration:none}
 /* Detalhe (spec 006, desvio intencional do protótipo só no celular): com 3 colunas sobram ~63 px para o texto do encontro a 360 px
    e as palavras quebram no meio. Abaixo de 560 px o pace desce para baixo do texto, e a data ocupa as duas linhas. */
 @media (max-width:560px){ul.sessions li{grid-template-columns:auto minmax(0,1fr);row-gap:4px}ul.sessions li > .date-box{grid-row:span 2}ul.sessions li > .mono{grid-column:2}}
+/* Encontrar (spec 008, desvio intencional do protótipo só onde não cabe): o botão "Mostrar grupos compatíveis" mede 334 px
+   em uma linha e a coluna do form tem 268 px a 360 px; com nowrap ele alargava o form e abria scroll horizontal.
+   Aqui o texto pode quebrar; em telas largas continua em uma linha, igual ao protótipo. */
+#matchForm .btn{white-space:normal;text-align:center}
 /* Mapa (spec 007): sem JS a lista vira <ul> de links para /mapa/<slug>#mapDetail. */
 ul.map-list{list-style:none;margin:0;padding:0 4px 0 0}
 a.map-item{text-decoration:none}
@@ -25,6 +29,10 @@ a.map-item{text-decoration:none}
 .map-detail{scroll-margin-top:84px}
 /* Nome (50) e local (80) sem espaço não podem abrir scroll horizontal em 360 px. */
 .map-item b,.map-item small,.map-detail h2{overflow-wrap:anywhere}
+/* Encontrar (spec 008): a âncora #matchResults para abaixo do cabeçalho fixo, como .filters. */
+#matchResults{scroll-margin-top:84px}
+/* Nome do grupo (até 50) sem espaço não pode abrir scroll horizontal em 360 px. */
+.match h3{overflow-wrap:anywhere}
 
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{

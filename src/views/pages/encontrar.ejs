@@ -1,0 +1,41 @@
+<%- include('../partials/page-head', {
+  kicker: 'Encontrar meu grupo',
+  title: 'Qual é o seu ritmo?',
+  text: 'Responda quatro perguntas e veja os grupos mais compatíveis com você. Nada é salvo.',
+}) %>
+<%
+  // Sem JS não há o focus() do showErrors: o autofocus vai no 1º controle do 1º campo com erro.
+  const firstError = Object.keys(errors)[0];
+  const af = (key) => (firstError === key ? ' autofocus' : '');
+  const on = (cond) => (cond ? ' checked' : '');
+  const err = (key) => errors[key] ? ic('alert', 'ico-sm') : '';
+-%>
+  <div class="wrap"><div class="form-layout">
+    <form class="form" id="matchForm" method="get" action="/encontrar#matchResults" novalidate>
+      <div id="matchAlert"><% if (firstError) { %><%- include('../partials/form-errors', { count: Object.keys(errors).length }) %><% } %></div>
+      <fieldset><legend>Em qual zona você prefere correr? *</legend><div class="choice-row">
+        <% ZONA_ORDEM.forEach((z, i) => { %><label class="choice z" style="<%= zstyle(z) %>"><input type="radio" name="zona" value="<%= z %>"<%= on(values.zona === z) %><%= i === 0 ? af('zona') : '' %>><span><%= ZONAS[z].nome %></span></label><% }) %>
+        <label class="choice"><input type="radio" name="zona" value="qualquer"<%= on(values.zona === 'qualquer') %>><span>Qualquer zona</span></label>
+      </div><span class="err" id="e-zona"><%- err('zona') %><%= errors.zona ?? '' %></span></fieldset>
+      <div class="row2">
+        <div class="field"><label for="m-pace">Seu pace aproximado (min/km) *</label><input class="input mono" id="m-pace" name="pace" inputmode="numeric" placeholder="6:00" aria-describedby="e-pace h-pace" value="<%= values.pace %>"<% if (errors.pace) { %> aria-invalid="true"<% } %><%= af('pace') %>><span class="hint" id="h-pace">Formato minutos:segundos, entre 3:00 e 12:00.</span><span class="err" id="e-pace"><%- err('pace') %><%= errors.pace ?? '' %></span></div>
+        <div class="field"><label for="m-periodo">Horário preferido</label><select class="select" id="m-periodo" name="periodo"><%- include('../partials/filter-options', { entries: Object.entries(PERIODOS), value: values.periodo, todos: 'Qualquer horário' }) %></select></div>
+      </div>
+      <fieldset><legend>Em quais dias você pode correr? *</legend><div class="choice-row">
+        <% DIA_ORDEM.forEach((d, i) => { %><label class="choice"><input type="checkbox" name="dias" value="<%= d %>"<%= on(values.dias.includes(d)) %><%= i === 0 ? af('dias') : '' %>><span><%= DIAS_CURTO[d] %></span></label><% }) %>
+      </div><span class="err" id="e-dias"><%- err('dias') %><%= errors.dias ?? '' %></span></fieldset>
+      <fieldset><legend>Seu nível de experiência *</legend><div class="choice-row">
+        <% Object.entries(NIVEIS).forEach(([k, v], i) => { %><label class="choice"><input type="radio" name="nivel" value="<%= k %>"<%= on(values.nivel === k) %><%= i === 0 ? af('nivel') : '' %>><span><%= v.nome %></span></label><% }) %>
+      </div><span class="err" id="e-nivel"><%- err('nivel') %><%= errors.nivel ?? '' %></span></fieldset>
+      <button class="btn btn-primary btn-lg" type="submit"><%- ic('search') %> Mostrar grupos compatíveis</button>
+    </form>
+    <aside class="side-note"><h3>Como calculamos</h3><ul><li>Pace dentro da faixa do grupo pesa mais.</li><li>Zona, dias em comum e nível ajustam a nota.</li><li>Mostramos até 6 grupos com compatibilidade a partir de 40%.</li></ul><p style="color:var(--muted)">Não sabe seu pace? Divida o tempo de uma corrida pela distância. 30 min em 5 km dá 6:00 min/km.</p></aside>
+  </div>
+<% if (result) {
+  const { q, matches } = result;
+  const n = matches.length;
+  const titulo = n ? `${n} ${n === 1 ? 'grupo combina' : 'grupos combinam'} com você` : 'Nenhum grupo compatível';
+-%>
+  <div id="matchResults" style="margin-top:32px"><div class="sec-head"><div><span class="kicker">Resultado</span><h2 class="display"><%= titulo %></h2><p>Pace <%= fmtPace(q.pace) %> min/km · <%= q.zona === 'qualquer' ? 'qualquer zona' : ZONAS[q.zona].nome %> · <%= NIVEIS[q.nivel].nome.toLowerCase() %></p></div></div><% if (n) { %><div class="grid-cards"><% for (const r of matches) { %><%- include('../partials/match-card', { r }) %><% } %></div><% } else { %><div class="empty"><%- ic('run') %><h3>Ainda não temos esse grupo</h3><p>Tente marcar mais dias ou escolher "Qualquer zona". Se você organiza treinos, pode ser o primeiro grupo desse perfil.</p><a class="btn btn-primary" href="/grupos/novo">Cadastrar grupo</a></div><% } %></div>
+<% } -%>
+</div>

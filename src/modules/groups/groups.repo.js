@@ -79,3 +79,11 @@ export async function findPublishedBySlug(slug) {
   ]);
   return rows[0] ?? null;
 }
+
+// Ordem de cadastro (P3 da spec 008): o /encontrar desempata como o protótipo, pela ordem
+// da lista (DEMO na ordem do seed, depois os grupos novos).
+export async function listPublishedByCreation() {
+  const { rows } = await pool.query(`${selectPublished("g.status = 'published'")}
+   ORDER BY g.id`);
+  return rows;
+}
