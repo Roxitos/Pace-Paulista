@@ -135,6 +135,13 @@ describe('CSRF', () => {
     expect(ok.text).toBe('eco');
   });
 
+  it('página anônima com token CSRF não pode ir para cache compartilhado', async () => {
+    // Um proxy/CDN que guardasse o HTML entregaria o token desta sessão a outro visitante.
+    const res = await request(app).get('/__test/form');
+    expect(res.text).toContain('name="_csrf"');
+    expect(res.headers['cache-control']).toBe('private, no-store');
+  });
+
   it('botão de retry volta ao Referer do mesmo host', async () => {
     const res = await request(app)
       .post('/__test/eco')
