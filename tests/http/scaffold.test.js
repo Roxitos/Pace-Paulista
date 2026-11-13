@@ -3,9 +3,11 @@ import request from 'supertest';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { pool } from '../../src/db/pool.js';
+import { createTestApp, getCsrf } from '../helpers/auth.js';
 import { migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const app = createApp();
+const testApp = createTestApp();
 
 // GET / lê os grupos do banco desde a spec 004.
 beforeAll(async () => {
@@ -97,7 +99,10 @@ describe('404', () => {
   });
 
   it('responde 404 também para POST em rota inexistente', async () => {
-    const res = await request(app).post('/nao-existe');
+    // Com token válido, para chegar ao 404 (o CSRF roda antes das rotas).
+    const agent = request.agent(testApp);
+    const _csrf = await getCsrf(agent);
+    const res = await agent.post('/nao-existe').type('form').send({ _csrf });
     expect(res.status).toBe(404);
     expect(res.text).toContain('Página não encontrada');
   });

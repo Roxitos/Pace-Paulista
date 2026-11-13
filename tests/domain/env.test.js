@@ -76,6 +76,21 @@ describe('parseEnv', () => {
     const url = 'postgresql://u:p@db.exemplo:6543/app';
     expect(parseEnv({ DATABASE_URL: url }).DATABASE_URL).toBe(url);
   });
+
+  it('trata SESSION_SECRET vazio como ausente em dev e test', () => {
+    expect(parseEnv({ SESSION_SECRET: '' }).SESSION_SECRET).toBe(
+      'dev-inseguro-nao-usar-em-producao',
+    );
+    expect(parseEnv({ NODE_ENV: 'test', SESSION_SECRET: '' }).SESSION_SECRET).toBe(
+      'dev-inseguro-nao-usar-em-producao',
+    );
+  });
+
+  it('trata DATABASE_URL vazio como ausente em dev', () => {
+    expect(parseEnv({ DATABASE_URL: '' }).DATABASE_URL).toBe(
+      'postgres://pace:pace@localhost:5432/pace_paulista',
+    );
+  });
 });
 
 describe('parseEnv em produção', () => {
@@ -115,6 +130,7 @@ describe('parseEnv em produção', () => {
 
   it.each([
     ['ausente', undefined],
+    ['vazio', ''],
     ['com 31 caracteres', 'a'.repeat(31)],
     ['igual ao placeholder do .env.example', 'troque-por-uma-string-longa-e-aleatoria'],
     ['igual ao default de desenvolvimento', 'dev-inseguro-nao-usar-em-producao'],

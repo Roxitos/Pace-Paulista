@@ -14,7 +14,7 @@ O caminho de uma spec (`docs/specs/NNN-*.md`). Se a spec tiver "Perguntas em abe
 1. Leia a spec, `AGENTS.md` e `docs/CONVENTIONS.md`. Abra no `docs/prototipo.html` o trecho correspondente e reproduza HTML, classes e textos.
 2. Comece pelo que é testável sem I/O: funções em `src/domain/` + testes em `tests/domain/`.
 3. Depois banco (migration nova, nunca editar uma antiga) → `*.repo.js` → `*.service.js` → `*.routes.js` → views → JS do cliente.
-4. Escreva os testes listados na spec. Cada critério de aceite deve ter um teste ou uma verificação descrita.
+4. Escreva os testes listados na spec, só casos representativos e sem redundância (docs/CONVENTIONS.md, seção Testes). Cada critério de aceite deve ter um teste ou uma verificação descrita.
 5. Rode `npm test` e `npm run lint` até passarem.
 
 ## Limites

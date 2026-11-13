@@ -34,7 +34,7 @@ describe('GET /sobre (CA7)', () => {
     );
   });
 
-  it('lista o status do default de P10: 2 ATIVO e 3 PENDENTE, nesta ordem', async () => {
+  it('lista o status do default de P10: 3 ATIVO e 2 PENDENTE, nesta ordem', async () => {
     const html = await getSobre();
     expect(html).toContain('<h2>Status do protótipo</h2>');
     const status = [
@@ -49,7 +49,7 @@ describe('GET /sobre (CA7)', () => {
         'Busca com filtros, cards, páginas de detalhes, zonas, cálculo de compatibilidade, cadastro e entrada em grupos.',
       ],
       ['on', 'ATIVO', 'Banco de dados compartilhado para todos verem os mesmos grupos.'],
-      ['off', 'PENDENTE', 'Login e conta de usuário.'],
+      ['on', 'ATIVO', 'Login e conta de usuário.'],
       ['off', 'PENDENTE', 'Mapa interativo com coordenadas reais dos pontos de encontro.'],
       ['off', 'PENDENTE', 'Notificações e confirmação de presença por encontro.'],
     ]);

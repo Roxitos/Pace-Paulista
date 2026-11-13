@@ -2,7 +2,7 @@
 
 Riscos aceitos, pendências e perguntas abertas levantadas pelo pipeline. **O Specifier lê este arquivo antes de cada spec** e incorpora (ou responde) os itens do marco. Ao resolver um item, marque `[x]` e cite a spec.
 
-Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md).
+Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md), `010` = [relatório 010](reports/010-criar-conta.md).
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
@@ -14,7 +14,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] **M7** — `/encontrar` a ≤ 375 px: o botão "Mostrar grupos compatíveis" quebra em 2 linhas (lupa à esquerda, texto centralizado) para não estourar a largura (desvio do protótipo, que estourava). Preferem um rótulo mais curto em telas estreitas? (008, QA)
 - [x] **M3 (007)** — P8: `/mapa/<slug inexistente>` → 404 (protótipo caía no padrão); P9: seleção padrão do mapa = primeiro da ordem (Cantareira Trail) ou fixar Correria do Carmo? (004) — spec 007: defaults aceitos pelo usuário (CA1, CA4)
 - [ ] **M3+** — Rodapé diz sempre "Os grupos marcados como “Fictício · demo”…", mesmo sem demos publicados. Condicionar a `hasDemo` como o aviso da home? (004, QA)
-- [ ] **M5** — `display_name` fica público ("Cadastrado por …"); avisar no cadastro de conta. Bloquear nomes que imitem a marca (ex.: "Equipe Pace Paulista")? (004, Hardener)
+- [ ] **M5** — (spec 010: P7 não bloquear na v1; risco de bidi/zero-width/personificação aceito) `display_name` fica público ("Cadastrado por …"); avisar no cadastro de conta. Bloquear nomes que imitem a marca (ex.: "Equipe Pace Paulista")? (004, Hardener)
 - [ ] **M6/M9** — Destaques (`DESTAQUES`) buscados só pelo slug: se os demos saírem, quem cadastrar "Pace da Oca" vai para a home. Restringir a `is_demo`/curadoria ou reservar os slugs? (004, Hardener)
 - [ ] **M3+** — Corrigir "Selo da Centro" → "Selo do Centro"? (texto literal do protótipo; também "Outros grupos da Centro" — P11; e o motivo "Fica na Centro" do `/encontrar` — spec 008, P4) (002, 004, 008)
 - [x] **M4 (008)** — P1: `/encontrar` só GET com query string (sem POST/CSRF); P2: subtítulo "…Nada é salvo."; P3: empate pela ordem de criação (`g.id`); P4/P5: textos e `inputmode` literais do protótipo. — spec 008: defaults aceitos pelo usuário; AGENTS §3/§5/§6 atualizados
@@ -41,24 +41,38 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Sem JS, ≤ 900 px: "Filtros" rola até `#filters` e o título/"Limpar filtros" ficam ~70 px atrás do cabeçalho fixo (toque acerta `/meus`). (005, QA) — spec 005: `.filters{scroll-margin-top:84px}` (a safe-area já vem do `scroll-padding-top` do `html`), reverificado pelo QA
 - [ ] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005)
 - [x] Spec 007: `/sobre` mantém o título "Status do protótipo" (P10, usuário); banco ATIVO, login PENDENTE, item "navegador" removido. (004) — spec 007, CA7
-- [ ] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5; compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6) e login (M5). (008)
+- [ ] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5 (feito na spec 011); compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6); login feito na spec 011. (008)
 
 ## M4 — Compatibilidade
 - O item "zod no cadastro de grupo" que estava aqui é do cadastro (`POST /grupos`) e foi para o M6 (spec 008).
 - [x] `/encontrar` com `calcMatch` no servidor e mesmos resultados do protótipo para as mesmas respostas. — spec 008, CA1: QA comparou 6.183.630 combinações com o código extraído do protótipo, 0 divergências. **M4 concluído.**
 
 ## M5 — Contas
-- [ ] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`), `requireAuth`, `session.regenerate`. (001)
-- [ ] `?next=` só caminhos internos (`/…`, nunca `//…`) — a home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
-- [ ] Rate limit em `/conta/entrar` e `/conta/criar`. (001)
-- [ ] Ao montar body-parser: `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
-- [ ] Excluir conta: cascata e sessão destruída. (001)
-- [ ] Mostrar o contato do grupo só para logado (P4). (004) — a 006 já deixou pronto: a sessão só precisa preencher `res.locals.user`; o QA do M5 repete o CA4 da 006 com sessão real. (006)
-- [ ] Página do grupo com contato para logado: responder com `Cache-Control: private` (ou `Vary: Cookie`) para um CDN/proxy não servir a versão com contato a deslogado. (006, Hardener)
-- [ ] `.trim()` no zod antes de `min()` em `display_name` (só espaços passa no CHECK). (004, Hardener)
-- [ ] LGPD: nunca logar `err.detail` do pg (no `23505` vem `Key (email)=(…)`); registrar só `code`/`constraint`. (004, Hardener)
-- [ ] `connect-pg-simple` com `createTableIfMissing: false` (tabela vem da migration 005). (003)
-- [ ] `SESSION_SECRET=` vazio é aceito em dev/test; conferir quando o `express-session` entrar. (003)
+- [x] **M5 concluído (specs 009–012, QA aprovado)** — — respostas do usuário e perguntas abertas em `docs/reports/009-sessao-csrf-requireauth.md`: abertas **P4/P8** (textos de criar conta, entrar e sair) e **P11** (texto da confirmação de exclusão); **P2** pede ajustar a spec 009 (mensagem "Sua sessão expirou…" + botão "Atualizar e tentar de novo"). Exclusão de conta passa do M6 para o M5 (atualizar `MILESTONES.md`).
+- [x] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`) e `requireAuth` — spec 009 (QA aprovado).
+- [x] `req.session.regenerate()` no login e no cadastro — specs 010/011. (001) — cadastro (010) e login (011) feitos, QA aprovado.
+- [x] `?next=` só caminhos internos (`/…`, nunca `//…`): `safeNext` em `domain/redirect.js` — spec 009. A home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
+- [x] Rate limit em `/conta/entrar` e `/conta/criar`. (001) — `/conta/criar` feito na spec 010 (10/15 min por IP, QA aprovado); `/conta/entrar` feito na spec 011 (10/15 min por IP+e-mail, chave normalizada; QA aprovado).
+- [x] Ao montar body-parser (spec 009: `limit: 16kb`): `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
+- [x] Excluir conta: cascata e sessão destruída. (001; resolvido na spec 012)
+- [ ] Riscos aceitos da spec 012: helmet/`frame-ancestors` e `style` inline do 2º passo da exclusão dependem da CSP do M8; sem reautenticação por senha (P13); sessões de outros aparelhos ficam até 30 dias na tabela `session` sem efeito. (012, Hardener)
+- [ ] Senha exige caractere especial, mas o AGENTS §6 pede só mínimo de 8 caracteres: alinhar regra e hint do form. (012, QA)
+- [x] (spec 009: `grupo-detalhe.ejs` + CA5) Mostrar o contato do grupo só para logado (P4). (004) — a 006 já deixou pronto: a sessão só precisa preencher `res.locals.user`; o QA do M5 repete o CA4 da 006 com sessão real. (006)
+- [x] (spec 009: `currentUser.js` e `csrf.js` enviam `private, no-store`) Página do grupo com contato para logado: responder com `Cache-Control: private` (ou `Vary: Cookie`) para um CDN/proxy não servir a versão com contato a deslogado. (006, Hardener)
+- [x] `.trim()` no zod antes de `min()` em `display_name` (só espaços passa no CHECK). (004, Hardener) — spec 010
+- [x] (spec 009) LGPD: nunca logar `err.detail` do pg (no `23505` vem `Key (email)=(…)`); registrar só `code`/`constraint`. (004, Hardener)
+- [x] (spec 009) `connect-pg-simple` com `createTableIfMissing: false` (tabela vem da migration 005). (003)
+- [x] (spec 009: dev usa segredo de dev; produção exige ≥ 32 caracteres e rejeita os de exemplo) `SESSION_SECRET=` vazio é aceito em dev/test; conferir quando o `express-session` entrar. (003)
+
+- [ ] **Para a 011**: se o header ganhar form "Sair" com `csrfToken()`, a página de erro quebra quando o próprio middleware de sessão falha (ex.: banco fora com cookie presente): `csrfLocals` não roda e a resposta vira o texto "Erro interno.". O `errorHandler` precisa tratar. (009, Hardener)
+
+- [ ] **Deploy (M8) — ALTA** — `trust proxy`: sem ele, atrás de Render/Railway todos compartilham o IP do proxy e o limite de 10 cadastros/15 min vira global; valor errado permite falsificar IP via `X-Forwarded-For`. (010, Hardener)
+- [ ] Rate limit de `/conta/criar` é em memória (zera ao reiniciar, não vale entre instâncias); CSRF roda antes do limiter (403 não conta); e-mail duplicado revela conta (aceito no AGENTS). Aceitos na v1. (010, Hardener)
+- [ ] `npm audit` não investigado. (010, Coder/Hardener)
+- [x] `/meus` deslogado redireciona para `/conta/entrar`, que só existe na spec 011 (404 até lá). (010, QA) — resolvido na spec 011
+
+- [ ] **Pós-M5 (spec própria)** — E-mail de boas-vindas ao criar conta, com visual do site (HTML com CSS inline). Envio por SMTP/API de provedor configurável por env (`SMTP_*` ou chave da API), falha de envio não pode impedir o cadastro. Exige dependência nova justificada (ex.: `nodemailer`), atualizar AGENTS §1 (hoje "notificações/e-mail" é fora do escopo) e revisar LGPD (e-mail usado também para mensagem, não só login). Provedor ainda a escolher. (usuário, 2026-11-13)
+- [x] P4/P8 textos de conta aprovados; P11 "Tem certeza que deseja excluir?" com grupos publicados; P2 página própria de CSRF. — specs 009/010/011/012
 
 ## M6 — Escrita
 - [ ] zod no cadastro de grupo (`parsePace`, dias, horário) e `slug()` com geração/validação. (002; movido do M4 pela spec 008)
@@ -81,6 +95,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Acessibilidade do mapa (vêm do protótipo): foco de teclado discreto nos pins não selecionados (anel `r=0`, só o ponto cresce) e alvo de toque de ~9 px a 360 px (WCAG 2.5.8 pede 24 px). (007, QA)
 
 ## M8 — Produção
+- [ ] `app.set('trust proxy', 1)` junto com o cookie `secure`: sem isso, atrás do proxy do Render/Railway o cookie não é enviado. Decidir antes do rate limit por IP da 010/011 (valor errado deixa o IP ser falsificado via `X-Forwarded-For`). (009, Hardener)
 - [ ] helmet + CSP (`self`, fonts.googleapis.com, fonts.gstatic.com). `style="--z:…"`, `style="font-size:14px"` e o `extra` do 404/500 exigem `style-src-attr 'unsafe-inline'` ou classes CSS. (001, 002)
 - [ ] Não publicar antes de M3/M5: links da home levam a 404. (002) — `/encontrar` deixou de ser um deles (spec 008); "Entrar no grupo" dos cards de `/encontrar` leva a `/conta/entrar` (404 até o M5). (008, QA)
 - [x] Seed dos grupos demo **não roda** com `NODE_ENV=production` (ou demos removidos/despublicados antes de abrir o site). O aviso "Versão de demonstração" some sozinho quando não houver demo publicado (`hasDemo`). (conteúdo) — spec 003, CA6
@@ -132,3 +147,8 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - Com mais de 1000 pares na query, o excedente é descartado e respostas podem "sumir" (422 ou form vazio), como na `/grupos`. (008, Hardener)
 - `tests/domain/match-prototipo.test.js` usa grade reduzida (subconjuntos de dias de tamanho 1, 2 e 7) por tempo; a grade completa foi rodada uma vez pelo QA da 008 (0 divergências). (008)
 - Com erro de validação, `/encontrar` responde 422 mesmo com o banco fora (não consulta). (008, Coder)
+- POST em rota inexistente sem token CSRF responde 403 "Sessão expirada"; com token válido, 404. CSRF fica antes das rotas de propósito: nenhum POST futuro fica sem proteção por esquecimento. (009, Hardener)
+- csrf-sync compara o token com `===` (sem tempo constante); risco baixo, token de 128 bytes aleatórios por sessão. (009, Hardener)
+- `isPgError` ("code" de 5 caracteres) também casa erros do Node (EPIPE, EPERM): só deixa o log menos detalhado. (009, Hardener)
+- Página pública anônima pode ir para cache sem `Vary: Cookie`; um logado pode receber a versão sem contato (funcional, não segurança). (009, Hardener)
+- [ ] (spec 011, Hardener/QA) `trust proxy` também afeta o limite de `/conta/entrar` (global atrás de proxy, permite travar o login de uma vítima); limiter em memória por processo; chave IP+e-mail não segura credential stuffing nem ataque distribuído (decisão da spec); senha de exatamente 72 bytes aceita sufixo (bcrypt); `bcrypt.hashSync` no boot (~250 ms). Observação do QA: medição única de 375 px sem JS em `/conta/entrar` não reproduziu.

@@ -39,7 +39,7 @@ O diff da tarefa atual e qualquer código que ele chame.
 **LGPD**: nenhum dado pessoal além do necessário; logs sem e-mail/senha.
 
 ## Regras
-- Para cada problema encontrado: escreva primeiro um teste que falha, depois corrija.
+- Para cada problema encontrado: escreva primeiro um teste que falha, depois corrija. Um teste representativo por problema; não replique casos já cobertos.
 - Não mude regra de produto. Se a spec estiver insegura por design, registre e pare.
 - `npm test && npm run lint` verdes ao final.
 

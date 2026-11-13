@@ -34,6 +34,7 @@ Vale para humanos e agentes. Em conflito, `AGENTS.md` define o produto e este ar
 ## Testes
 - `vitest`. Unit em `tests/domain/`, HTTP com `supertest` em `tests/http/`.
 - Nome descreve comportamento: `it('recusa pace acima de 12:00')`.
+- **Casos representativos, sem redundância.** Um teste por comportamento, não por combinação. Cubra cada classe de entrada com poucos exemplos (válido típico, cada borda, cada tipo de erro) em vez de tabelas enormes ou varreduras de combinações. Não repita num teste HTTP o que um teste de domínio já prova, nem escreva dois testes que quebram pelo mesmo motivo. A quantidade de testes não é meta.
 - Banco de teste separado (`DATABASE_URL_TEST`), limpo entre suítes com `TRUNCATE … RESTART IDENTITY CASCADE`.
 
 ## Git

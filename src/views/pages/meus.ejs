@@ -1,0 +1,20 @@
+<%- include('../partials/page-head', {
+  kicker: 'Meus grupos',
+  title: 'Seus treinos',
+  text: 'Grupos em que você entrou e grupos que você cadastrou.',
+}) %>
+<div class="wrap">
+  <div class="panel" id="conta">
+    <h2>Conta e dados</h2>
+    <p style="color:var(--muted)">Você entrou como <b><%= user.displayName %></b> (<%= user.email %>).</p>
+    <form method="post" action="/conta/sair" style="margin-top:14px"><%- include('../partials/csrf') %><button class="btn btn-outline btn-sm" type="submit">Sair da conta</button></form>
+    <div id="resetBox" style="margin-top:14px">
+<% if (!confirmDelete) { -%>
+      <a class="btn btn-outline btn-sm" href="/meus?excluir=1#conta">Excluir minha conta</a>
+<% } else { -%>
+      <div class="form-alert bad" role="alert"><%- ic('alert') %><span>Tem certeza que deseja excluir? Isso apaga sua conta e suas participações nos grupos. Os grupos que você cadastrou continuam publicados, sem o seu nome. Não dá para desfazer.</span></div>
+      <form method="post" action="/conta/excluir" class="choice-row" style="margin-top:10px"><%- include('../partials/csrf') %><button class="btn btn-primary btn-sm" type="submit" style="background:var(--pista)">Excluir conta</button><a class="btn btn-outline btn-sm" href="/meus#conta">Cancelar</a></form>
+<% } -%>
+    </div>
+  </div>
+</div>
