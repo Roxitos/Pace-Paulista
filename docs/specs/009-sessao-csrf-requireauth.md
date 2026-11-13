@@ -40,7 +40,7 @@ Aceita só `string` que: começa com `/`; **não** começa com `//` nem `/\`; n�
 ### CSRF — `src/middlewares/csrf.js` (novo)
 - `csrf-sync` com `getTokenFromRequest: (req) => req.body?._csrf` (campo oculto `_csrf` nos forms; sem header, não há fetch com POST na v1).
 - Exporta `csrfProtection` (o `csrfSynchronisedProtection`; ignora GET/HEAD/OPTIONS) e `csrfLocals(req, res, next)`, que define **`res.locals.csrfToken = () => generateToken(req)`** — função **preguiçosa**: só a página que desenha um form POST chama, então só ela grava token (e cria sessão) para o visitante anônimo. AGENTS §3 cita `csrfToken` em `locals`; aqui ele vira função por esse motivo.
-- Token inválido/ausente → o erro do `csrf-sync` (status 403) segue para o `errorHandler`, que já responde 403 com a página genérica "Algo deu errado" (ver P2).
+- Token inválido/ausente → o erro do `csrf-sync` (status 403) segue para o `errorHandler`, que responde 403 com a página própria: "Sua sessão expirou ou ocorreu um problema de segurança na atualização. Por favor, atualize a página e tente novamente." e o botão "Atualizar e tentar de novo" (link para a página anterior, sem JS; P2, resposta de 2026-11-12).
 - Novo partial `src/views/partials/csrf.ejs`: `<input type="hidden" name="_csrf" value="<%= csrfToken() %>">`.
 
 ### Usuário na requisição — `src/middlewares/currentUser.js` (novo)
@@ -89,7 +89,7 @@ Pasta `account` para as **páginas** de conta (`/meus` e, na 010–012, `/conta/
 | Situação | Regra | Resposta |
 |---|---|---|
 | `?next=` | `safeNext` (acima) | inválido → `/meus` |
-| POST sem `_csrf` ou com token errado | `csrf-sync` | 403, página genérica de erro (texto atual do `500.ejs`) |
+| POST sem `_csrf` ou com token errado | `csrf-sync` | 403, página própria de sessão expirada com o botão "Atualizar e tentar de novo" (P2) |
 | Página protegida sem sessão | `requireAuth` | 302 `/conta/entrar?next=…` |
 | Sessão aponta para usuário apagado | `currentUser` | anônimo; `userId` removido da sessão |
 
@@ -119,7 +119,7 @@ Nenhuma mensagem nova de UI nesta spec além do parágrafo do painel "Conta e da
 
 ## Riscos / perguntas em aberto
 - **P1** — `/meus` no M5 só com o painel "Conta e dados" (nome, e-mail; depois Sair e Excluir). As seções de grupos do protótipo entram no M6, quando existirem participar/cadastrar. **Default proposto**: assim. Alternativa: já listar as duas seções (com os estados vazios do protótipo) nesta spec.
-- **P2** — CSRF inválido (ex.: form aberto há mais de 30 dias, sessão expirada) cai na página genérica "Algo deu errado" com 403. Querem texto próprio (ex.: "Sua sessão expirou. Volte, recarregue a página e tente de novo.")? Junta-se à pendência M5/M6 sobre 4xx que não são 404. **Default**: página genérica.
+- **P2** — (respondida: texto próprio + botão "Atualizar e tentar de novo"; renovar o token via AJAX fica para o M7)  CSRF inválido (ex.: form aberto há mais de 30 dias, sessão expirada) cai na página genérica "Algo deu errado" com 403. Querem texto próprio (ex.: "Sua sessão expirou. Volte, recarregue a página e tente de novo.")? Junta-se à pendência M5/M6 sobre 4xx que não são 404. **Default**: página genérica.
 - **P3** — Pasta das rotas: `src/modules/account/` (proposto) ou `src/modules/auth/auth.routes.js` (AGENTS §3)? Não muda comportamento; se escolherem `account/`, o orquestrador atualiza o AGENTS §3.
 - Risco: com `saveUninitialized: false` e token preguiçoso, só `/conta/entrar` e `/conta/criar` criam sessão anônima (uma linha por visitante que abre o form). O `connect-pg-simple` limpa as expiradas; aceitável.
 - Risco (M8): atrás de proxy (Render/Railway), `secure: true` exige `app.set('trust proxy', 1)`, senão o cookie não é enviado. Registrar no PENDENCIAS M8.

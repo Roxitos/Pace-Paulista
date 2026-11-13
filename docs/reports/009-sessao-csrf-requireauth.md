@@ -11,9 +11,9 @@ Branch: `feat/m5-contas` (recriada a partir de `origin/main`; sem commit ainda) 
 ## Decisões de produto
 Respostas do usuário em 2026-11-12 (parciais; **sem OK para o Coder**, specs mantidas salvas):
 - **P1** sim · **P3** rotas em `auth/auth.routes.js` (AGENTS §3 não muda) · **P5/P6** sim · **P7** não bloquear nomes · **P9** sim · **P10** padrão (nenhuma mensagem ao sair) · **P12** sim · **P13** não pede senha para excluir · **Marco**: excluir conta fica no M5 (spec 012; atualizar `MILESTONES.md` ao fechar o M5).
-- **P2** (spec 009, a ajustar antes do Coder): 403 de CSRF mostra "Sua sessão expirou ou ocorreu um problema de segurança na atualização. Por favor, atualize a página e tente novamente." e oferece um botão **"Atualizar e tentar de novo"** (renovar o token em segundo plano via AJAX foi sugerido como alternativa; ficaria no M7, pois o JS é só melhoria progressiva).
-- **P4/P8**: "ainda há verificar" — textos novos de criar conta, entrar e sair seguem **abertos**.
-- **P11** (texto da confirmação de exclusão): **sem resposta**, aberta.
+- **P2** (spec 009, já ajustada em 2026-11-13): 403 de CSRF mostra "Sua sessão expirou ou ocorreu um problema de segurança na atualização. Por favor, atualize a página e tente novamente." e oferece um botão **"Atualizar e tentar de novo"** (renovar o token em segundo plano via AJAX foi sugerido como alternativa; ficaria no M7, pois o JS é só melhoria progressiva).
+- **P4/P8** (2026-11-13): textos de criar conta, entrar e sair aprovados como nas specs. Pedido novo do usuário: e-mail de boas-vindas, estilizado como o site, enviado a quem cria a conta — **fora do escopo da v1** (AGENTS §1); decidido: **spec própria depois do M5**, via SMTP/API de provedor configurável por env.
+- **P11** (2026-11-13): alerta "Tem certeza que deseja excluir?"; os grupos cadastrados continuam publicados, sem o nome do dono (AGENTS §4 inalterado).
 
 ## Specifier
 Specs, uma por PR, nesta ordem:

@@ -93,7 +93,7 @@ Mesmo esqueleto e classes de `PageCadastrar` (`page-head` + `.form-layout` com `
 - http (`tests/http/conta-criar.test.js`, `supertest.agent` + `getCsrf` da 009): CA1–CA10. Para CA2, ler `users` com o pool de teste.
 
 ## Riscos / perguntas em aberto
-- **P4** — Textos novos (não existem no protótipo, que não tinha conta): título/texto do `page-head`, rótulos, hints, a lista "O que guardamos", `Informe um nome com pelo menos 2 caracteres.`, `Use no máximo 40 caracteres.`, `A senha precisa ter de 8 a 72 caracteres.`. As mensagens de e-mail, e-mail duplicado e caractere especial são as do AGENTS §6. Aprovar ou ajustar.
+- **P4** — (respondida em 2026-11-13: textos aprovados como propostos; o e-mail de boas-vindas ao criar conta vai numa spec própria depois do M5, ver PENDENCIAS)  Textos novos (não existem no protótipo, que não tinha conta): título/texto do `page-head`, rótulos, hints, a lista "O que guardamos", `Informe um nome com pelo menos 2 caracteres.`, `Use no máximo 40 caracteres.`, `A senha precisa ter de 8 a 72 caracteres.`. As mensagens de e-mail, e-mail duplicado e caractere especial são as do AGENTS §6. Aprovar ou ajustar.
 - **P5** — Limite do `/conta/criar`: o AGENTS só define o do login (10 / 15 min por IP+e-mail). **Default**: 10 / 15 min **por IP**, contando sucesso e erro. Querem outro número?
 - **P6** — Mensagem e status do rate limit (`429` + `Muitas tentativas. Espere alguns minutos e tente de novo.`), mesma para criar e entrar.
 - **P7** — Bloquear nomes de exibição que imitem a marca (ex.: "Equipe Pace Paulista")? (PENDENCIAS M5, Hardener.) **Default**: não bloquear na v1; só o aviso de que o nome é público. Se sim, definir a regra e a mensagem.

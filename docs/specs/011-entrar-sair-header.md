@@ -87,7 +87,7 @@ Abaixo do parágrafo da 009: `<form method="post" action="/conta/sair">` + `part
 - http: `tests/http/conta-entrar.test.js` (CA1–CA8), `tests/http/sobre.test.js` (CA9), `tests/http/fluxo-conta.test.js` (CA10).
 
 ## Riscos / perguntas em aberto
-- **P8** — Textos novos: `page-head` do login, aside "Primeira vez aqui?", `Informe seu e-mail.`, `Informe sua senha.`, botão `Sair da conta`. Aprovar ou ajustar.
+- **P8** — (respondida em 2026-11-13: textos aprovados como propostos)  Textos novos: `page-head` do login, aside "Primeira vez aqui?", `Informe seu e-mail.`, `Informe sua senha.`, botão `Sair da conta`. Aprovar ou ajustar.
 - **P9** — "Usuário no header": **default** = mesmo ícone, com destino e rótulo trocados (deslogado → "Entrar"; logado → "Meus grupos · {nome}"); "Sair" só em `/meus`. Alternativas: mostrar o nome/inicial visível no botão, ou um botão "Sair" no header/menu mobile (aperta o header a 360 px).
 - **P10** — Depois de sair, ir para `/` sem mensagem (**default**) ou mostrar algo como o toast do protótipo ("Você saiu da conta.")? Sem flash em sessão no M5, a mensagem iria por query string (como a 012 propõe para "Conta excluída").
 - Risco: rate limit em memória por processo (ver 010). Sem bloqueio de conta: um atacante distribuído por muitos IPs não é contido (aceitável na v1).

@@ -47,7 +47,7 @@ Conferir que nenhum texto diz "Nenhum dado é enviado a servidores" (AGENTS §9)
 | Situação | Regra | Texto exato |
 |---|---|---|
 | 1º passo | link | `Excluir minha conta` |
-| 2º passo | alerta | `Isso apaga sua conta e suas participações nos grupos. Os grupos que você cadastrou continuam publicados, sem o seu nome. Não dá para desfazer.` (P11) |
+| 2º passo | alerta | `Tem certeza que deseja excluir? Isso apaga sua conta e suas participações nos grupos. Os grupos que você cadastrou continuam publicados, sem o seu nome. Não dá para desfazer.` (P11) |
 | 2º passo | botões | `Excluir conta` / `Cancelar` |
 | depois de excluir | home | `Sua conta foi excluída.` (adapta o toast "Dados locais apagados."; P12) |
 
@@ -67,7 +67,7 @@ Conferir que nenhum texto diz "Nenhum dado é enviado a servidores" (AGENTS §9)
 - http: `tests/http/conta-excluir.test.js` (CA1–CA6) e o fluxo completo em `tests/http/fluxo-conta.test.js` (CA7).
 
 ## Riscos / perguntas em aberto
-- **P11** — Texto do alerta do 2º passo e do painel (o do protótipo falava de "dados deste navegador"). Aprovar ou ajustar. Inclui avisar que os grupos cadastrados **continuam publicados sem o nome** (regra do AGENTS §4) — querem, em vez disso, despublicar/apagar os grupos do usuário junto? (Mudaria regra do AGENTS §4.)
+- **P11** — (respondida em 2026-11-13: alerta começa com "Tem certeza que deseja excluir?" e os grupos continuam publicados, sem o nome do dono) Texto do alerta do 2º passo e do painel (o do protótipo falava de "dados deste navegador"). Aprovar ou ajustar. Inclui avisar que os grupos cadastrados **continuam publicados sem o nome** (regra do AGENTS §4) — querem, em vez disso, despublicar/apagar os grupos do usuário junto? (Mudaria regra do AGENTS §4.)
 - **P12** — Aviso pós-exclusão na home via `?conta=excluida` (**default**) ou redirecionar para `/` sem mensagem? (Sem flash em sessão, porque a sessão acabou de ser destruída.)
 - **P13** — Pedir a senha de novo para confirmar a exclusão? **Default**: não (protótipo usa só os 2 passos; CSRF + sessão bastam). Com senha fica mais seguro contra sessão esquecida aberta num computador compartilhado.
 - Risco: sessões de outros aparelhos ficam na tabela até expirar (no máximo 30 dias), sem efeito (viram anônimas). Aceitável.
