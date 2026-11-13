@@ -159,4 +159,29 @@ describe('describeDatabaseUrl', () => {
     expect(described).toBe('db.exemplo:5432/pace');
     expect(described).not.toContain('segredo');
   });
+
+  it('trata SESSION_SECRET vazio como ausente em dev e test', () => {
+    expect(parseEnv({ SESSION_SECRET: '' }).SESSION_SECRET).toBe(
+      'dev-inseguro-nao-usar-em-producao',
+    );
+    expect(parseEnv({ NODE_ENV: 'test', SESSION_SECRET: '' }).SESSION_SECRET).toBe(
+      'dev-inseguro-nao-usar-em-producao',
+    );
+  });
+
+  it('recusa SESSION_SECRET vazio em produção', () => {
+    expect(() =>
+      parseEnv({
+        NODE_ENV: 'production',
+        SESSION_SECRET: '',
+        DATABASE_URL: 'postgres://u:p@db.exemplo:5432/app',
+      }),
+    ).toThrow(/SESSION_SECRET/);
+  });
+
+  it('trata DATABASE_URL vazio como ausente em dev', () => {
+    expect(parseEnv({ DATABASE_URL: '' }).DATABASE_URL).toBe(
+      'postgres://pace:pace@localhost:5432/pace_paulista',
+    );
+  });
 });

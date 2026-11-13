@@ -2,9 +2,11 @@ import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { pool } from '../../src/db/pool.js';
+import { createTestApp, getCsrf } from '../helpers/auth.js';
 import { migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const app = createApp();
+const testApp = createTestApp();
 const XSS = '<script>alert(1)</script>';
 const XSS_ESC = '&lt;script&gt;alert(1)&lt;/script&gt;';
 
@@ -450,7 +452,10 @@ describe('GET /encontrar com entradas fora do form (nunca 500)', () => {
 
 describe('POST /encontrar', () => {
   it('não existe: 404 com a página padrão', async () => {
-    const res = await request(app).post('/encontrar').type('form').send('zona=sul');
+    // Com token válido, para chegar ao 404 (o CSRF roda antes das rotas).
+    const agent = request.agent(testApp);
+    const _csrf = await getCsrf(agent);
+    const res = await agent.post('/encontrar').type('form').send({ _csrf, zona: 'sul' });
     expect(res.status).toBe(404);
     expect(res.text).toContain('<title>Página não encontrada · Pace Paulista</title>');
   });

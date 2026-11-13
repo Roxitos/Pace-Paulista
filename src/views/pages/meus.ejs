@@ -1,0 +1,11 @@
+<%- include('../partials/page-head', {
+  kicker: 'Meus grupos',
+  title: 'Seus treinos',
+  text: 'Grupos em que você entrou e grupos que você cadastrou.',
+}) %>
+<div class="wrap">
+  <div class="panel" id="conta">
+    <h2>Conta e dados</h2>
+    <p style="color:var(--muted)">Você entrou como <b><%= user.displayName %></b> (<%= user.email %>).</p>
+  </div>
+</div>

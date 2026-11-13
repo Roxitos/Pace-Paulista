@@ -1,6 +1,12 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import { createSessionMiddleware } from './middlewares/session.js';
+import { currentUser } from './middlewares/currentUser.js';
+import { csrfLocals, csrfProtection } from './middlewares/csrf.js';
+import { pool } from './db/pool.js';
+import { env } from './config/env.js';
+import { accountRouter } from './modules/account/account.routes.js';
 import { locals } from './middlewares/locals.js';
 import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -56,10 +62,16 @@ export function createApp({ beforeErrorHandlers } = {}) {
   });
 
   app.use(express.static(path.join(root, '..', 'public')));
+  app.use(express.urlencoded({ extended: false, limit: '16kb', parameterLimit: 200 }));
+  app.use(createSessionMiddleware({ pool, env }));
+  app.use(currentUser);
+  app.use(csrfLocals);
   app.use(locals);
+  app.use(csrfProtection);
   app.use(pagesRouter);
   app.use(groupsRouter);
   app.use(matchingRouter);
+  app.use(accountRouter);
   if (beforeErrorHandlers) beforeErrorHandlers(app);
 
   app.use(notFound);

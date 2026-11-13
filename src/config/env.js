@@ -53,8 +53,9 @@ const schema = z
     const production = data.NODE_ENV === 'production';
     const invalid = (path) => ctx.addIssue({ code: 'custom', path: [path], message: 'inválida' });
 
-    const DATABASE_URL = data.DATABASE_URL ?? (production ? undefined : DEV_DATABASE_URL);
-    const SESSION_SECRET = data.SESSION_SECRET ?? (production ? undefined : DEV_SESSION_SECRET);
+    // `VAR=` vazio no .env conta como ausente (`||`, não `??`).
+    const DATABASE_URL = data.DATABASE_URL || (production ? undefined : DEV_DATABASE_URL);
+    const SESSION_SECRET = data.SESSION_SECRET || (production ? undefined : DEV_SESSION_SECRET);
 
     if (DATABASE_URL === undefined || !isValidDatabaseUrl(DATABASE_URL)) invalid('DATABASE_URL');
     // Impede que os testes (que fazem TRUNCATE) apaguem o banco de desenvolvimento.
