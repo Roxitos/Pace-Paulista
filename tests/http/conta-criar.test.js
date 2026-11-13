@@ -115,6 +115,16 @@ describe('POST /conta/criar', () => {
     expect(await countUsers()).toBe(0);
   });
 
+  it('NUL no nome ou no e-mail não vira 500 (22021 do Postgres)', async () => {
+    const { agent, csrf } = await start();
+    const ruim = await post(agent, csrf, { ...valido, email: 'a\0na@x.com' });
+    expect(ruim.status).toBe(422);
+    expect(ruim.text).toContain('Informe um e-mail válido.');
+    await post(agent, csrf, { ...valido, nome: 'A\0na' }).expect(303);
+    const { rows } = await pool.query('SELECT display_name FROM users');
+    expect(rows).toEqual([{ display_name: 'Ana' }]);
+  });
+
   it('três campos inválidos: topo com a contagem (CA7)', async () => {
     const { agent, csrf } = await start();
     const res = await post(agent, csrf, { nome: '', email: 'x', senha: 'curta' });

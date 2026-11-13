@@ -9,7 +9,8 @@ const MSG = {
   passwordSpecial: 'A senha precisa de pelo menos 1 caractere especial (ex.: ! @ # $ %).',
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Sem caracteres de controle: NUL derrubaria o INSERT (22021) e nenhum e-mail real os tem.
+const EMAIL_RE = /^[^\s@\p{Cc}]+@[^\s@\p{Cc}]+\.[^\s@\p{Cc}]+$/u;
 const ESPECIAL_RE = /[^\p{L}\p{N}]/u;
 
 function text(value) {
@@ -47,7 +48,8 @@ const ERROR_ORDER = ['nome', 'email', 'senha'];
  */
 export function parseSignup(body) {
   const src = body !== null && typeof body === 'object' ? body : {};
-  const nome = text(src.nome).trim().normalize('NFC');
+  // O Postgres recusa texto com NUL (22021): sem isso, nome=%00 virava 500 (mesmo tratamento de filters.js).
+  const nome = text(src.nome).replaceAll('\0', '').trim().normalize('NFC');
   const email = text(src.email).trim().normalize('NFC');
   const senha = text(src.senha);
   const next = safeNext(text(src.next), '');

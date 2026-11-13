@@ -33,13 +33,24 @@ describe('parseSignup', () => {
       expect(errorsOf({ nome: '😀'.repeat(40) }).nome).toBeUndefined();
       expect(errorsOf({ nome: 'a'.repeat(41) }).nome).toBe('Use no máximo 40 caracteres.');
     });
+    it('remove NUL (o Postgres recusa com 22021)', () => {
+      expect(parseSignup({ ...ok, nome: 'A\0na' }).values.nome).toBe('Ana');
+      expect(errorsOf({ nome: '\0a\0' }).nome).toBe('Informe um nome com pelo menos 2 caracteres.');
+    });
   });
 
   describe('email', () => {
     it.each(['joão@x.com', 'Ana@Clube.com.br'])('aceita %s', (email) => {
       expect(errorsOf({ email }).email).toBeUndefined();
     });
-    it.each(['ana', 'ana@x', 'a b@x.com', `${'a'.repeat(250)}@x.com`])('recusa %s', (email) => {
+    it.each([
+      'ana',
+      'ana@x',
+      'a b@x.com',
+      `${'a'.repeat(250)}@x.com`,
+      'a\0b@x.com',
+      'a\u0007@x.com',
+    ])('recusa %s', (email) => {
       expect(errorsOf({ email }).email).toBe('Informe um e-mail válido.');
     });
   });
