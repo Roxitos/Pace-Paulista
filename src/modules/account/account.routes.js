@@ -12,8 +12,10 @@ const TITLE = 'Criar conta · Pace Paulista';
 export function createAccountRouter() {
   const router = Router();
 
-  const renderSignup = (res, status, values, errors, rateLimited = false) =>
-    res.status(status).renderPage('conta-criar', { title: TITLE, values, errors, rateLimited });
+  const renderSignup = (res, status, values, errors) =>
+    res
+      .status(status)
+      .renderPage('conta-criar', { title: TITLE, values, errors, rateLimited: false });
 
   const signupLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -23,7 +25,9 @@ export function createAccountRouter() {
     keyGenerator: (req) => ipKeyGenerator(req.ip),
     handler: (req, res) => {
       const { values } = parseSignup(req.body);
-      return renderSignup(res, 429, values, {}, true);
+      return res
+        .status(429)
+        .renderPage('conta-criar', { title: TITLE, values, errors: {}, rateLimited: true });
     },
   });
 

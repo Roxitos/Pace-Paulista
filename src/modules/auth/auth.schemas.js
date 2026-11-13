@@ -1,11 +1,11 @@
 import { safeNext } from '../../domain/redirect.js';
 
 const MSG = {
-  nomeCurto: 'Informe um nome com pelo menos 2 caracteres.',
-  nomeLongo: 'Use no máximo 40 caracteres.',
+  nameTooShort: 'Informe um nome com pelo menos 2 caracteres.',
+  nameTooLong: 'Use no máximo 40 caracteres.',
   email: 'Informe um e-mail válido.',
-  senhaTamanho: 'A senha precisa ter de 8 a 72 caracteres.',
-  senhaEspecial: 'A senha precisa de pelo menos 1 caractere especial (ex.: ! @ # $ %).',
+  passwordLength: 'A senha precisa ter de 8 a 72 caracteres.',
+  passwordSpecial: 'A senha precisa de pelo menos 1 caractere especial (ex.: ! @ # $ %).',
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,8 +19,8 @@ function text(value) {
 function validateNome(nome) {
   // Code points, como o char_length do CHECK do banco.
   const len = [...nome].length;
-  if (len < 2) return MSG.nomeCurto;
-  if (len > 40) return MSG.nomeLongo;
+  if (len < 2) return MSG.nameTooShort;
+  if (len > 40) return MSG.nameTooLong;
   return null;
 }
 
@@ -31,8 +31,8 @@ function validateEmail(email) {
 function validateSenha(senha) {
   // O bcrypt só usa os 72 primeiros bytes: acima disso senhas diferentes colidiriam.
   const len = [...senha].length;
-  if (len < 8 || len > 72 || Buffer.byteLength(senha, 'utf8') > 72) return MSG.senhaTamanho;
-  return ESPECIAL_RE.test(senha) ? null : MSG.senhaEspecial;
+  if (len < 8 || len > 72 || Buffer.byteLength(senha, 'utf8') > 72) return MSG.passwordLength;
+  return ESPECIAL_RE.test(senha) ? null : MSG.passwordSpecial;
 }
 
 /**

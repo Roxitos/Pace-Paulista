@@ -6,7 +6,8 @@ Branch: `feat/m5-contas` (sem commit ainda) · Data: 2026-11-13
 | Etapa | Resultado |
 |---|---|
 | Specifier | Spec já existia (commit `4338fca`), P4 respondida. P5, P6 e P7 seguiram os defaults da spec após o "seguir" do usuário |
-| Coder | Implementado. `npm test` 714 ok (37 arquivos), `npm run lint` ok |
+| Coder | Implementado e commitado (`88788c9`, já no remoto). `npm test` 714 ok (37 arquivos), `npm run lint` ok |
+| Cleaner | Refatoração sem mudar comportamento (não commitada). `npm test` 716 ok, `npm run lint` ok |
 
 ## Decisões de produto
 - **P4**: textos aprovados como propostos. **P5**: 10 POST / 15 min por IP, contando sucesso e erro. **P6**: 429 + "Muitas tentativas. Espere alguns minutos e tente de novo.". **P7**: não bloquear nomes de marca na v1.
@@ -28,7 +29,15 @@ Branch: `feat/m5-contas` (sem commit ainda) · Data: 2026-11-13
 - E-mail de boas-vindas segue como spec própria depois do M5 (já em PENDENCIAS).
 
 ## Cleaner
-— (não rodou)
+Sem mudança de comportamento. `npm test` 716 ok, `npm run lint` ok.
+- `account.routes.js`: `renderSignup` perdeu o parâmetro booleano `rateLimited`; o handler do 429 renderiza direto com `rateLimited: true`.
+- `auth.schemas.js`: chaves de `MSG` renomeadas para inglês (`nameTooShort`, `nameTooLong`, `passwordLength`, `passwordSpecial`); textos de UI inalterados.
+- Testes: nomes corrigidos, dois testes mistos divididos, parâmetro não usado de `start()` removido.
+- Markup repetido dos três campos em `conta-criar.ejs` mantido (atributos diferem por campo); não virou partial.
+
+### Pendências para o Hardener e o usuário
+- **Divergência de spec**: a spec 010 e o AGENTS §2 pedem zod em `auth.schemas.js`, mas o `parseSignup` foi escrito com validações manuais. Decidir: migrar para zod ou registrar a exceção no AGENTS.
+- Itens já listados no Coder (`trust proxy` no M8, CSRF antes do limiter, enumeração de e-mail, `userId` como string, `npm audit`).
 
 ## Hardener
 — (não rodou)

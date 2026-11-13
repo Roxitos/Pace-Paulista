@@ -23,9 +23,9 @@ afterAll(async () => {
 });
 
 // App novo por teste: o rate limit tem memória própria por createApp.
-async function start(path = '/conta/criar') {
+async function start() {
   const agent = request.agent(createTestApp());
-  const csrf = await getCsrf(agent, path);
+  const csrf = await getCsrf(agent, '/conta/criar');
   return { agent, csrf };
 }
 
@@ -91,15 +91,16 @@ describe('POST /conta/criar', () => {
     expect(res.headers['set-cookie'][0].split(';')[0]).not.toBe(cookieAntes);
   });
 
-  it('respeita next interno e ignora externo (CA3)', async () => {
-    let t = await start();
+  it('redireciona para o next interno (CA3)', async () => {
+    const { agent, csrf } = await start();
     const next = '/grupos/correria-do-carmo#participar';
-    let res = await post(t.agent, t.csrf, { ...valido, next });
+    const res = await post(agent, csrf, { ...valido, next });
     expect(res.headers.location).toBe(next);
+  });
 
-    await truncateAll(pool);
-    t = await start();
-    res = await post(t.agent, t.csrf, { ...valido, next: '//evil.com' });
+  it('ignora next externo e vai para /meus (CA3)', async () => {
+    const { agent, csrf } = await start();
+    const res = await post(agent, csrf, { ...valido, next: '//evil.com' });
     expect(res.headers.location).toBe('/meus');
   });
 

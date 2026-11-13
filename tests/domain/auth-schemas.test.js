@@ -5,17 +5,19 @@ const ok = { nome: 'Ana', email: 'ana@x.com', senha: 'abcdefg!' };
 const errorsOf = (patch) => parseSignup({ ...ok, ...patch }).errors;
 
 describe('parseSignup', () => {
-  it('aceita entrada válida e devolve data sem next quando ausente', () => {
+  it('aceita entrada válida e monta data e values', () => {
     const r = parseSignup(ok);
     expect(r.errors).toEqual({});
     expect(r.data).toEqual({ displayName: 'Ana', email: 'ana@x.com', password: 'abcdefg!' });
     expect(r.values).toEqual({ nome: 'Ana', email: 'ana@x.com', next: '' });
   });
 
-  it('values nunca contém a senha e next inseguro vira vazio', () => {
-    const r = parseSignup({ ...ok, next: '//evil.com' });
-    expect(r.values).not.toHaveProperty('senha');
-    expect(r.values.next).toBe('');
+  it('values nunca contém a senha', () => {
+    expect(parseSignup(ok).values).not.toHaveProperty('senha');
+  });
+
+  it('next inseguro vira vazio e next interno é mantido', () => {
+    expect(parseSignup({ ...ok, next: '//evil.com' }).values.next).toBe('');
     expect(parseSignup({ ...ok, next: '/grupos/x#participar' }).values.next).toBe(
       '/grupos/x#participar',
     );
@@ -68,7 +70,7 @@ describe('parseSignup', () => {
     expect(r.data).toBeNull();
   });
 
-  it('não lança com arrays, objetos, undefined e null', () => {
+  it('não lança com body malformado e usa o primeiro valor de array', () => {
     expect(parseSignup({ ...ok, nome: ['Bia', 'x'] }).values.nome).toBe('Bia');
     expect(Object.keys(parseSignup({ nome: { a: 1 }, email: 5 }).errors)).toEqual([
       'nome',
