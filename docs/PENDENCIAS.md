@@ -49,17 +49,18 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 
 ## M5 — Contas
 - [ ] **M5 (specs 009–012, aguardando OK para o Coder)** — respostas do usuário e perguntas abertas em `docs/reports/009-sessao-csrf-requireauth.md`: abertas **P4/P8** (textos de criar conta, entrar e sair) e **P11** (texto da confirmação de exclusão); **P2** pede ajustar a spec 009 (mensagem "Sua sessão expirou…" + botão "Atualizar e tentar de novo"). Exclusão de conta passa do M6 para o M5 (atualizar `MILESTONES.md`).
-- [ ] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`), `requireAuth`, `session.regenerate`. (001)
-- [ ] `?next=` só caminhos internos (`/…`, nunca `//…`) — a home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
+- [x] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`) e `requireAuth` — spec 009 (QA aprovado).
+- [ ] `req.session.regenerate()` no login e no cadastro — specs 010/011. (001)
+- [x] `?next=` só caminhos internos (`/…`, nunca `//…`): `safeNext` em `domain/redirect.js` — spec 009. A home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
 - [ ] Rate limit em `/conta/entrar` e `/conta/criar`. (001)
-- [ ] Ao montar body-parser: `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
+- [x] Ao montar body-parser (spec 009: `limit: 16kb`): `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
 - [ ] Excluir conta: cascata e sessão destruída. (001)
 - [ ] Mostrar o contato do grupo só para logado (P4). (004) — a 006 já deixou pronto: a sessão só precisa preencher `res.locals.user`; o QA do M5 repete o CA4 da 006 com sessão real. (006)
 - [ ] Página do grupo com contato para logado: responder com `Cache-Control: private` (ou `Vary: Cookie`) para um CDN/proxy não servir a versão com contato a deslogado. (006, Hardener)
 - [ ] `.trim()` no zod antes de `min()` em `display_name` (só espaços passa no CHECK). (004, Hardener)
-- [ ] LGPD: nunca logar `err.detail` do pg (no `23505` vem `Key (email)=(…)`); registrar só `code`/`constraint`. (004, Hardener)
-- [ ] `connect-pg-simple` com `createTableIfMissing: false` (tabela vem da migration 005). (003)
-- [ ] `SESSION_SECRET=` vazio é aceito em dev/test; conferir quando o `express-session` entrar. (003)
+- [x] (spec 009) LGPD: nunca logar `err.detail` do pg (no `23505` vem `Key (email)=(…)`); registrar só `code`/`constraint`. (004, Hardener)
+- [x] (spec 009) `connect-pg-simple` com `createTableIfMissing: false` (tabela vem da migration 005). (003)
+- [x] (spec 009: dev usa segredo de dev; produção exige ≥ 32 caracteres e rejeita os de exemplo) `SESSION_SECRET=` vazio é aceito em dev/test; conferir quando o `express-session` entrar. (003)
 
 - [ ] **Para a 011**: se o header ganhar form "Sair" com `csrfToken()`, a página de erro quebra quando o próprio middleware de sessão falha (ex.: banco fora com cookie presente): `csrfLocals` não roda e a resposta vira o texto "Erro interno.". O `errorHandler` precisa tratar. (009, Hardener)
 
