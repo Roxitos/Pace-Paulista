@@ -1,6 +1,6 @@
 import { pool } from '../../db/pool.js';
 
-// Colunas explícitas: password_hash não sai deste repo.
+// Colunas explícitas: password_hash só sai em findCredentialsByEmail.
 export async function findById(id) {
   const { rows } = await pool.query(
     'SELECT id, email, display_name, role FROM users WHERE id = $1',
@@ -16,4 +16,12 @@ export async function create({ email, passwordHash, displayName }) {
     [email, passwordHash, displayName],
   );
   return rows[0];
+}
+
+// Único SELECT que lê password_hash. E-mail é citext: a comparação ignora a caixa.
+export async function findCredentialsByEmail(email) {
+  const { rows } = await pool.query('SELECT id, password_hash FROM users WHERE email = $1', [
+    email,
+  ]);
+  return rows[0] ?? null;
 }

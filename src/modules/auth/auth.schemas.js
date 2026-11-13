@@ -66,3 +66,36 @@ export function parseSignup(body) {
   const data = result.success ? { displayName: nome, email, password: senha } : null;
   return { values: { nome, email, next }, errors, data };
 }
+
+const LOGIN_MSG = { email: 'Informe seu e-mail.', senha: 'Informe sua senha.' };
+
+/**
+ * Normaliza o body do POST /conta/entrar. Login só exige campos preenchidos:
+ * regras de formato/tamanho ficam no cadastro, para não trancar contas antigas. Nunca lança.
+ * `values` não contém a senha; `data` só existe quando não há erro.
+ */
+export function parseLogin(body) {
+  const src = body !== null && typeof body === 'object' ? body : {};
+  // NUL derrubaria a query (22021), como no cadastro.
+  const email = text(src.email).replaceAll('\0', '').trim().normalize('NFC');
+  const senha = text(src.senha);
+  const next = safeNext(text(src.next), '');
+
+  const errors = {};
+  if (!email) errors.email = LOGIN_MSG.email;
+  if (!senha) errors.senha = LOGIN_MSG.senha;
+
+  const data = Object.keys(errors).length ? null : { email, password: senha };
+  return { values: { email, next }, errors, data };
+}
+
+/**
+ * Parte "e-mail" da chave do rate limit do login. Precisa juntar tudo que o citext do banco
+ * considera igual: 'İ'.toLowerCase() no JS vira i + U+0307, mas no banco casa com 'i', e cada
+ * variante abriria uma cota nova contra a mesma conta. Tirar acentos junta e-mails distintos
+ * no mesmo balde (só deixa o limite mais rígido). Corte em 254: nenhum e-mail real passa disso
+ * e o corpo inteiro não vira chave na memória do limiter.
+ */
+export function loginLimitKey(email) {
+  return email.toLowerCase().normalize('NFKD').replace(/\p{M}/gu, '').slice(0, 254);
+}

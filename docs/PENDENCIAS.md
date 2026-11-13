@@ -41,7 +41,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Sem JS, ≤ 900 px: "Filtros" rola até `#filters` e o título/"Limpar filtros" ficam ~70 px atrás do cabeçalho fixo (toque acerta `/meus`). (005, QA) — spec 005: `.filters{scroll-margin-top:84px}` (a safe-area já vem do `scroll-padding-top` do `html`), reverificado pelo QA
 - [ ] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005)
 - [x] Spec 007: `/sobre` mantém o título "Status do protótipo" (P10, usuário); banco ATIVO, login PENDENTE, item "navegador" removido. (004) — spec 007, CA7
-- [ ] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5; compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6) e login (M5). (008)
+- [ ] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5 (feito na spec 011); compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6); login feito na spec 011. (008)
 
 ## M4 — Compatibilidade
 - O item "zod no cadastro de grupo" que estava aqui é do cadastro (`POST /grupos`) e foi para o M6 (spec 008).
@@ -50,9 +50,9 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 ## M5 — Contas
 - [ ] **M5 (specs 009–012, aguardando OK para o Coder)** — respostas do usuário e perguntas abertas em `docs/reports/009-sessao-csrf-requireauth.md`: abertas **P4/P8** (textos de criar conta, entrar e sair) e **P11** (texto da confirmação de exclusão); **P2** pede ajustar a spec 009 (mensagem "Sua sessão expirou…" + botão "Atualizar e tentar de novo"). Exclusão de conta passa do M6 para o M5 (atualizar `MILESTONES.md`).
 - [x] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`) e `requireAuth` — spec 009 (QA aprovado).
-- [ ] `req.session.regenerate()` no login e no cadastro — specs 010/011. (001) — cadastro feito na spec 010 (QA aprovado); falta o login (011).
+- [x] `req.session.regenerate()` no login e no cadastro — specs 010/011. (001) — cadastro (010) e login (011) feitos, QA aprovado.
 - [x] `?next=` só caminhos internos (`/…`, nunca `//…`): `safeNext` em `domain/redirect.js` — spec 009. A home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
-- [ ] Rate limit em `/conta/entrar` e `/conta/criar`. (001) — `/conta/criar` feito na spec 010 (10/15 min por IP, QA aprovado); falta `/conta/entrar` (011).
+- [x] Rate limit em `/conta/entrar` e `/conta/criar`. (001) — `/conta/criar` feito na spec 010 (10/15 min por IP, QA aprovado); `/conta/entrar` feito na spec 011 (10/15 min por IP+e-mail, chave normalizada; QA aprovado).
 - [x] Ao montar body-parser (spec 009: `limit: 16kb`): `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
 - [ ] Excluir conta: cascata e sessão destruída. (001)
 - [x] (spec 009: `grupo-detalhe.ejs` + CA5) Mostrar o contato do grupo só para logado (P4). (004) — a 006 já deixou pronto: a sessão só precisa preencher `res.locals.user`; o QA do M5 repete o CA4 da 006 com sessão real. (006)
@@ -67,7 +67,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] **Deploy (M8) — ALTA** — `trust proxy`: sem ele, atrás de Render/Railway todos compartilham o IP do proxy e o limite de 10 cadastros/15 min vira global; valor errado permite falsificar IP via `X-Forwarded-For`. (010, Hardener)
 - [ ] Rate limit de `/conta/criar` é em memória (zera ao reiniciar, não vale entre instâncias); CSRF roda antes do limiter (403 não conta); e-mail duplicado revela conta (aceito no AGENTS). Aceitos na v1. (010, Hardener)
 - [ ] `npm audit` não investigado. (010, Coder/Hardener)
-- [ ] `/meus` deslogado redireciona para `/conta/entrar`, que só existe na spec 011 (404 até lá). (010, QA)
+- [x] `/meus` deslogado redireciona para `/conta/entrar`, que só existe na spec 011 (404 até lá). (010, QA) — resolvido na spec 011
 
 - [ ] **Pós-M5 (spec própria)** — E-mail de boas-vindas ao criar conta, com visual do site (HTML com CSS inline). Envio por SMTP/API de provedor configurável por env (`SMTP_*` ou chave da API), falha de envio não pode impedir o cadastro. Exige dependência nova justificada (ex.: `nodemailer`), atualizar AGENTS §1 (hoje "notificações/e-mail" é fora do escopo) e revisar LGPD (e-mail usado também para mensagem, não só login). Provedor ainda a escolher. (usuário, 2026-11-13)
 - [x] P4/P8 textos de conta aprovados; P11 "Tem certeza que deseja excluir?" com grupos publicados; P2 página própria de CSRF. — specs 009/010/011/012
@@ -149,3 +149,4 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - csrf-sync compara o token com `===` (sem tempo constante); risco baixo, token de 128 bytes aleatórios por sessão. (009, Hardener)
 - `isPgError` ("code" de 5 caracteres) também casa erros do Node (EPIPE, EPERM): só deixa o log menos detalhado. (009, Hardener)
 - Página pública anônima pode ir para cache sem `Vary: Cookie`; um logado pode receber a versão sem contato (funcional, não segurança). (009, Hardener)
+- [ ] (spec 011, Hardener/QA) `trust proxy` também afeta o limite de `/conta/entrar` (global atrás de proxy, permite travar o login de uma vítima); limiter em memória por processo; chave IP+e-mail não segura credential stuffing nem ataque distribuído (decisão da spec); senha de exatamente 72 bytes aceita sufixo (bcrypt); `bcrypt.hashSync` no boot (~250 ms). Observação do QA: medição única de 375 px sem JS em `/conta/entrar` não reproduziu.

@@ -7,5 +7,6 @@
   <div class="panel" id="conta">
     <h2>Conta e dados</h2>
     <p style="color:var(--muted)">Você entrou como <b><%= user.displayName %></b> (<%= user.email %>).</p>
+    <form method="post" action="/conta/sair" style="margin-top:14px"><%- include('../partials/csrf') %><button class="btn btn-outline btn-sm" type="submit">Sair da conta</button></form>
   </div>
 </div>

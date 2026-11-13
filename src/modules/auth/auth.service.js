@@ -2,6 +2,10 @@ import bcrypt from 'bcrypt';
 import * as usersRepo from './users.repo.js';
 
 const BCRYPT_COST = 12;
+// O bcrypt só olha 72 bytes: acima disso é credencial errada, sem gastar CPU com corpo gigante.
+const MAX_LOGIN_PASSWORD = 1024;
+// E-mail inexistente também paga um bcrypt.compare: o tempo não revela se a conta existe.
+const DUMMY_HASH = bcrypt.hashSync('pace-paulista-dummy', BCRYPT_COST);
 
 export async function findUserById(id) {
   const row = await usersRepo.findById(id);
@@ -21,4 +25,13 @@ export async function signup({ email, password, displayName }) {
     }
     throw err;
   }
+}
+
+export async function login({ email, password }) {
+  if (password.length > MAX_LOGIN_PASSWORD) return null;
+  const creds = await usersRepo.findCredentialsByEmail(email);
+  const ok = await bcrypt.compare(password, creds ? creds.password_hash : DUMMY_HASH);
+  if (!creds || !ok) return null;
+  const user = await findUserById(creds.id);
+  return user ? { user } : null;
 }

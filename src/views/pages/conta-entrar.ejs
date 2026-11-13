@@ -1,0 +1,24 @@
+<%- include('../partials/page-head', {
+  kicker: 'Conta',
+  title: 'Entrar',
+  text: 'Entre para participar de grupos e cadastrar o seu.',
+}) %>
+<%
+  // Sem JS não há o focus() do showErrors: o autofocus vai no 1º campo com erro (ou no e-mail).
+  const firstError = Object.keys(errors)[0] ?? 'email';
+  const af = (key) => (firstError === key ? ' autofocus' : '');
+  const inv = (key) => (errors[key] ? ' aria-invalid="true"' : '');
+  const err = (key) => (errors[key] ? ic('alert', 'ico-sm') : '');
+  const criarHref = '/conta/criar' + (values.next ? '?next=' + encodeURIComponent(values.next) : '');
+-%>
+  <div class="wrap"><div class="form-layout">
+    <form class="form" method="post" action="/conta/entrar" novalidate>
+      <%- include('../partials/csrf') %>
+      <% if (values.next) { %><input type="hidden" name="next" value="<%= values.next %>"><% } %>
+      <div id="loginAlert"><% if (alert) { %><div class="form-alert bad" role="alert"><%- ic('alert') %><span><%= alert %></span></div><% } else if (Object.keys(errors).length) { %><%- include('../partials/form-errors', { count: Object.keys(errors).length }) %><% } %></div>
+      <div class="field"><label for="l-email">E-mail *</label><input class="input" id="l-email" name="email" type="email" maxlength="254" autocomplete="username" inputmode="email" aria-describedby="e-lemail" value="<%= values.email %>"<%- inv('email') %><%- af('email') %>><span class="err" id="e-lemail"><%- err('email') %><%= errors.email ?? '' %></span></div>
+      <div class="field"><label for="l-senha">Senha *</label><input class="input" id="l-senha" name="senha" type="password" autocomplete="current-password" aria-describedby="e-lsenha"<%- inv('senha') %><%- af('senha') %>><span class="err" id="e-lsenha"><%- err('senha') %><%= errors.senha ?? '' %></span></div>
+      <button class="btn btn-primary btn-lg" type="submit">Entrar</button>
+    </form>
+    <aside class="side-note"><h3>Primeira vez aqui?</h3><p>Crie uma conta para entrar nos grupos e cadastrar o seu.</p><a class="btn btn-outline" href="<%= criarHref %>">Criar conta</a></aside>
+  </div></div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseSignup } from '../../src/modules/auth/auth.schemas.js';
+import { parseLogin, parseSignup } from '../../src/modules/auth/auth.schemas.js';
 
 const ok = { nome: 'Ana', email: 'ana@x.com', senha: 'abcdefg!' };
 const errorsOf = (patch) => parseSignup({ ...ok, ...patch }).errors;
@@ -90,5 +90,26 @@ describe('parseSignup', () => {
     ]);
     expect(() => parseSignup(undefined)).not.toThrow();
     expect(() => parseSignup(null)).not.toThrow();
+  });
+});
+
+describe('parseLogin', () => {
+  const okLogin = { email: ' ANA@x.com ', senha: 'qualquer' };
+
+  it('só exige preenchimento: trim no e-mail, senha intacta e fora de values', () => {
+    const r = parseLogin({ ...okLogin, next: '/grupos' });
+    expect(r.errors).toEqual({});
+    expect(r.data).toEqual({ email: 'ANA@x.com', password: 'qualquer' });
+    expect(r.values).toEqual({ email: 'ANA@x.com', next: '/grupos' });
+  });
+
+  it('campos vazios, arrays e senha só de espaços', () => {
+    expect(parseLogin({}).errors).toEqual({
+      email: 'Informe seu e-mail.',
+      senha: 'Informe sua senha.',
+    });
+    expect(parseLogin({ email: ['a'], senha: { x: 1 } }).data).toBeNull();
+    expect(parseLogin(undefined).data).toBeNull();
+    expect(parseLogin({ email: 'a@x.com', senha: '   ' }).errors).toEqual({});
   });
 });
