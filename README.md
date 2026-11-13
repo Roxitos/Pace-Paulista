@@ -16,8 +16,8 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 | **M2** Banco | Postgres, migrations e seed dos grupos demo | ✅ concluído |
 | **M3** Leitura | `/grupos` com filtros, detalhe, zonas, mapa e sobre; home lendo do banco | ✅ concluído |
 | **M4** Compatibilidade | `/encontrar` | ✅ concluído |
-| **M5** Contas | Criar conta, entrar e sair, sessão | em andamento |
-| **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | — |
+| **M5** Contas | Criar conta, entrar e sair, sessão | ✅ concluído |
+| **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | em andamento |
 | **M7** JS progressivo | Filtros ao vivo, modal, toast | — |
 | **M8** Produção | helmet/CSP, rate limit, deploy | — |
 | **M9** Conteúdo real | Grupos reais no lugar dos fictícios, mantidos atualizados | — |
