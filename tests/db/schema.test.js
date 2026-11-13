@@ -68,6 +68,10 @@ describe('CHECKs de groups', () => {
     await expect(insertGroup({ pace_min_s: '330.5' })).rejects.toMatchObject({ code: '22P02' });
   });
 
+  it('recusa start_time 24:00 pelo CHECK da migration 006', async () => {
+    await expect(insertGroup({ start_time: '24:00' })).rejects.toMatchObject({ code: '23514' });
+  });
+
   it('recusa start_time 25:00 pelo tipo', async () => {
     await expect(insertGroup({ start_time: '25:00' })).rejects.toMatchObject({ code: '22008' });
   });

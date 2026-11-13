@@ -35,6 +35,11 @@ a.map-item{text-decoration:none}
 #matchResults{scroll-margin-top:84px}
 /* Nome do grupo (até 50) sem espaço não pode abrir scroll horizontal em 360 px. */
 .match h3{overflow-wrap:anywhere}
+/* Cadastro (spec 013): nome de 50 chars sem espaço no card da busca e na tela de sucesso não pode abrir scroll horizontal em 360 px.
+   O card é item de grid (min-width:auto alargaria a coluna); .success centraliza filhos pelo min-content. */
+.card{min-width:0}
+.card h3,.success{overflow-wrap:anywhere}
+.success{min-width:0}
 
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{

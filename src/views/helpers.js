@@ -44,6 +44,7 @@ export function ic(name, cls = '') {
 
 export function currentNav(path) {
   if (path === '/') return 'inicio';
+  if (path === '/grupos/novo') return '';
   if (path === '/grupos' || path.startsWith('/grupos/')) return 'grupos';
   if (path === '/zonas') return 'zonas';
   if (path === '/sobre') return 'sobre';

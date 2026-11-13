@@ -4,7 +4,7 @@
   const hora = fmtHora(group.start_time);
   const dias = fmtDiasLongo(group.days);
   const slugUrl = encodeURIComponent(group.slug);
-  const headTag = group.is_demo ? 'Grupo fictício · demonstração' : group.owner_name && `Cadastrado por ${group.owner_name}`;
+  const headTag = group.is_demo ? 'Grupo fictício · demonstração' : locals.isOwner ? 'Cadastrado por você' : group.owner_name && `Cadastrado por ${group.owner_name}`;
 -%>
 <section class="detail-head" style="<%= zstyle(group.zone) %>"><div class="wrap">
     <a class="back" href="/grupos"><%- ic('back', 'ico-sm') %> Voltar para os grupos</a>

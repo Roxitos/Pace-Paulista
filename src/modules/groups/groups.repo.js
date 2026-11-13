@@ -22,6 +22,7 @@ const SELECT_PUBLISHED = `
          g.contact,
          g.is_demo,
          u.display_name AS owner_name,
+         g.owner_id::text AS owner_id,
          g.map_pin
     FROM groups g
     LEFT JOIN users u ON u.id = g.owner_id
@@ -86,4 +87,50 @@ export async function listPublishedByCreation() {
   const { rows } = await pool.query(`${selectPublished("g.status = 'published'")}
    ORDER BY g.id`);
   return rows;
+}
+
+// citext: sem diferença de caixa. Considera todos os status, pois o UNIQUE do banco também.
+export async function nameExists(name) {
+  const { rows } = await pool.query(
+    'SELECT EXISTS (SELECT 1 FROM groups WHERE name = $1) AS found',
+    [name],
+  );
+  return rows[0].found;
+}
+
+export async function findSlugsLike(base) {
+  const { rows } = await pool.query(
+    "SELECT slug FROM groups WHERE slug = $1 OR slug LIKE $2 ESCAPE '\\'",
+    [base, `${base}-%`],
+  );
+  return rows.map((r) => r.slug);
+}
+
+// Não captura erro: o service trata 23505. status e profile_tags saem do DEFAULT do banco.
+export async function insertGroup(data, ownerId, slug) {
+  const { rows } = await pool.query(
+    `INSERT INTO groups (slug, name, zone, location, meeting_point, days, start_time,
+                         pace_min_s, pace_max_s, distance, level, base_participants,
+                         description, contact, is_demo, owner_id)
+     VALUES ($1, $2, $3, $4, $5, $6::text[], $7::time, $8, $9, $10, $11, $12, $13, $14, false, $15)
+     RETURNING slug`,
+    [
+      slug,
+      data.name,
+      data.zone,
+      data.location,
+      data.meetingPoint,
+      data.days,
+      data.startTime,
+      data.paceMinS,
+      data.paceMaxS,
+      data.distance,
+      data.level,
+      data.baseParticipants,
+      data.description,
+      data.contact,
+      ownerId,
+    ],
+  );
+  return rows[0];
 }

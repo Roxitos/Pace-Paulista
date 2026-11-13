@@ -75,16 +75,16 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] P4/P8 textos de conta aprovados; P11 "Tem certeza que deseja excluir?" com grupos publicados; P2 página própria de CSRF. — specs 009/010/011/012
 
 ## M6 — Escrita
-- [ ] zod no cadastro de grupo (`parsePace`, dias, horário) e `slug()` com geração/validação. (002; movido do M4 pela spec 008)
-- [ ] Tratar `23505`/`23514` e usar `tx()` em escritas múltiplas (movido do M3). (001, 004)
-- [ ] `start_time = '24:00'` é aceito pelo Postgres e derruba `/` (e `/grupos`) via `fmtHora`: migration nova `CHECK (start_time < '24:00')` + zod `([01]\d|2[0-3]):[0-5]\d`. Corrige o item do M2 "CHECKs garantem start_time". (004, Hardener)
+- [x] zod no cadastro de grupo (`parsePace`, dias, horário) e `slug()` com geração/validação. (002; movido do M4 pela spec 008) — spec 013: validação em `groups.schemas.js` (à mão, sem zod — ver risco abaixo); `slug()` com sufixo `-2`, `-3`…
+- [x] Tratar `23505`/`23514` e usar `tx()` em escritas múltiplas (movido do M3). (001, 004) — spec 013: `23505` (nome e slug) tratado no cadastro de grupo; `23514` não dispara (validação antes). `tx()` segue para escritas múltiplas futuras
+- [x] `start_time = '24:00'` é aceito pelo Postgres e derruba `/` (e `/grupos`) via `fmtHora`: migration nova `CHECK (start_time < '24:00')` + zod `([01]\d|2[0-3]):[0-5]\d`. Corrige o item do M2 "CHECKs garantem start_time". (004, Hardener) — spec 013: migration 006 + validação `HH:MM` (0–23)
 - [ ] Zod: deduplicar `days` ("Sáb, Sáb"); `.trim()` em `name`/`location`/`contact`/`apelido` antes do tamanho. (004, Hardener) — no `/encontrar`, `days = {seg,seg}` viraria "Treina segunda e segunda". (008, Hardener)
 - [ ] Normalizar para NFC também na escrita (`name`, `location`): a busca normaliza a entrada, mas um nome gravado em NFD não seria achado. (005, Hardener)
-- [ ] `start_time = '24:00'` também derruba `/grupos` (cai em `periodo=noite` e em `fmtHora`), com ou sem filtro — mesma correção do item acima. (005, Hardener)
-- [ ] Registrar `/grupos/novo` antes de `/grupos/:slug`; reservar slugs `novo` e `zona`. (004, Specifier) — hoje `/grupos/novo` e `/grupos/zona` dão o 404 com a mensagem do grupo. (006)
-- [ ] `start_time = '24:00'` também derruba `/grupos/:slug` (`proximos`/`fmtHora`) — mesma correção dos itens acima. (006, Hardener) — e `/mapa/<slug>` desse grupo (e `/mapa` se ele for o 1º da lista) responde 500 pelo `fmtHora` do painel. (007, Hardener) — e `/encontrar` (`fmtHora` do card sempre; `periodoDe` do `calcMatch` quando há período). (008, Hardener)
+- [x] `start_time = '24:00'` também derruba `/grupos` (cai em `periodo=noite` e em `fmtHora`), com ou sem filtro — mesma correção do item acima. (005, Hardener) — spec 013 (migration 006)
+- [x] Registrar `/grupos/novo` antes de `/grupos/:slug`; reservar slugs `novo` e `zona`. (004, Specifier) — hoje `/grupos/novo` e `/grupos/zona` dão o 404 com a mensagem do grupo. (006) — spec 013: rota registrada antes de `/:slug`
+- [x] `start_time = '24:00'` também derruba `/grupos/:slug` (`proximos`/`fmtHora`) — mesma correção dos itens acima. (006, Hardener) — e `/mapa/<slug>` desse grupo (e `/mapa` se ele for o 1º da lista) responde 500 pelo `fmtHora` do painel. (007, Hardener) — e `/encontrar` (`fmtHora` do card sempre; `periodoDe` do `calcMatch` quando há período). (008, Hardener) — spec 013 (migration 006)
 - [ ] `groups.map_pin` sem CHECK: a view já ignora coordenadas fora do viewBox (0–400 × 0–380); se o pin passar a ser editável, criar migration com CHECK. (007, Hardener)
-- [ ] Cards de `/grupos` com nome de 50 caracteres sem espaço abrem scroll horizontal a 360 px (já na HEAD da 005): `overflow-wrap` no card ou limite no zod. (006, QA)
+- [x] Cards de `/grupos` com nome de 50 caracteres sem espaço abrem scroll horizontal a 360 px (já na HEAD da 005): `overflow-wrap` no card ou limite no zod. (006, QA) — spec 013, CA12: `overflow-wrap:anywhere` + `min-width:0` (QA aprovado, volta 2)
 
 ## M7 — Melhorias de JS
 - [ ] Testar em aparelho real (iPhone) o campo de pace com `inputmode="numeric"` (literal do protótipo): o teclado numérico pode não ter `:`, impedindo digitar "5:30". Vale para `/encontrar` (spec 008, P5) e para o cadastro do M6. (008)
@@ -121,6 +121,7 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - [ ] **Moderação** usando a coluna `status` já existente + página `/admin` (ver pergunta de produto).
 
 ## Riscos aceitos
+- (spec 013, Hardener) `groups.schemas.js` valida à mão, sem zod (AGENTS/spec pedem zod): conformidade, não segurança. Sem rate limit em `POST /grupos` (M8/moderação). `display_name` da conta aceita caracteres invisíveis (aparece em "Cadastrado por …"). Homóglifos e nomes que diferem só no acento são aceitos (slug ganha `-2`). Conta excluída entre carregar o usuário e o INSERT dá FK `23503` → 500 (corrida improvável). `/api/grupos` (M7) deve remover `owner_id` junto com `contact`. `inputmode` do pace do cadastro: testar em iPhone (M7). (013)
 - `npm audit`: 4 moderados (GHSA-g3hv-75wg-m249, minimatch via eslint 10), só devDependencies; `--omit=dev` = 0. Reavaliar quando sair eslint 10.x corrigido. (001)
 - `throw null` / `next(null)` → Express trata como "sem erro" e responde 404. (001)
 - `.prettierignore` com `*.md` e `.claude/` além da spec. (001)
