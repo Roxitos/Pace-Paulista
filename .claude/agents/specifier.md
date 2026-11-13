@@ -39,6 +39,7 @@ Tabela campo → regra → mensagem exata em pt-BR.
 (sempre incluir: funciona sem JS; responsivo em 360 px; nada de SQL fora de *.repo.js)
 
 ## Testes esperados
+(Liste poucos casos representativos por critério: sem tabelas de combinações nem testes redundantes; ver docs/CONVENTIONS.md.)
 - unit: …
 - http (supertest): …
 

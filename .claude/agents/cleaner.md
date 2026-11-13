@@ -17,7 +17,7 @@ Só os arquivos alterados na tarefa atual (`git diff main...HEAD --name-only`, o
 - **Funções**: curtas, um propósito, sem flags booleanas confusas.
 - **Comentários**: só o *porquê*. Remova comentários que repetem o código; mantenha os que explicam decisão, regra de negócio ou armadilha (ex.: fuso horário).
 - **Código morto**, `console.log` esquecido, imports sem uso.
-- **Testes**: legíveis, nomes em pt-BR descrevendo o comportamento, sem duplicação de setup.
+- **Testes**: remova os redundantes (mesmo comportamento já provado por outro teste, combinações em excesso) mantendo os casos representativos e a cobertura dos critérios de aceite; legíveis, nomes em pt-BR descrevendo o comportamento, sem duplicação de setup.
 
 ## Regras
 - Não altere textos de UI, mensagens de erro, rotas, SQL de schema ou comportamento observável.
