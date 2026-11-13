@@ -6,13 +6,13 @@ import { currentUser } from './middlewares/currentUser.js';
 import { csrfLocals, csrfProtection } from './middlewares/csrf.js';
 import { pool } from './db/pool.js';
 import { env } from './config/env.js';
-import { accountRouter } from './modules/account/account.routes.js';
 import { locals } from './middlewares/locals.js';
 import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { pagesRouter } from './modules/pages/pages.routes.js';
 import { groupsRouter } from './modules/groups/groups.routes.js';
 import { matchingRouter } from './modules/matching/matching.routes.js';
+import { accountRouter } from './modules/account/account.routes.js';
 import { ic, seal, zstyle } from './views/helpers.js';
 import {
   DIA_ORDEM,

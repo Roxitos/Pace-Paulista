@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool.js';
+import { requireAuth } from '../../src/middlewares/requireAuth.js';
 import { createTestApp, getCsrf } from '../helpers/auth.js';
 import { insertUser, migrateTestDb, seedDemo, truncateAll } from '../helpers/db.js';
 
@@ -63,6 +64,12 @@ describe('requireAuth', () => {
     expect(res.headers.location).toBe('/conta/entrar?next=%2Fmeus');
     const res2 = await request(app).get('/meus?x=1');
     expect(res2.headers.location).toBe('/conta/entrar?next=%2Fmeus%3Fx%3D1');
+  });
+
+  it('POST protegido sem sessão redireciona sem next (CA3)', () => {
+    const redirects = [];
+    requireAuth({ method: 'POST' }, { redirect: (...a) => redirects.push(a) }, () => {});
+    expect(redirects).toEqual([[303, '/conta/entrar']]);
   });
 });
 
@@ -136,13 +143,6 @@ describe('CSRF', () => {
       .type('form')
       .send({});
     expect(res.text).toContain('href="/grupos?zona=sul"');
-  });
-
-  it('POST protegido sem sessão redireciona sem next (CA3)', async () => {
-    const { requireAuth } = await import('../../src/middlewares/requireAuth.js');
-    const redirects = [];
-    requireAuth({ method: 'POST' }, { redirect: (...a) => redirects.push(a) }, () => {});
-    expect(redirects).toEqual([[303, '/conta/entrar']]);
   });
 });
 
