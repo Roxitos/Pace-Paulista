@@ -1,0 +1,26 @@
+<%- include('../partials/page-head', {
+  kicker: 'Conta',
+  title: 'Criar conta',
+  text: 'Crie sua conta para entrar em grupos e cadastrar o seu.',
+}) %>
+<%
+  // Sem JS não há o focus() do showErrors: o autofocus vai no 1º campo com erro.
+  const firstError = Object.keys(errors)[0];
+  const af = (key) => (firstError === key ? ' autofocus' : '');
+  const inv = (key) => (errors[key] ? ' aria-invalid="true"' : '');
+  const err = (key) => (errors[key] ? ic('alert', 'ico-sm') : '');
+  const entrarHref = '/conta/entrar' + (values.next ? '?next=' + encodeURIComponent(values.next) : '');
+-%>
+  <div class="wrap"><div class="form-layout">
+    <form class="form" method="post" action="/conta/criar" novalidate>
+      <%- include('../partials/csrf') %>
+      <% if (values.next) { %><input type="hidden" name="next" value="<%= values.next %>"><% } %>
+      <div id="signupAlert"><% if (rateLimited) { %><div class="form-alert bad" role="alert"><%- ic('alert') %><span>Muitas tentativas. Espere alguns minutos e tente de novo.</span></div><% } else if (firstError) { %><%- include('../partials/form-errors', { count: Object.keys(errors).length }) %><% } %></div>
+      <div class="field"><label for="a-nome">Nome de exibição *</label><input class="input" id="a-nome" name="nome" maxlength="40" autocomplete="nickname" aria-describedby="h-anome e-anome" value="<%= values.nome %>"<%- inv('nome') %><%- af('nome') %>><span class="hint" id="h-anome">Aparece como “Cadastrado por …” nos grupos que você cadastrar.</span><span class="err" id="e-anome"><%- err('nome') %><%= errors.nome ?? '' %></span></div>
+      <div class="field"><label for="a-email">E-mail *</label><input class="input" id="a-email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" aria-describedby="e-aemail" value="<%= values.email %>"<%- inv('email') %><%- af('email') %>><span class="err" id="e-aemail"><%- err('email') %><%= errors.email ?? '' %></span></div>
+      <div class="field"><label for="a-senha">Senha *</label><input class="input" id="a-senha" name="senha" type="password" maxlength="72" autocomplete="new-password" aria-describedby="h-asenha e-asenha"<%- inv('senha') %><%- af('senha') %>><span class="hint" id="h-asenha">De 8 a 72 caracteres, com pelo menos 1 caractere especial (ex.: ! @ # $ %).</span><span class="err" id="e-asenha"><%- err('senha') %><%= errors.senha ?? '' %></span></div>
+      <button class="btn btn-primary btn-lg" type="submit">Criar conta</button>
+      <p>Já tem conta? <a href="<%= entrarHref %>">Entrar</a></p>
+    </form>
+    <aside class="side-note"><h3>O que guardamos</h3><ul><li>Seu e-mail e sua senha (guardada de forma protegida), só para você entrar.</li><li>Seu nome de exibição, que fica público nos grupos que você cadastrar.</li><li>O apelido que você escolher em cada grupo em que entrar.</li><li>Você pode excluir sua conta quando quiser, em Meus grupos.</li></ul></aside>
+  </div></div>

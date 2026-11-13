@@ -12,7 +12,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { pagesRouter } from './modules/pages/pages.routes.js';
 import { groupsRouter } from './modules/groups/groups.routes.js';
 import { matchingRouter } from './modules/matching/matching.routes.js';
-import { accountRouter } from './modules/account/account.routes.js';
+import { createAccountRouter } from './modules/account/account.routes.js';
 import { ic, seal, zstyle } from './views/helpers.js';
 import {
   DIA_ORDEM,
@@ -71,7 +71,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
   app.use(pagesRouter);
   app.use(groupsRouter);
   app.use(matchingRouter);
-  app.use(accountRouter);
+  app.use(createAccountRouter());
   if (beforeErrorHandlers) beforeErrorHandlers(app);
 
   app.use(notFound);
