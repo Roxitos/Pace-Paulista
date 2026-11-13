@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { safeNext } from '../../domain/redirect.js';
 
 const MSG = {
@@ -16,24 +17,28 @@ function text(value) {
   return typeof v === 'string' ? v : '';
 }
 
-function validateNome(nome) {
-  // Code points, como o char_length do CHECK do banco.
-  const len = [...nome].length;
-  if (len < 2) return MSG.nameTooShort;
-  if (len > 40) return MSG.nameTooLong;
-  return null;
-}
+// Roda sobre os valores já normalizados (trim/NFC). Tamanhos em code points, como o char_length do banco.
+const signupSchema = z.object({
+  nome: z
+    .string()
+    .refine((s) => [...s].length >= 2, { error: MSG.nameTooShort, abort: true })
+    .refine((s) => [...s].length <= 40, { error: MSG.nameTooLong }),
+  email: z.string().refine((s) => s.length <= 254 && EMAIL_RE.test(s), { error: MSG.email }),
+  senha: z
+    .string()
+    // O bcrypt só usa os 72 primeiros bytes: acima disso senhas diferentes colidiriam.
+    .refine(
+      (s) => [...s].length >= 8 && [...s].length <= 72 && Buffer.byteLength(s, 'utf8') <= 72,
+      {
+        error: MSG.passwordLength,
+        abort: true,
+      },
+    )
+    .refine((s) => ESPECIAL_RE.test(s), { error: MSG.passwordSpecial }),
+});
 
-function validateEmail(email) {
-  return email.length <= 254 && EMAIL_RE.test(email) ? null : MSG.email;
-}
-
-function validateSenha(senha) {
-  // O bcrypt só usa os 72 primeiros bytes: acima disso senhas diferentes colidiriam.
-  const len = [...senha].length;
-  if (len < 8 || len > 72 || Buffer.byteLength(senha, 'utf8') > 72) return MSG.passwordLength;
-  return ESPECIAL_RE.test(senha) ? null : MSG.passwordSpecial;
-}
+// Ordem de inserção dos erros = ordem dos campos no form (o 1º recebe o foco).
+const ERROR_ORDER = ['nome', 'email', 'senha'];
 
 /**
  * Normaliza o body do POST /conta/criar e valida. Nunca lança.
@@ -47,14 +52,15 @@ export function parseSignup(body) {
   const senha = text(src.senha);
   const next = safeNext(text(src.next), '');
 
+  const result = signupSchema.safeParse({ nome, email, senha });
   const errors = {};
-  const checks = [
-    ['nome', validateNome(nome)],
-    ['email', validateEmail(email)],
-    ['senha', validateSenha(senha)],
-  ];
-  for (const [key, msg] of checks) if (msg) errors[key] = msg;
+  if (!result.success) {
+    for (const key of ERROR_ORDER) {
+      const issue = result.error.issues.find((i) => i.path[0] === key);
+      if (issue) errors[key] = issue.message;
+    }
+  }
 
-  const data = Object.keys(errors).length ? null : { displayName: nome, email, password: senha };
+  const data = result.success ? { displayName: nome, email, password: senha } : null;
   return { values: { nome, email, next }, errors, data };
 }
