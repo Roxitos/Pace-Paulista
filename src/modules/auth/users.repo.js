@@ -18,6 +18,12 @@ export async function create({ email, passwordHash, displayName }) {
   return rows[0];
 }
 
+// As FKs fazem o resto: memberships em cascata, groups.owner_id vira NULL.
+export async function deleteById(id) {
+  const { rowCount } = await pool.query('DELETE FROM users WHERE id = $1', [id]);
+  return rowCount > 0;
+}
+
 // Único SELECT que lê password_hash. E-mail é citext: a comparação ignora a caixa.
 export async function findCredentialsByEmail(email) {
   const { rows } = await pool.query('SELECT id, password_hash FROM users WHERE email = $1', [

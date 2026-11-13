@@ -8,7 +8,12 @@ export const pagesRouter = Router();
 const MAP_TITLE = 'Mapa e rotas · Pace Paulista';
 
 pagesRouter.get('/', async (req, res) => {
-  await res.renderPage('home', { title: 'Pace Paulista', ...(await loadHomeData()) });
+  await res.renderPage('home', {
+    title: 'Pace Paulista',
+    // Quem acabou de excluir está deslogado; logado, o aviso só viria de um link forjado.
+    accountDeleted: req.query.conta === 'excluida' && !req.user,
+    ...(await loadHomeData()),
+  });
 });
 
 pagesRouter.get('/zonas', async (req, res) => {

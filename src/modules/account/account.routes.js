@@ -13,6 +13,16 @@ const LOGIN_TITLE = 'Entrar · Pace Paulista';
 const LOGIN_FAIL = 'E-mail ou senha incorretos.';
 const RATE_LIMIT_MSG = 'Muitas tentativas. Espere alguns minutos e tente de novo.';
 
+// Destrói a sessão e expira o cookie. Mesmas opções do cookie de sessão (sem maxAge),
+// senão o navegador não o expira.
+const endSession = (req, res, next, to) =>
+  req.session.destroy((err) => {
+    if (err) return next(err);
+    const { httpOnly, sameSite, secure } = sessionCookieOptions(env);
+    res.clearCookie('pp.sid', { path: '/', httpOnly, sameSite, secure });
+    res.redirect(303, to);
+  });
+
 // Criado por router (e não no módulo) para cada app de teste ter a própria memória.
 export function createAccountRouter() {
   const router = Router();
@@ -53,7 +63,10 @@ export function createAccountRouter() {
   });
 
   router.get('/meus', requireAuth, async (req, res) => {
-    await res.renderPage('meus', { title: 'Meus grupos · Pace Paulista' });
+    await res.renderPage('meus', {
+      title: 'Meus grupos · Pace Paulista',
+      confirmDelete: req.query.excluir === '1',
+    });
   });
 
   router.get('/conta/criar', redirectIfAuthenticated, async (req, res) => {
@@ -100,14 +113,12 @@ export function createAccountRouter() {
     });
   });
 
-  router.post('/conta/sair', requireAuth, (req, res, next) => {
-    req.session.destroy((err) => {
-      if (err) return next(err);
-      // Mesmas opções do cookie de sessão (sem maxAge), senão o navegador não o expira.
-      const { httpOnly, sameSite, secure } = sessionCookieOptions(env);
-      res.clearCookie('pp.sid', { path: '/', httpOnly, sameSite, secure });
-      res.redirect(303, '/');
-    });
+  router.post('/conta/sair', requireAuth, (req, res, next) => endSession(req, res, next, '/'));
+
+  // Sem flash: a sessão acaba de morrer, então o aviso viaja na query da home.
+  router.post('/conta/excluir', requireAuth, async (req, res, next) => {
+    await authService.deleteAccount(req.user.id);
+    endSession(req, res, next, '/?conta=excluida');
   });
 
   return router;

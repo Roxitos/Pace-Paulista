@@ -54,7 +54,9 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] `?next=` só caminhos internos (`/…`, nunca `//…`): `safeNext` em `domain/redirect.js` — spec 009. A home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
 - [x] Rate limit em `/conta/entrar` e `/conta/criar`. (001) — `/conta/criar` feito na spec 010 (10/15 min por IP, QA aprovado); `/conta/entrar` feito na spec 011 (10/15 min por IP+e-mail, chave normalizada; QA aprovado).
 - [x] Ao montar body-parser (spec 009: `limit: 16kb`): `limit` explícito em `express.urlencoded` (o `errorHandler` já trata 400/413). (001)
-- [ ] Excluir conta: cascata e sessão destruída. (001)
+- [x] Excluir conta: cascata e sessão destruída. (001; resolvido na spec 012)
+- [ ] Riscos aceitos da spec 012: helmet/`frame-ancestors` e `style` inline do 2º passo da exclusão dependem da CSP do M8; sem reautenticação por senha (P13); sessões de outros aparelhos ficam até 30 dias na tabela `session` sem efeito. (012, Hardener)
+- [ ] Senha exige caractere especial, mas o AGENTS §6 pede só mínimo de 8 caracteres: alinhar regra e hint do form. (012, QA)
 - [x] (spec 009: `grupo-detalhe.ejs` + CA5) Mostrar o contato do grupo só para logado (P4). (004) — a 006 já deixou pronto: a sessão só precisa preencher `res.locals.user`; o QA do M5 repete o CA4 da 006 com sessão real. (006)
 - [x] (spec 009: `currentUser.js` e `csrf.js` enviam `private, no-store`) Página do grupo com contato para logado: responder com `Cache-Control: private` (ou `Vary: Cookie`) para um CDN/proxy não servir a versão com contato a deslogado. (006, Hardener)
 - [x] `.trim()` no zod antes de `min()` em `display_name` (só espaços passa no CHECK). (004, Hardener) — spec 010

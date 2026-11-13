@@ -27,6 +27,10 @@ export async function signup({ email, password, displayName }) {
   }
 }
 
+export async function deleteAccount(userId) {
+  return usersRepo.deleteById(userId);
+}
+
 export async function login({ email, password }) {
   if (password.length > MAX_LOGIN_PASSWORD) return null;
   const creds = await usersRepo.findCredentialsByEmail(email);

@@ -45,4 +45,25 @@ describe('fluxo da conta (M5)', () => {
     await form('/conta/sair', { _csrf: csrf }).expect(303);
     expect((await pagina()).text).not.toContain('Contato');
   });
+
+  it('entrar, excluir a conta e não conseguir mais entrar (CA7)', async () => {
+    const agent = request.agent(createTestApp());
+    const form = (path, body) => agent.post(path).type('form').send(body);
+    const dados = { nome: 'Ana', email: 'ana@x.com', senha: 'abcdefg!' };
+
+    let csrf = await getCsrf(agent, '/conta/criar');
+    await form('/conta/criar', { _csrf: csrf, ...dados }).expect(303);
+    csrf = await getCsrf(agent, '/meus');
+    await form('/conta/sair', { _csrf: csrf }).expect(303);
+    csrf = await getCsrf(agent, '/conta/entrar');
+    await form('/conta/entrar', { _csrf: csrf, ...dados }).expect(303);
+
+    csrf = await getCsrf(agent, '/meus?excluir=1');
+    await form('/conta/excluir', { _csrf: csrf })
+      .expect(303)
+      .expect('Location', '/?conta=excluida');
+
+    csrf = await getCsrf(agent, '/conta/entrar');
+    await form('/conta/entrar', { _csrf: csrf, ...dados }).expect(401);
+  });
 });

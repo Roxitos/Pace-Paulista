@@ -8,6 +8,8 @@
 .ztog:has(input:checked)::before{background:currentColor}
 .ztog:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
 a.achip{text-decoration:none}
+/* Aviso no topo da home depois de excluir a conta (spec 012). */
+.notice-top{padding-top:16px}
 /* Sem JS, o link "Filtros" aponta para #filters e o :target mostra o painel. */
 @media (max-width:900px){ .filters:target{display:grid} }
 /* Ao rolar até #filters, o topo do painel para abaixo do cabeçalho fixo (68px + 3px de borda) com folga.
