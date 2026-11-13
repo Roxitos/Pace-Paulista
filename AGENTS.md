@@ -104,14 +104,19 @@ pace-paulista/
 │   │   ├── match.js          ← calcMatch (algoritmo de compatibilidade)
 │   │   └── slug.js
 │   ├── modules/
+│   │   ├── account/          ← account.routes.js (páginas de conta: /conta/entrar, /conta/criar; spec 010+)
 │   │   ├── auth/             ← auth.routes.js, auth.service.js, users.repo.js, auth.schemas.js
 │   │   ├── groups/           ← groups.routes.js, groups.service.js, groups.repo.js, groups.schemas.js
 │   │   ├── memberships/      ← memberships.routes.js, memberships.service.js, memberships.repo.js
 │   │   ├── matching/         ← matching.routes.js, matching.service.js, matching.schemas.js (usa domain/match.js)
 │   │   └── pages/            ← pages.routes.js (home, zonas, mapa, sobre)
 │   ├── middlewares/
-│   │   ├── locals.js         ← res.locals.user, csrfToken, currentPath, flash, helpers de view
+│   │   ├── locals.js         ← res.locals.currentPath, flash, helpers de view
+│   │   ├── session.js        ← express-session + connect-pg-simple
+│   │   ├── csrf.js           ← csrf-sync; res.locals.csrfToken() (marca a resposta Cache-Control: private, no-store)
+│   │   ├── currentUser.js    ← res.locals.user a partir da sessão (sem password_hash)
 │   │   ├── requireAuth.js    ← redireciona p/ /conta/entrar?next=...
+│   │   ├── redirectIfAuthenticated.js ← páginas "só deslogado"
 │   │   ├── notFound.js
 │   │   └── errorHandler.js
 │   └── views/

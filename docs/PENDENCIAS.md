@@ -61,6 +61,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] `connect-pg-simple` com `createTableIfMissing: false` (tabela vem da migration 005). (003)
 - [ ] `SESSION_SECRET=` vazio é aceito em dev/test; conferir quando o `express-session` entrar. (003)
 
+- [ ] **Para a 011**: se o header ganhar form "Sair" com `csrfToken()`, a página de erro quebra quando o próprio middleware de sessão falha (ex.: banco fora com cookie presente): `csrfLocals` não roda e a resposta vira o texto "Erro interno.". O `errorHandler` precisa tratar. (009, Hardener)
+
 - [ ] **Pós-M5 (spec própria)** — E-mail de boas-vindas ao criar conta, com visual do site (HTML com CSS inline). Envio por SMTP/API de provedor configurável por env (`SMTP_*` ou chave da API), falha de envio não pode impedir o cadastro. Exige dependência nova justificada (ex.: `nodemailer`), atualizar AGENTS §1 (hoje "notificações/e-mail" é fora do escopo) e revisar LGPD (e-mail usado também para mensagem, não só login). Provedor ainda a escolher. (usuário, 2026-11-13)
 - [x] P4/P8 textos de conta aprovados; P11 "Tem certeza que deseja excluir?" com grupos publicados; P2 página própria de CSRF. — specs 009/010/011/012
 
@@ -85,6 +87,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Acessibilidade do mapa (vêm do protótipo): foco de teclado discreto nos pins não selecionados (anel `r=0`, só o ponto cresce) e alvo de toque de ~9 px a 360 px (WCAG 2.5.8 pede 24 px). (007, QA)
 
 ## M8 — Produção
+- [ ] `app.set('trust proxy', 1)` junto com o cookie `secure`: sem isso, atrás do proxy do Render/Railway o cookie não é enviado. Decidir antes do rate limit por IP da 010/011 (valor errado deixa o IP ser falsificado via `X-Forwarded-For`). (009, Hardener)
 - [ ] helmet + CSP (`self`, fonts.googleapis.com, fonts.gstatic.com). `style="--z:…"`, `style="font-size:14px"` e o `extra` do 404/500 exigem `style-src-attr 'unsafe-inline'` ou classes CSS. (001, 002)
 - [ ] Não publicar antes de M3/M5: links da home levam a 404. (002) — `/encontrar` deixou de ser um deles (spec 008); "Entrar no grupo" dos cards de `/encontrar` leva a `/conta/entrar` (404 até o M5). (008, QA)
 - [x] Seed dos grupos demo **não roda** com `NODE_ENV=production` (ou demos removidos/despublicados antes de abrir o site). O aviso "Versão de demonstração" some sozinho quando não houver demo publicado (`hasDemo`). (conteúdo) — spec 003, CA6
@@ -136,3 +139,7 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - Com mais de 1000 pares na query, o excedente é descartado e respostas podem "sumir" (422 ou form vazio), como na `/grupos`. (008, Hardener)
 - `tests/domain/match-prototipo.test.js` usa grade reduzida (subconjuntos de dias de tamanho 1, 2 e 7) por tempo; a grade completa foi rodada uma vez pelo QA da 008 (0 divergências). (008)
 - Com erro de validação, `/encontrar` responde 422 mesmo com o banco fora (não consulta). (008, Coder)
+- POST em rota inexistente sem token CSRF responde 403 "Sessão expirada"; com token válido, 404. CSRF fica antes das rotas de propósito: nenhum POST futuro fica sem proteção por esquecimento. (009, Hardener)
+- csrf-sync compara o token com `===` (sem tempo constante); risco baixo, token de 128 bytes aleatórios por sessão. (009, Hardener)
+- `isPgError` ("code" de 5 caracteres) também casa erros do Node (EPIPE, EPERM): só deixa o log menos detalhado. (009, Hardener)
+- Página pública anônima pode ir para cache sem `Vary: Cookie`; um logado pode receber a versão sem contato (funcional, não segurança). (009, Hardener)
