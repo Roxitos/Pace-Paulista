@@ -48,7 +48,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] `/encontrar` com `calcMatch` no servidor e mesmos resultados do protótipo para as mesmas respostas. — spec 008, CA1: QA comparou 6.183.630 combinações com o código extraído do protótipo, 0 divergências. **M4 concluído.**
 
 ## M5 — Contas
-- [ ] **M5 (specs 009–012, aguardando OK para o Coder)** — respostas do usuário e perguntas abertas em `docs/reports/009-sessao-csrf-requireauth.md`: abertas **P4/P8** (textos de criar conta, entrar e sair) e **P11** (texto da confirmação de exclusão); **P2** pede ajustar a spec 009 (mensagem "Sua sessão expirou…" + botão "Atualizar e tentar de novo"). Exclusão de conta passa do M6 para o M5 (atualizar `MILESTONES.md`).
+- [x] **M5 concluído (specs 009–012, QA aprovado)** — — respostas do usuário e perguntas abertas em `docs/reports/009-sessao-csrf-requireauth.md`: abertas **P4/P8** (textos de criar conta, entrar e sair) e **P11** (texto da confirmação de exclusão); **P2** pede ajustar a spec 009 (mensagem "Sua sessão expirou…" + botão "Atualizar e tentar de novo"). Exclusão de conta passa do M6 para o M5 (atualizar `MILESTONES.md`).
 - [x] CSRF, sessão, cookies (`httpOnly`, `sameSite=lax`, `secure`) e `requireAuth` — spec 009 (QA aprovado).
 - [x] `req.session.regenerate()` no login e no cadastro — specs 010/011. (001) — cadastro (010) e login (011) feitos, QA aprovado.
 - [x] `?next=` só caminhos internos (`/…`, nunca `//…`): `safeNext` em `domain/redirect.js` — spec 009. A home já gera `/conta/entrar?next=/grupos/<slug>%23participar`. (001, 002)
