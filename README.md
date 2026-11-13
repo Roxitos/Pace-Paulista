@@ -98,19 +98,6 @@ docs/                    convenções, protótipo, marcos, pendências, specs, r
 AGENTS.md                fonte de verdade para agentes (.claude/CLAUDE.md importa)
 ```
 
-## Como o trabalho é feito
-
-Cada entrega passa por um pipeline de agentes de IA definidos em [`.claude/agents/`](.claude/agents):
-
-```
-Specifier → (OK humano) → Coder → Cleaner → Hardener → QA
-```
-
-- [`docs/specs/`](docs/specs): especificação de cada tarefa, com critérios de aceite.
-- [`docs/qa/`](docs/qa): veredito do QA, com a evidência de cada critério.
-- [`docs/reports/`](docs/reports): o que cada etapa fez.
-- [`docs/PENDENCIAS.md`](docs/PENDENCIAS.md): riscos, pendências e perguntas abertas, organizados por marco.
-
 Convenções de código, testes e git estão em [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md). Resumo:
 - código em inglês;
 - interface, mensagens, commits e comentários em português;
