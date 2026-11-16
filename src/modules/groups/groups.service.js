@@ -1,9 +1,10 @@
 import { env } from '../../config/env.js';
 import { activeChips, parseFilters } from '../../domain/filters.js';
-import { fmtEncontro, proximos } from '../../domain/schedule.js';
+import { fmtDataCurta, fmtDataLonga, fmtEncontro, proximos } from '../../domain/schedule.js';
 import { slugify, nextSlug } from '../../domain/slug.js';
 import { parseGroupForm } from './groups.schemas.js';
 import * as groupsRepo from './groups.repo.js';
+import * as membershipsRepo from '../memberships/memberships.repo.js';
 
 export function listPublishedGroups(filters) {
   return groupsRepo.listPublished(filters);
@@ -24,11 +25,23 @@ export async function getGroupDetail(slug, now, { viewer = null } = {}) {
   const found = await groupsRepo.findPublishedBySlug(slug);
   if (!found) return null;
   const group = viewer ? found : { ...found, contact: null };
-  const sessions = proximos(group, now, { timeZone: env.TZ_APP }).map((d) =>
-    fmtEncontro(d, env.TZ_APP),
-  );
+  const dates = proximos(group, now, { timeZone: env.TZ_APP });
+  const sessions = dates.map((d) => fmtEncontro(d, env.TZ_APP));
+  const nextSession = dates.length
+    ? { curta: fmtDataCurta(dates[0], env.TZ_APP), longa: fmtDataLonga(dates[0], env.TZ_APP) }
+    : null;
   const isOwner = Boolean(viewer) && group.owner_id === String(viewer.id);
-  return { group, sessions, isOwner };
+  const nickname = viewer ? await membershipsRepo.findNickname(viewer.id, slug) : null;
+  const membership = nickname === null ? null : { nickname };
+  return { group, sessions, isOwner, membership, nextSession };
+}
+
+export async function listMyGroups(userId) {
+  const [joined, mine] = await Promise.all([
+    groupsRepo.listJoinedBy(userId),
+    groupsRepo.listOwnedBy(userId),
+  ]);
+  return { joined, mine };
 }
 
 const NAME_TAKEN = 'Já existe um grupo com esse nome.';

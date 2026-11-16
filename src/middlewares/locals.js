@@ -17,7 +17,10 @@ export function locals(req, res, next) {
   res.locals.year = currentYear(env.TZ_APP);
 
   res.renderPage = async (view, pageLocals = {}) => {
-    const data = { ...res.locals, ...pageLocals };
+    // Só página renderizada consome o flash: redirects e POSTs não o perdem.
+    const flash = req.session?.flash ?? null;
+    if (flash) delete req.session.flash;
+    const data = { flash, ...res.locals, ...pageLocals };
     const body = await render(req.app, `pages/${view}`, data);
     const html = await render(req.app, 'layout', { ...data, body });
     res.type('html').send(html);

@@ -41,7 +41,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Sem JS, ≤ 900 px: "Filtros" rola até `#filters` e o título/"Limpar filtros" ficam ~70 px atrás do cabeçalho fixo (toque acerta `/meus`). (005, QA) — spec 005: `.filters{scroll-margin-top:84px}` (a safe-area já vem do `scroll-padding-top` do `html`), reverificado pelo QA
 - [ ] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005)
 - [x] Spec 007: `/sobre` mantém o título "Status do protótipo" (P10, usuário); banco ATIVO, login PENDENTE, item "navegador" removido. (004) — spec 007, CA7
-- [ ] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5 (feito na spec 011); compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6); login feito na spec 011. (008)
+- [x] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5 (feito na spec 011); compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6); login feito na spec 011. (008) — resolvida na spec 015: cadastro e entrada em grupos existem, texto do 1º ATIVO passa a valer.
 
 ## M4 — Compatibilidade
 - O item "zod no cadastro de grupo" que estava aqui é do cadastro (`POST /grupos`) e foi para o M6 (spec 008).
@@ -78,6 +78,8 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] zod no cadastro de grupo (`parsePace`, dias, horário) e `slug()` com geração/validação. (002; movido do M4 pela spec 008) — spec 013: validação em `groups.schemas.js` (à mão, sem zod — ver risco abaixo); `slug()` com sufixo `-2`, `-3`…
 - [x] Tratar `23505`/`23514` e usar `tx()` em escritas múltiplas (movido do M3). (001, 004) — spec 013: `23505` (nome e slug) tratado no cadastro de grupo; `23514` não dispara (validação antes). `tx()` segue para escritas múltiplas futuras
 - [x] `start_time = '24:00'` é aceito pelo Postgres e derruba `/` (e `/grupos`) via `fmtHora`: migration nova `CHECK (start_time < '24:00')` + zod `([01]\d|2[0-3]):[0-5]\d`. Corrige o item do M2 "CHECKs garantem start_time". (004, Hardener) — spec 013: migration 006 + validação `HH:MM` (0–23)
+- [x] Participar/sair de grupo: `POST /grupos/:slug/participar` e `/sair` com PRG, flash e painel sem JS. (AGENTS §5) — spec 014 (QA aprovado, volta 2; CA11: apelido de 40 caracteres sem espaço em 360 px corrigido com CSS)
+- [ ] Rate limit em `participar`/`sair`; quem já participa e envia o form inválido (aba antiga) recebe 422 sem erro visível; apelido só com caracteres invisíveis passa na validação; CA8 (sem próximo encontro) só por inspeção do template, sem teste com `nextSession: null`. (014, Hardener/QA)
 - [ ] Zod: deduplicar `days` ("Sáb, Sáb"); `.trim()` em `name`/`location`/`contact`/`apelido` antes do tamanho. (004, Hardener) — no `/encontrar`, `days = {seg,seg}` viraria "Treina segunda e segunda". (008, Hardener)
 - [ ] Normalizar para NFC também na escrita (`name`, `location`): a busca normaliza a entrada, mas um nome gravado em NFD não seria achado. (005, Hardener)
 - [x] `start_time = '24:00'` também derruba `/grupos` (cai em `periodo=noite` e em `fmtHora`), com ou sem filtro — mesma correção do item acima. (005, Hardener) — spec 013 (migration 006)
@@ -153,3 +155,5 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - `isPgError` ("code" de 5 caracteres) também casa erros do Node (EPIPE, EPERM): só deixa o log menos detalhado. (009, Hardener)
 - Página pública anônima pode ir para cache sem `Vary: Cookie`; um logado pode receber a versão sem contato (funcional, não segurança). (009, Hardener)
 - [ ] (spec 011, Hardener/QA) `trust proxy` também afeta o limite de `/conta/entrar` (global atrás de proxy, permite travar o login de uma vítima); limiter em memória por processo; chave IP+e-mail não segura credential stuffing nem ataque distribuído (decisão da spec); senha de exatamente 72 bytes aceita sufixo (bcrypt); `bcrypt.hashSync` no boot (~250 ms). Observação do QA: medição única de 375 px sem JS em `/conta/entrar` não reproduziu.
+- [ ] `/favicon.ico` devolve 404 (erro no console com JS ligado); adicionar favicon ou `<link rel="icon">`. (015, QA)
+- [ ] M7: o JSON de `/api/grupos` deve vir do repo, nunca de `res.locals` (`joinedSlugs`). Custo aceito: 1 consulta extra por página para logado (P8). (015, Hardener/QA)

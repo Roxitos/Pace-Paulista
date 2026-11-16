@@ -41,6 +41,14 @@ a.map-item{text-decoration:none}
 .card h3,.success{overflow-wrap:anywhere}
 .success{min-width:0}
 
+/* Painel "Entrar no grupo" sem JS: abre pelo link #participar ou após erro/sucesso (spec 014).
+   Apelido longo sem espaço não pode abrir scroll em 360 px: a coluna pode encolher e o texto quebra em qualquer ponto. */
+.detail-grid .stack,.join-panel .stack{grid-template-columns:minmax(0,1fr)}
+.form-alert > span,.detail-grid .btn{min-width:0;overflow-wrap:anywhere}
+.detail-grid .btn{white-space:normal;text-align:center}
+.join-panel{scroll-margin-top:84px}
+.join-panel:not(:target):not(.open){display:none}
+
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{
   --verde:#5E9A22; --verde-hover:#4F8519; --roxo:#7A3FA0; --laranja:#E8892B; --vermelho:#C8402F; --azul:#3A78C2;

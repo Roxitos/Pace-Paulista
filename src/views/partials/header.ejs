@@ -16,7 +16,7 @@
       <a class="btn btn-light btn-sm" href="/grupos/novo">Cadastrar grupo</a>
       <a class="btn btn-primary btn-sm" href="/encontrar">Encontrar meu grupo</a>
       <% const meusLabel = locals.user ? 'Meus grupos · ' + user.displayName : 'Entrar'; -%>
-      <a class="icon-btn" href="<%= locals.user ? '/meus' : '/conta/entrar' %>" aria-label="<%= meusLabel %>" title="<%= meusLabel %>" id="meusBtn"><%- ic('user') %></a>
+      <a class="icon-btn" href="<%= locals.user ? '/meus' : '/conta/entrar' %>" aria-label="<%= meusLabel %>" title="<%= meusLabel %>" id="meusBtn"><%- ic('user') %><% const nJoined = locals.joinedSlugs?.size ?? 0; if (locals.user && nJoined > 0) { %><span class="badge-count"><%= nJoined %></span><% } %></a>
       <button class="icon-btn menu-btn" data-act="menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav"><%- ic('menu') %></button>
     </div>
   </div>

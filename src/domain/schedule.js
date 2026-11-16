@@ -128,3 +128,23 @@ export function fmtEncontro(date, timeZone = 'America/Sao_Paulo') {
     semana: fmt({ weekday: 'long' }).replace(/^./, (c) => c.toUpperCase()),
   };
 }
+
+/** "sáb., 21 de nov." — "Próximo treino" do form de participar, no fuso `timeZone`. */
+export function fmtDataCurta(date, timeZone = 'America/Sao_Paulo') {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone,
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+}
+
+/** "sábado, 21 de novembro" — "Primeiro treino" da tela de boas-vindas, no fuso `timeZone`. */
+export function fmtDataLonga(date, timeZone = 'America/Sao_Paulo') {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(date);
+}

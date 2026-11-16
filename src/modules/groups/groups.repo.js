@@ -89,6 +89,25 @@ export async function listPublishedByCreation() {
   return rows;
 }
 
+export async function listJoinedBy(userId) {
+  const { rows } = await pool.query(
+    `${selectPublished(`g.status = 'published'
+     AND EXISTS (SELECT 1 FROM memberships mm WHERE mm.group_id = g.id AND mm.user_id = $1)`)}
+   ORDER BY g.id`,
+    [userId],
+  );
+  return rows;
+}
+
+export async function listOwnedBy(userId) {
+  const { rows } = await pool.query(
+    `${selectPublished("g.status = 'published' AND g.owner_id = $1")}
+   ORDER BY g.id`,
+    [userId],
+  );
+  return rows;
+}
+
 // citext: sem diferença de caixa. Considera todos os status, pois o UNIQUE do banco também.
 export async function nameExists(name) {
   const { rows } = await pool.query(

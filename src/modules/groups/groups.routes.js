@@ -3,6 +3,7 @@ import { ZONA_ORDEM } from '../../domain/constants.js';
 import { isSlug } from '../../domain/slug.js';
 import { renderNotFound } from '../../middlewares/notFound.js';
 import { requireAuth } from '../../middlewares/requireAuth.js';
+import { joinGroup, leaveGroup } from '../memberships/memberships.service.js';
 import { createGroup, getGroupDetail, searchGroups } from './groups.service.js';
 
 export const groupsRouter = Router();
@@ -55,10 +56,19 @@ groupsRouter.post('/grupos', requireAuth, async (req, res) => {
   res.redirect(303, `/grupos/${result.slug}?criado=1`);
 });
 
+// Mesma página para o GET e para o 422 do participar (mesmo título e dados).
+async function renderDetail(res, detail, join) {
+  const { user } = res.locals;
+  await res.renderPage('grupo-detalhe', {
+    title: `${detail.group.name} · Pace Paulista`,
+    ...detail,
+    join: join ?? (user ? { values: { apelido: user.displayName, ok: false }, errors: {} } : null),
+  });
+}
+
 groupsRouter.get('/grupos/:slug', async (req, res) => {
   const { slug } = req.params;
   if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
-  // res.locals.user é preenchido pela sessão a partir do M5; até lá fica ausente.
   const detail = await getGroupDetail(slug, new Date(), { viewer: res.locals.user });
   if (!detail) return renderNotFound(res, GROUP_NOT_FOUND);
   if (req.query.criado === '1' && detail.isOwner) {
@@ -69,8 +79,27 @@ groupsRouter.get('/grupos/:slug', async (req, res) => {
       errors: {},
     });
   }
-  await res.renderPage('grupo-detalhe', {
-    title: `${detail.group.name} · Pace Paulista`,
-    ...detail,
-  });
+  await renderDetail(res, detail);
+});
+
+groupsRouter.post('/grupos/:slug/participar', requireAuth, async (req, res) => {
+  const { slug } = req.params;
+  if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
+  const result = await joinGroup(slug, req.user.id, req.body);
+  if (result.notFound) return renderNotFound(res, GROUP_NOT_FOUND);
+  if (result.errors) {
+    const detail = await getGroupDetail(slug, new Date(), { viewer: req.user });
+    if (!detail) return renderNotFound(res, GROUP_NOT_FOUND);
+    res.status(422);
+    return renderDetail(res, detail, { values: result.values, errors: result.errors });
+  }
+  req.session.flash = { kind: 'joined', slug };
+  res.redirect(303, `/grupos/${slug}#participar`);
+});
+
+groupsRouter.post('/grupos/:slug/sair', requireAuth, async (req, res) => {
+  const { slug } = req.params;
+  if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
+  if (await leaveGroup(slug, req.user.id)) req.session.flash = { kind: 'left', slug };
+  res.redirect(303, `/grupos/${slug}`);
 });

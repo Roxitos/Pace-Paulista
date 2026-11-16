@@ -4,8 +4,19 @@
   const hora = fmtHora(group.start_time);
   const dias = fmtDiasLongo(group.days);
   const slugUrl = encodeURIComponent(group.slug);
+  const flashHere = locals.flash && locals.flash.slug === group.slug ? locals.flash.kind : null;
+  const loggedIn = Boolean(locals.user);
+  const joinedNow = flashHere === 'joined' && Boolean(locals.membership);
+  const joinErrors = (locals.join && locals.join.errors) || {};
+  const joinValues = (locals.join && locals.join.values) || { apelido: '', ok: false };
+  const joinFirstError = Object.keys(joinErrors)[0];
+  const showPanel = loggedIn && (!locals.membership || joinedNow);
+  const panelOpen = joinedNow || Boolean(joinFirstError);
+  const proxima = locals.nextSession || null;
   const headTag = group.is_demo ? 'Grupo fictício · demonstração' : locals.isOwner ? 'Cadastrado por você' : group.owner_name && `Cadastrado por ${group.owner_name}`;
 -%>
+<% if (flashHere === 'left') { %><div class="wrap notice-top"><div class="form-alert good" role="status"><%- ic('check') %><span>Você saiu do grupo.</span></div></div>
+<% } -%>
 <section class="detail-head" style="<%= zstyle(group.zone) %>"><div class="wrap">
     <a class="back" href="/grupos"><%- ic('back', 'ico-sm') %> Voltar para os grupos</a>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><%- include('../partials/zone-chip', { zone: group.zone }) -%><% if (headTag) { %><span class="demo-tag" style="color:inherit;border-color:currentColor"><%= headTag %></span><% } %></div>
@@ -37,10 +48,28 @@
           <% if (locals.user && group.contact) { %><div><dt><%- ic('ext', 'ico-sm') %>Contato</dt><dd><%= group.contact %></dd></div><% } %>
         </dl>
         <div class="stack" style="margin-top:16px">
-          <a class="btn btn-primary btn-lg" href="/conta/entrar?next=/grupos/<%= slugUrl %>%23participar"><%- ic('plus') %> Entrar no grupo</a>
+          <% if (locals.membership) { %><div class="form-alert good"><%- ic('check') %><span>Você entrou como <b><%= membership.nickname %></b>. Te esperamos no próximo encontro.</span></div>
+          <form method="post" action="/grupos/<%= slugUrl %>/sair" class="stack"><%- include('../partials/csrf') %><button class="btn btn-outline" type="submit">Sair do grupo</button></form>
+          <% } else if (loggedIn) { %><a class="btn btn-primary btn-lg" href="#participar"><%- ic('plus') %> Entrar no grupo</a>
+          <% } else { %><a class="btn btn-primary btn-lg" href="/conta/entrar?next=/grupos/<%= slugUrl %>%23participar"><%- ic('plus') %> Entrar no grupo</a>
+          <% } %>
           <a class="btn btn-outline" href="/mapa/<%= slugUrl %>"><%- ic('map', 'ico-sm') %> Ver rota no mapa</a>
         </div>
       </div>
+      <% if (showPanel) { %><div class="panel join-panel<%= panelOpen ? ' open' : '' %>" id="participar">
+        <% if (joinedNow) { %><div class="success" role="status"><span class="success-ico"><%- ic('check') %></span><h3>Bem-vindo(a), <%= membership.nickname %>!</h3><p style="color:var(--muted)">Você agora faz parte do <b style="color:var(--ink)"><%= group.name %></b>.<% if (proxima) { %> Primeiro treino: <b style="color:var(--ink)"><%= proxima.longa %>, <%= hora %></b>.<% } %></p>
+          <div class="stack" style="width:100%"><a class="btn btn-primary btn-block" href="/mapa/<%= slugUrl %>"><%- ic('route', 'ico-sm') %> Ver rota até o encontro</a></div></div>
+        <% } else { %><h2>Entrar no <%= group.name %></h2>
+        <dl class="spec"><div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= group.location %></dd></div><div><dt><%- ic('cal', 'ico-sm') %>Próximo treino</dt><dd><%= proxima ? proxima.curta + ' · ' + hora : '—' %></dd></div><div><dt><%- ic('gauge', 'ico-sm') %>Pace</dt><dd class="mono"><%= faixa %></dd></div></dl>
+        <form method="post" action="/grupos/<%= slugUrl %>/participar#participar" class="stack" novalidate>
+          <%- include('../partials/csrf') %>
+          <div class="field"><label for="j-nome">Como o grupo pode te chamar? *</label><input class="input" id="j-nome" name="apelido" maxlength="40" placeholder="Seu primeiro nome ou apelido" autocomplete="given-name" aria-describedby="e-jnome" value="<%= joinValues.apelido %>"<%- joinErrors.apelido ? ' aria-invalid="true"' : '' %><%- joinFirstError === 'apelido' ? ' autofocus' : '' %>><span class="err" id="e-jnome"><%- joinErrors.apelido ? ic('alert', 'ico-sm') : '' %><%= joinErrors.apelido ?? '' %></span></div>
+          <label class="check"><input type="checkbox" name="ok" id="j-ok" aria-describedby="e-jok"<%= joinValues.ok ? ' checked' : '' %><%- joinFirstError === 'ok' ? ' autofocus' : '' %>><span>Li as orientações: chegar no horário, levar água e respeitar o ritmo do grupo. *</span></label><span class="err" id="e-jok"><%- joinErrors.ok ? ic('alert', 'ico-sm') : '' %><%= joinErrors.ok ?? '' %></span>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" id="joinBtn">Confirmar entrada</button>
+          <p style="font-size:12.5px;color:var(--muted)">Pedimos só um apelido. Ele fica na sua conta e é apagado quando você sai do grupo ou exclui a conta.</p>
+        </form>
+        <% } %>
+      </div><% } %>
       <div class="panel"><h2><%= z.nome %></h2><div style="display:flex;gap:14px;align-items:center"><span style="background:var(--z);color:var(--zon);border-radius:50%;display:grid;place-items:center;width:72px;height:72px;flex:none"><%- seal(group.zone, 56) %></span><p style="color:var(--muted);font-size:14.5px"><%= z.desc %></p></div><a class="link" href="/grupos?zona=<%= group.zone %>" style="display:inline-block;margin-top:12px">Outros grupos da <%= z.nome %></a></div>
     </aside>
   </div></div>
