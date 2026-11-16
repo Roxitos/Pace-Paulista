@@ -17,14 +17,14 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 | **M3** Leitura | `/grupos` com filtros, detalhe, zonas, mapa e sobre; home lendo do banco | ✅ concluído |
 | **M4** Compatibilidade | `/encontrar` | ✅ concluído |
 | **M5** Contas | Criar conta, entrar e sair, sessão | ✅ concluído |
-| **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | em andamento |
+| **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | ✅ concluído |
 | **M7** JS progressivo | Filtros ao vivo, modal, toast | — |
 | **M8** Produção | helmet/CSP, rate limit, deploy | — |
 | **M9** Conteúdo real | Grupos reais no lugar dos fictícios, mantidos atualizados | — |
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
-> ⚠️ Por enquanto funcionam as páginas de leitura (home, `/zonas`, a busca `/grupos` com filtros, o detalhe do grupo, `/mapa` e `/sobre`), lendo os grupos do banco. `/encontrar`, conta, cadastro e "Meus grupos" levam a uma página 404 até os próximos marcos.
+> ⚠️ Todas as páginas e ações funcionam sem JS: busca e detalhe, `/encontrar`, contas, cadastro de grupo, participar/sair e "Meus grupos". Ainda faltam as melhorias com JS do protótipo (filtros ao vivo, modal, toast, menu mobile — M7) e a preparação para produção (M8).
 
 ## Stack
 
