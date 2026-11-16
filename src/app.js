@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { createSessionMiddleware } from './middlewares/session.js';
 import { currentUser } from './middlewares/currentUser.js';
+import { joinedGroups } from './middlewares/joinedGroups.js';
 import { csrfLocals, csrfProtection } from './middlewares/csrf.js';
 import { pool } from './db/pool.js';
 import { env } from './config/env.js';
@@ -65,6 +66,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
   app.use(express.urlencoded({ extended: false, limit: '16kb', parameterLimit: 200 }));
   app.use(createSessionMiddleware({ pool, env }));
   app.use(currentUser);
+  app.use(joinedGroups);
   app.use(csrfLocals);
   app.use(locals);
   app.use(csrfProtection);

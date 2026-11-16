@@ -1,0 +1,51 @@
+<%- include('../partials/page-head', {
+  kicker: 'Cadastrar grupo',
+  title: 'Coloque seu grupo no mapa',
+  text: 'Preencha as informações do treino. Campos com * são obrigatórios.',
+}) %>
+<%
+  const created = locals.created ?? null;
+  // Sem JS não há o focus() do showErrors: o autofocus vai no 1º campo com erro.
+  const firstError = Object.keys(errors)[0];
+  const af = (key) => (firstError === key ? ' autofocus' : '');
+  const inv = (key) => (errors[key] ? ' aria-invalid="true"' : '');
+  const err = (key) => (errors[key] ? ic('alert', 'ico-sm') + ' ' : '');
+  const msg = (key) => errors[key] ?? '';
+  const descLen = [...values.descricao].length;
+-%>
+  <div class="wrap"><div class="form-layout">
+    <div id="cadWrap">
+<% if (created) { %>
+    <div class="form" style="<%= zstyle(created.zone) %>"><div class="success"><span class="success-ico"><%- ic('check') %></span><h3>Grupo cadastrado</h3><p style="color:var(--muted);max-width:44ch"><b style="color:var(--ink)"><%= created.name %></b> já aparece na busca, no mapa e na <%= ZONAS[created.zone].nome %>.</p><div class="choice-row" style="justify-content:center"><a class="btn btn-primary" href="/grupos/<%= encodeURIComponent(created.slug) %>">Ver página do grupo</a><a class="btn btn-outline" href="/grupos?zona=<%= created.zone %>">Ver na busca</a><a class="btn btn-quiet" href="/grupos/novo">Cadastrar outro</a></div></div></div>
+<% } else { %>
+    <form class="form" id="cadForm" method="post" action="/grupos" novalidate>
+      <%- include('../partials/csrf') %>
+      <div id="cadAlert"><% if (firstError) { %><%- include('../partials/form-errors', { count: Object.keys(errors).length }) %><% } %></div>
+      <div class="field"><label for="c-nome">Nome do grupo *</label><input class="input" id="c-nome" name="nome" maxlength="50" placeholder="Ex.: Correria do Carmo" aria-describedby="e-nome" value="<%= values.nome %>"<%- inv('nome') %><%- af('nome') %>><span class="err" id="e-nome"><%- err('nome') %><%= msg('nome') %></span></div>
+      <fieldset><legend>Zona *</legend><div class="choice-row"><% ZONA_ORDEM.forEach((z, i) => { %><label class="choice z" style="<%= zstyle(z) %>"><input type="radio" name="zona" value="<%= z %>"<%= values.zona === z ? ' checked' : '' %><%- i === 0 ? af('zona') : '' %>><span><%= ZONAS[z].nome %></span></label><% }) %></div><span class="err" id="e-czona"><%- err('zona') %><%= msg('zona') %></span></fieldset>
+      <div class="row2">
+        <div class="field"><label for="c-local">Local de encontro *</label><input class="input" id="c-local" name="local" maxlength="80" placeholder="Ex.: Parque do Carmo" aria-describedby="e-local" value="<%= values.local %>"<%- inv('local') %><%- af('local') %>><span class="err" id="e-local"><%- err('local') %><%= msg('local') %></span></div>
+        <div class="field"><label for="c-ponto">Ponto de referência</label><input class="input" id="c-ponto" name="ponto" maxlength="100" placeholder="Ex.: portão principal" aria-describedby="e-ponto" value="<%= values.ponto %>"<%- inv('ponto') %><%- af('ponto') %>><span class="err" id="e-ponto"><%- err('ponto') %><%= msg('ponto') %></span></div>
+      </div>
+      <fieldset><legend>Dias de treino *</legend><div class="choice-row"><% DIA_ORDEM.forEach((d, i) => { %><label class="choice"><input type="checkbox" name="dias" value="<%= d %>"<%= values.dias.includes(d) ? ' checked' : '' %><%- i === 0 ? af('dias') : '' %>><span><%= DIAS_CURTO[d] %></span></label><% }) %></div><span class="err" id="e-cdias"><%- err('dias') %><%= msg('dias') %></span></fieldset>
+      <div class="row2">
+        <div class="field"><label for="c-hora">Horário *</label><input class="input mono" id="c-hora" name="horario" type="time" aria-describedby="e-hora" value="<%= values.horario %>"<%- inv('horario') %><%- af('horario') %>><span class="err" id="e-hora"><%- err('horario') %><%= msg('horario') %></span></div>
+        <div class="field"><label for="c-dist">Distância habitual</label><input class="input mono" id="c-dist" name="distancia" maxlength="30" placeholder="Ex.: 8 a 12 km" aria-describedby="e-dist" value="<%= values.distancia %>"<%- inv('distancia') %><%- af('distancia') %>><span class="err" id="e-dist"><%- err('distancia') %><%= msg('distancia') %></span></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="c-pmin">Pace mais rápido (min/km) *</label><input class="input mono" id="c-pmin" name="paceMin" placeholder="5:30" inputmode="numeric" aria-describedby="e-pmin" value="<%= values.paceMin %>"<%- inv('paceMin') %><%- af('paceMin') %>><span class="err" id="e-pmin"><%- err('paceMin') %><%= msg('paceMin') %></span></div>
+        <div class="field"><label for="c-pmax">Pace mais lento (min/km) *</label><input class="input mono" id="c-pmax" name="paceMax" placeholder="6:30" inputmode="numeric" aria-describedby="e-pmax" value="<%= values.paceMax %>"<%- inv('paceMax') %><%- af('paceMax') %>><span class="err" id="e-pmax"><%- err('paceMax') %><%= msg('paceMax') %></span></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="c-nivel">Nível *</label><select class="select" id="c-nivel" name="nivel" aria-describedby="e-cnivel"<%- inv('nivel') %><%- af('nivel') %>><option value="">Selecione</option><% for (const [k, v] of Object.entries(NIVEIS)) { %><option value="<%= k %>"<%= values.nivel === k ? ' selected' : '' %>><%= v.nome %></option><% } %></select><span class="err" id="e-cnivel"><%- err('nivel') %><%= msg('nivel') %></span></div>
+        <div class="field"><label for="c-part">Participantes hoje</label><input class="input mono" id="c-part" name="participantes" type="number" min="1" max="999" placeholder="Ex.: 15" value="<%= values.participantes %>"></div>
+      </div>
+      <div class="field"><label for="c-desc">Descrição *</label><textarea class="input" id="c-desc" name="descricao" rows="4" maxlength="400" placeholder="Como é o treino, para quem é, o que acontece depois..." aria-describedby="e-desc h-desc"<%- inv('descricao') %><%- af('descricao') %>><%= values.descricao %></textarea><span class="hint" id="h-desc"><span id="descCount"><%= descLen %></span>/400 · mínimo de 30 caracteres</span><span class="err" id="e-desc"><%- err('descricao') %><%= msg('descricao') %></span></div>
+      <div class="field"><label for="c-contato">Contato público do grupo *</label><input class="input" id="c-contato" name="contato" maxlength="80" placeholder="@perfil, site ou e-mail do grupo" aria-describedby="e-contato h-contato" value="<%= values.contato %>"<%- inv('contato') %><%- af('contato') %>><span class="hint" id="h-contato">Use um canal do grupo, não um telefone pessoal.</span><span class="err" id="e-contato"><%- err('contato') %><%= msg('contato') %></span></div>
+      <label class="check"><input type="checkbox" name="organizador" id="c-org"<%= values.organizador ? ' checked' : '' %><%- inv('organizador') %><%- af('organizador') %>><span>Sou organizador(a) deste grupo e as informações estão corretas. *</span></label><span class="err" id="e-org"><%- err('organizador') %><%= msg('organizador') %></span>
+      <button class="btn btn-primary btn-lg" type="submit"><%- ic('plus') %> Cadastrar grupo</button>
+    </form>
+<% } %>
+    </div>
+    <aside class="side-note"><h3>O que acontece depois</h3><ul><li>O grupo aparece na hora na busca, no mapa e nas zonas, para todos os visitantes.</li><li>Seu nome de exibição aparece como “Cadastrado por …” na página do grupo.</li><li>Só pedimos dados do grupo. Use contatos públicos do grupo, nunca um telefone pessoal.</li></ul></aside>
+  </div></div>

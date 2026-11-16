@@ -1,3 +1,4 @@
+import request from 'supertest';
 import { createApp } from '../../src/app.js';
 
 // Rotas só de teste: o app real não as registra (beforeErrorHandlers nunca é usado pelo server.js).
@@ -29,4 +30,16 @@ export async function getCsrf(agent, path = '/__test/form') {
   const match = /name="_csrf" value="([^"]+)"/.exec(res.text);
   if (!match) throw new Error(`Sem _csrf em ${path}`);
   return match[1];
+}
+
+// Cria a conta pelo formulário e devolve o agente já logado.
+export async function signedUp(app, nome, email) {
+  const agent = request.agent(app);
+  const csrf = await getCsrf(agent, '/conta/criar');
+  await agent
+    .post('/conta/criar')
+    .type('form')
+    .send({ _csrf: csrf, nome, email, senha: 'abcdefg!' })
+    .expect(303);
+  return agent;
 }

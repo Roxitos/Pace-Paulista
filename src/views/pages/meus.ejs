@@ -4,6 +4,22 @@
   text: 'Grupos em que você entrou e grupos que você cadastrou.',
 }) %>
 <div class="wrap">
+  <section class="section" style="padding-top:32px">
+    <div class="sec-head"><h2 class="display" style="font-size:34px">Grupos em que você entrou</h2></div>
+<% if (joined.length > 0) { -%>
+    <div class="grid-cards"><% for (const g of joined) { %><%- include('../partials/group-card', { g }) %><% } %></div>
+<% } else { -%>
+    <div class="empty"><%- ic('users') %><h3>Você ainda não entrou em nenhum grupo</h3><p>Encontre um grupo com o seu pace e a sua região e entre com um clique.</p><a class="btn btn-primary" href="/encontrar">Encontrar meu grupo</a></div>
+<% } -%>
+  </section>
+  <section class="section" style="padding-top:0">
+    <div class="sec-head"><h2 class="display" style="font-size:34px">Grupos que você cadastrou</h2></div>
+<% if (mine.length > 0) { -%>
+    <div class="grid-cards"><% for (const g of mine) { %><%- include('../partials/group-card', { g }) %><% } %></div>
+<% } else { -%>
+    <div class="empty"><%- ic('plus') %><h3>Nenhum grupo cadastrado</h3><p>Organiza treinos? Cadastre seu grupo para aparecer na busca.</p><a class="btn btn-outline" href="/grupos/novo">Cadastrar grupo</a></div>
+<% } -%>
+  </section>
   <div class="panel" id="conta">
     <h2>Conta e dados</h2>
     <p style="color:var(--muted)">Você entrou como <b><%= user.displayName %></b> (<%= user.email %>).</p>

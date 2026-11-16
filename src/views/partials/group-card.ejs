@@ -1,6 +1,7 @@
+<% const j = locals.joinedSlugs?.has(g.slug); const slug = encodeURIComponent(g.slug); -%>
 <article class="card" style="<%= zstyle(g.zone) %>">
-    <div class="card-top"><%- include('zone-chip', { zone: g.zone }) -%><%- include('demo-tag', { g }) -%></div>
-    <h3><a href="/grupos/<%= encodeURIComponent(g.slug) %>"><%= g.name %></a></h3>
+    <div class="card-top"><%- include('zone-chip', { zone: g.zone }) -%><% if (j) { %><span class="joined-pill"><%- ic('check', 'ico-sm') %>Você participa</span><% } else { %><%- include('demo-tag', { g }) -%><% } %></div>
+    <h3><a href="/grupos/<%= slug %>"><%= g.name %></a></h3>
     <p class="card-desc"><%= g.description %></p>
     <dl class="facts">
       <div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= g.location %></dd></div>
@@ -10,8 +11,10 @@
     </dl>
     <%- include('level-meter', { level: g.level }) -%>
     <div class="card-actions">
-      <a class="btn btn-primary" href="/conta/entrar?next=/grupos/<%= encodeURIComponent(g.slug) %>%23participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a>
-      <a class="btn btn-outline btn-sm" href="/grupos/<%= encodeURIComponent(g.slug) %>">Ver detalhes</a>
-      <a class="btn btn-outline btn-sm" href="/mapa/<%= encodeURIComponent(g.slug) %>"><%- ic('route', 'ico-sm') %> Ver rota</a>
+      <% if (j) { %><a class="btn btn-quiet" href="/grupos/<%= slug %>"><%- ic('check', 'ico-sm') %> No grupo · ver encontros</a>
+      <% } else if (locals.user) { %><a class="btn btn-primary" href="/grupos/<%= slug %>#participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a>
+      <% } else { %><a class="btn btn-primary" href="/conta/entrar?next=/grupos/<%= slug %>%23participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a><% } %>
+      <a class="btn btn-outline btn-sm" href="/grupos/<%= slug %>">Ver detalhes</a>
+      <a class="btn btn-outline btn-sm" href="/mapa/<%= slug %>"><%- ic('route', 'ico-sm') %> Ver rota</a>
     </div>
   </article>

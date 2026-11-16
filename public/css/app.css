@@ -35,6 +35,19 @@ a.map-item{text-decoration:none}
 #matchResults{scroll-margin-top:84px}
 /* Nome do grupo (até 50) sem espaço não pode abrir scroll horizontal em 360 px. */
 .match h3{overflow-wrap:anywhere}
+/* Cadastro (spec 013): nome de 50 chars sem espaço no card da busca e na tela de sucesso não pode abrir scroll horizontal em 360 px.
+   O card é item de grid (min-width:auto alargaria a coluna); .success centraliza filhos pelo min-content. */
+.card{min-width:0}
+.card h3,.success{overflow-wrap:anywhere}
+.success{min-width:0}
+
+/* Painel "Entrar no grupo" sem JS: abre pelo link #participar ou após erro/sucesso (spec 014).
+   Apelido longo sem espaço não pode abrir scroll em 360 px: a coluna pode encolher e o texto quebra em qualquer ponto. */
+.detail-grid .stack,.join-panel .stack{grid-template-columns:minmax(0,1fr)}
+.form-alert > span,.detail-grid .btn{min-width:0;overflow-wrap:anywhere}
+.detail-grid .btn{white-space:normal;text-align:center}
+.join-panel{scroll-margin-top:84px}
+.join-panel:not(:target):not(.open){display:none}
 
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{

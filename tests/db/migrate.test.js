@@ -14,6 +14,7 @@ const ALL = [
   '003_groups.sql',
   '004_memberships.sql',
   '005_sessions.sql',
+  '006_groups_start_time_check.sql',
 ];
 const tempDirs = [];
 
@@ -46,15 +47,15 @@ afterAll(async () => {
 });
 
 describe('runMigrations', () => {
-  it('aplica as 5 migrations em ordem num esquema zerado e não reaplica na 2ª execução', async () => {
+  it('aplica as 6 migrations em ordem num esquema zerado e não reaplica na 2ª execução', async () => {
     await resetSchema(pool);
     const logs = [];
     const first = await runMigrations({ pool, log: (line) => logs.push(line) });
-    expect(first).toEqual({ applied: ALL, total: 5 });
+    expect(first).toEqual({ applied: ALL, total: 6 });
     expect(logs).toEqual(ALL.map((file) => `Aplicada ${file}`));
 
     const second = await runMigrations({ pool });
-    expect(second).toEqual({ applied: [], total: 5 });
+    expect(second).toEqual({ applied: [], total: 6 });
 
     const rows = await appliedRows();
     expect(rows.map((row) => row.filename)).toEqual(ALL);
@@ -85,12 +86,12 @@ describe('runMigrations', () => {
   it('falha com a mensagem de imutabilidade se uma migration aplicada foi alterada, sem aplicar nada', async () => {
     const dir = await copyMigrations();
     await appendFile(path.join(dir, '005_sessions.sql'), '-- editada\n');
-    await writeFile(path.join(dir, '006_nova.sql'), 'CREATE TABLE nao_deveria_existir (id INT);\n');
+    await writeFile(path.join(dir, '007_nova.sql'), 'CREATE TABLE nao_deveria_existir (id INT);\n');
 
     await expect(runMigrations({ pool, dir })).rejects.toThrow(
       'A migration 005_sessions.sql foi alterada depois de aplicada. Migrations são imutáveis: crie uma nova.',
     );
-    expect(await appliedRows()).toHaveLength(5);
+    expect(await appliedRows()).toHaveLength(6);
     const { rows } = await pool.query("SELECT to_regclass('nao_deveria_existir') AS t");
     expect(rows[0].t).toBeNull();
   });
@@ -122,13 +123,13 @@ describe('runMigrations', () => {
   it('desfaz só a migration que falhou e informa o arquivo', async () => {
     const dir = await copyMigrations();
     await writeFile(
-      path.join(dir, '006_quebrada.sql'),
+      path.join(dir, '007_quebrada.sql'),
       'CREATE TABLE parcial (id INT);\nSELECT * FROM tabela_que_nao_existe;\n',
     );
     await expect(runMigrations({ pool, dir })).rejects.toThrow(
-      /^Falha na migration 006_quebrada\.sql: /,
+      /^Falha na migration 007_quebrada\.sql: /,
     );
-    expect(await appliedRows()).toHaveLength(5);
+    expect(await appliedRows()).toHaveLength(6);
     const { rows } = await pool.query("SELECT to_regclass('parcial') AS t");
     expect(rows[0].t).toBeNull();
   });
@@ -137,6 +138,6 @@ describe('runMigrations', () => {
     await resetSchema(pool);
     const results = await Promise.all([runMigrations({ pool }), runMigrations({ pool })]);
     expect(results.flatMap((result) => result.applied).sort()).toEqual(ALL);
-    expect(await appliedRows()).toHaveLength(5);
+    expect(await appliedRows()).toHaveLength(6);
   });
 });

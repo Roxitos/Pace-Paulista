@@ -6,6 +6,7 @@ import { safeNext } from '../../domain/redirect.js';
 import { sessionCookieOptions } from '../../middlewares/session.js';
 import { env } from '../../config/env.js';
 import { parseSignup, parseLogin, loginLimitKey } from '../auth/auth.schemas.js';
+import { listMyGroups } from '../groups/groups.service.js';
 import * as authService from '../auth/auth.service.js';
 
 const TITLE = 'Criar conta · Pace Paulista';
@@ -63,8 +64,11 @@ export function createAccountRouter() {
   });
 
   router.get('/meus', requireAuth, async (req, res) => {
+    const { joined, mine } = await listMyGroups(req.user.id);
     await res.renderPage('meus', {
       title: 'Meus grupos · Pace Paulista',
+      joined,
+      mine,
       confirmDelete: req.query.excluir === '1',
     });
   });

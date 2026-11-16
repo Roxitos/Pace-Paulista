@@ -13,3 +13,12 @@ document.addEventListener('click', (e) => {
   btn.setAttribute('aria-expanded', open);
   btn.innerHTML = ic(open ? 'x' : 'menu');
 });
+
+// Contador de caracteres da descrição (cadastro de grupo).
+const desc = document.getElementById('c-desc');
+const descCount = document.getElementById('descCount');
+if (desc && descCount) {
+  desc.addEventListener('input', () => {
+    descCount.textContent = [...desc.value].length;
+  });
+}

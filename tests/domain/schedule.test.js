@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fmtDiasCurto,
   fmtDiasLongo,
+  fmtDataCurta,
+  fmtDataLonga,
   fmtEncontro,
   fmtHora,
   periodoDe,
@@ -248,5 +250,15 @@ describe('fmtEncontro', () => {
       mes: 'dez',
       semana: 'Sábado',
     });
+  });
+});
+
+describe('fmtDataCurta e fmtDataLonga', () => {
+  // 02:30Z ainda é sábado à noite em SP: o fuso do servidor não pode mudar o dia.
+  const date = new Date('2026-11-22T02:30:00Z');
+
+  it('formatam no fuso de SP', () => {
+    expect(fmtDataCurta(date)).toBe('sáb., 21 de nov.');
+    expect(fmtDataLonga(date)).toBe('sábado, 21 de novembro');
   });
 });

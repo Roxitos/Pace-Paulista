@@ -262,6 +262,8 @@ describe('Links (CA6)', () => {
 
 describe('Escape (CA7)', () => {
   it('logado: nome, local, descrição, tags, ponto, distância, contato e dono aparecem escapados', async () => {
+    // O visitante logado do teste é o usuário 1: o dono precisa ser outro para aparecer pelo nome.
+    await insertUser(pool, 'Ana');
     const owner = await insertUser(pool, XSS);
     const slug = await insertGroup({
       name: XSS,

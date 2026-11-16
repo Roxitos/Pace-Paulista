@@ -27,6 +27,7 @@ const GROUP_KEYS = [
   'contact',
   'is_demo',
   'owner_name',
+  'owner_id',
   'map_pin',
 ];
 
@@ -91,15 +92,7 @@ describe('groupsRepo.listPublished', () => {
       await createUser('Ana'),
     ]);
     const g = await bySlug('pace-da-oca');
-    for (const key of [
-      'id',
-      'owner_id',
-      'email',
-      'password_hash',
-      'role',
-      'base_participants',
-      'status',
-    ]) {
+    for (const key of ['id', 'email', 'password_hash', 'role', 'base_participants', 'status']) {
       expect(g).not.toHaveProperty(key);
     }
     expect(JSON.stringify(g)).not.toMatch(/hash-secreto|ana@exemplo\.com/);
