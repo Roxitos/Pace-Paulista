@@ -1,0 +1,31 @@
+# Blueprint do Render. Segredos ficam fora do git: DATABASE_URL é pedido no painel (sync: false).
+services:
+  - type: web
+    name: pace-paulista
+    runtime: node
+    region: virginia # mesma região AWS do Neon (us-east-1): cada página faz várias consultas
+    plan: free # custo zero; hiberna após ~15 min sem tráfego
+    branch: main
+    # Free não tem preDeployCommand: migrate e seed rodam no build. Se falharem, o build falha
+    # e a versão anterior continua no ar. DATABASE_URL e os demais envs existem durante o build.
+    buildCommand: npm ci && npm run migrate && npm run seed
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: checksPass # só depois do CI verde
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '22' # engines ">=22" faria o Render escolher a versão mais nova
+      - key: TZ_APP
+        value: America/Sao_Paulo
+      - key: TRUST_PROXY
+        value: '1'
+      # DIAG_IP fica DESLIGADA aqui de propósito: ligue (=1) no painel só durante o diagnóstico do
+      # TRUST_PROXY (docs/DEPLOY.md, "Diagnóstico do IP") e remova ao terminar.
+      - key: ALLOW_DEMO_SEED
+        value: '1' # produção sobe com os demos até o M9
+      - key: SESSION_SECRET
+        generateValue: true # 256 bits em base64
+      - key: DATABASE_URL
+        sync: false # conexão DIRETA do Neon com ?sslmode=verify-full

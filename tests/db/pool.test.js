@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createPool, pool, tx } from '../../src/db/pool.js';
 import { migrateTestDb } from '../helpers/db.js';
 
@@ -108,6 +108,46 @@ describe('statement_timeout', () => {
       await expect(limited.query('SELECT pg_sleep(1)')).rejects.toMatchObject({ code: '57014' });
     } finally {
       await limited.end();
+    }
+  });
+});
+
+describe('resiliência a conexões derrubadas', () => {
+  const url = pool.options.connectionString;
+
+  it('usa connectionTimeoutMillis de 15000 em todos os pools', () => {
+    expect(pool.options.connectionTimeoutMillis).toBe(15000);
+    const other = createPool(url);
+    expect(other.options.connectionTimeoutMillis).toBe(15000);
+    return other.end();
+  });
+
+  it('erro numa conexão ociosa não derruba o processo e a consulta seguinte funciona', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const local = createPool(url);
+    try {
+      const client = await local.connect();
+      client.release();
+      client.emit('error', new Error('conexão caiu'));
+      expect(spy).toHaveBeenCalled();
+      expect((await local.query('SELECT 1 AS one')).rows[0].one).toBe(1);
+    } finally {
+      spy.mockRestore();
+      await local.end();
+    }
+  });
+
+  it('se o servidor encerra a conexão ociosa, a próxima consulta abre outra', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const local = createPool(url);
+    try {
+      const { rows } = await local.query('SELECT pg_backend_pid() AS pid');
+      await pool.query('SELECT pg_terminate_backend($1)', [rows[0].pid]);
+      await vi.waitFor(() => expect(spy).toHaveBeenCalled());
+      expect((await local.query('SELECT 1 AS one')).rows[0].one).toBe(1);
+    } finally {
+      spy.mockRestore();
+      await local.end();
     }
   });
 });
