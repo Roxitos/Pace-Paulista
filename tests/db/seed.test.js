@@ -29,6 +29,13 @@ describe('runSeed', () => {
     expect(await countGroups()).toBe(11);
   });
 
+  it('em produção só insere com allowDemoSeed (idempotente)', async () => {
+    const run = () => runSeed({ pool, nodeEnv: 'production', allowDemoSeed: true });
+    expect(await run()).toEqual({ inserted: 11, total: 11 });
+    expect(await run()).toEqual({ inserted: 0, total: 11 });
+    expect(await countGroups()).toBe(11);
+  });
+
   it('grava os mesmos dados de DEMO_GROUPS, demo, publicados, sem dono e sem contato', async () => {
     await runSeed({ pool, nodeEnv: 'test' });
     const { rows } = await pool.query(

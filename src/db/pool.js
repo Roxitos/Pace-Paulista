@@ -1,8 +1,14 @@
 import pg from 'pg';
 import { connectionStringFor, env } from '../config/env.js';
 
-export function createPool(connectionString) {
-  const pool = new pg.Pool({ connectionString, connectionTimeoutMillis: 5000 });
+// Só o pool da app usa: um lock longo em `groups` pendurava `/` e `/zonas` até o timeout do cliente.
+// migrate/seed criam o pool sem limite (uma migration pode demorar).
+const APP_STATEMENT_TIMEOUT_MS = 5000;
+
+export function createPool(connectionString, { statementTimeoutMs } = {}) {
+  const config = { connectionString, connectionTimeoutMillis: 5000 };
+  if (statementTimeoutMs) config.statement_timeout = statementTimeoutMs;
+  const pool = new pg.Pool(config);
   // Sem este listener, uma conexão ociosa derrubada pelo servidor mata o processo.
   pool.on('error', (err) => {
     console.error('Erro inesperado em conexão ociosa do Postgres:', err.message);
@@ -11,7 +17,9 @@ export function createPool(connectionString) {
 }
 
 // pg.Pool só conecta na primeira query: importar este módulo não abre conexão.
-export const pool = createPool(connectionStringFor(env));
+export const pool = createPool(connectionStringFor(env), {
+  statementTimeoutMs: APP_STATEMENT_TIMEOUT_MS,
+});
 
 export async function tx(fn, targetPool = pool) {
   const client = await targetPool.connect();

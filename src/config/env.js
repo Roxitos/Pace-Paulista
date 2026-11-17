@@ -34,8 +34,30 @@ function sameDatabase(a, b) {
   return describeDatabaseUrl(a).toLowerCase() === describeDatabaseUrl(b).toLowerCase();
 }
 
+const SECURE_SSLMODES = ['require', 'verify-ca', 'verify-full'];
+
+// Produção fala com o banco gerenciado: sem TLS a senha e os dados trafegariam em claro.
+// Exige um único `sslmode`: repetido, o pg usa o último (`?sslmode=require&sslmode=disable`).
+function hasSecureSslmode(value) {
+  try {
+    const modes = new URL(value).searchParams.getAll('sslmode');
+    return modes.length === 1 && SECURE_SSLMODES.includes(modes[0]);
+  } catch {
+    return false;
+  }
+}
+
+// Nunca `true`: express-rate-limit recusa e o IP passaria a ser falsificável.
+function parseTrustProxy(value, production) {
+  if (!value) return production ? 1 : 0;
+  if (!/^\d{1,2}$/.test(value) || Number(value) > 10) return null;
+  return Number(value);
+}
+
 function isStrongSecret(value) {
-  return value.length >= 32 && value !== EXAMPLE_SESSION_SECRET && value !== DEV_SESSION_SECRET;
+  return (
+    value.trim().length >= 32 && value !== EXAMPLE_SESSION_SECRET && value !== DEV_SESSION_SECRET
+  );
 }
 
 // Em produção banco e segredo não têm default: subir com o valor de dev seria pior que não subir.
@@ -48,6 +70,7 @@ const schema = z
     DATABASE_URL: z.string().optional(),
     DATABASE_URL_TEST: z.string().default(DEV_DATABASE_URL_TEST),
     SESSION_SECRET: z.string().optional(),
+    TRUST_PROXY: z.string().optional(),
   })
   .transform((data, ctx) => {
     const production = data.NODE_ENV === 'production';
@@ -57,7 +80,15 @@ const schema = z
     const DATABASE_URL = data.DATABASE_URL || (production ? undefined : DEV_DATABASE_URL);
     const SESSION_SECRET = data.SESSION_SECRET || (production ? undefined : DEV_SESSION_SECRET);
 
-    if (DATABASE_URL === undefined || !isValidDatabaseUrl(DATABASE_URL)) invalid('DATABASE_URL');
+    if (
+      DATABASE_URL === undefined ||
+      !isValidDatabaseUrl(DATABASE_URL) ||
+      (production && !hasSecureSslmode(DATABASE_URL))
+    ) {
+      invalid('DATABASE_URL');
+    }
+    const TRUST_PROXY = parseTrustProxy(data.TRUST_PROXY, production);
+    if (TRUST_PROXY === null) invalid('TRUST_PROXY');
     // Impede que os testes (que fazem TRUNCATE) apaguem o banco de desenvolvimento.
     // Compara o alvo (host:porta/banco), não o texto: outro protocolo ou credencial é o mesmo banco.
     if (
@@ -72,7 +103,7 @@ const schema = z
       invalid('SESSION_SECRET');
     }
 
-    return { ...data, DATABASE_URL, SESSION_SECRET };
+    return { ...data, DATABASE_URL, SESSION_SECRET, TRUST_PROXY };
   });
 
 export function parseEnv(source) {

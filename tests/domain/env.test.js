@@ -10,6 +10,7 @@ describe('parseEnv', () => {
       DATABASE_URL: 'postgres://pace:pace@localhost:5432/pace_paulista',
       DATABASE_URL_TEST: 'postgres://pace:pace@localhost:5432/pace_paulista_test',
       SESSION_SECRET: 'dev-inseguro-nao-usar-em-producao',
+      TRUST_PROXY: 0,
     });
   });
 
@@ -95,7 +96,7 @@ describe('parseEnv', () => {
 
 describe('parseEnv em produção', () => {
   const secret = 'k3J9x!vQ2mZ7pL0wR5tY8uB1nC4eH6aS';
-  const url = 'postgres://app:senha-super-secreta@db.exemplo:5432/pace';
+  const url = 'postgres://app:senha-super-secreta@db.exemplo:5432/pace?sslmode=require';
   const prod = (overrides) => ({
     NODE_ENV: 'production',
     DATABASE_URL: url,
@@ -136,6 +137,41 @@ describe('parseEnv em produção', () => {
     ['igual ao default de desenvolvimento', 'dev-inseguro-nao-usar-em-producao'],
   ])('recusa SESSION_SECRET %s', (_caso, value) => {
     expect(messageOf(prod({ SESSION_SECRET: value }))).toMatch(/SESSION_SECRET/);
+  });
+
+  it.each([
+    ['sem sslmode', 'postgres://app:senha-super-secreta@db.exemplo:5432/pace'],
+    ['sslmode=disable', 'postgres://app:senha-super-secreta@db.exemplo:5432/pace?sslmode=disable'],
+    ['sslmode=prefer', 'postgres://app:senha-super-secreta@db.exemplo:5432/pace?sslmode=prefer'],
+    // O pg usa o último valor repetido; validar só o primeiro deixaria a conexão sem TLS.
+    [
+      'sslmode repetido (require e depois disable)',
+      'postgres://app:senha-super-secreta@db.exemplo:5432/pace?sslmode=require&sslmode=disable',
+    ],
+  ])('recusa DATABASE_URL %s', (_caso, value) => {
+    const message = messageOf(prod({ DATABASE_URL: value }));
+    expect(message).toBe('Variáveis de ambiente inválidas: DATABASE_URL');
+    expect(message).not.toContain('senha-super-secreta');
+  });
+
+  it('aceita sslmode=verify-full com outros parâmetros', () => {
+    const value = `${url.split('?')[0]}?sslmode=verify-full&channel_binding=require`;
+    expect(parseEnv(prod({ DATABASE_URL: value })).DATABASE_URL).toBe(value);
+  });
+
+  it('recusa SESSION_SECRET só de espaços', () => {
+    expect(messageOf(prod({ SESSION_SECRET: ' '.repeat(40) }))).toMatch(/SESSION_SECRET/);
+  });
+
+  it('TRUST_PROXY: padrão 1 em produção e 0 fora; aceita inteiro; recusa true, -1, 11, abc', () => {
+    expect(parseEnv(prod()).TRUST_PROXY).toBe(1);
+    expect(parseEnv({ NODE_ENV: 'development' }).TRUST_PROXY).toBe(0);
+    expect(parseEnv({ NODE_ENV: 'test', TRUST_PROXY: '2' }).TRUST_PROXY).toBe(2);
+    for (const bad of ['true', '-1', '11', 'abc']) {
+      expect(messageOf(prod({ TRUST_PROXY: bad }))).toBe(
+        'Variáveis de ambiente inválidas: TRUST_PROXY',
+      );
+    }
   });
 
   it('não expõe a senha da URL nem o segredo na mensagem de erro', () => {

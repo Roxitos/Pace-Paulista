@@ -2,9 +2,11 @@ import request from 'supertest';
 import { createApp } from '../../src/app.js';
 
 // Rotas só de teste: o app real não as registra (beforeErrorHandlers nunca é usado pelo server.js).
-export function createTestApp() {
+export function createTestApp(options = {}) {
   return createApp({
+    ...options,
     beforeErrorHandlers(app) {
+      options.beforeErrorHandlers?.(app);
       app.get('/__test/login/:id', (req, res, next) => {
         req.session.regenerate((err) => {
           if (err) return next(err);

@@ -1,7 +1,14 @@
 import { DEMO_GROUPS } from '../db/seeds/demo-groups.js';
 import { cliErrorMessage, isMain } from './cli.js';
 
-const BLOCKED_IN_PRODUCTION = 'Seed de demonstração bloqueado em produção (NODE_ENV=production).';
+const BLOCKED_IN_PRODUCTION =
+  'Seed de demonstração bloqueado em produção (NODE_ENV=production). ' +
+  'Para publicar os grupos demo mesmo assim, rode com ALLOW_DEMO_SEED=1.';
+
+// Só o texto exato `1` libera: `true`, `yes` ou vazio não contam.
+export function demoSeedAllowed(value) {
+  return value === '1';
+}
 
 const INSERT_GROUP = `
   INSERT INTO groups (slug, name, zone, location, meeting_point, days, start_time, pace_min_s,
@@ -10,9 +17,9 @@ const INSERT_GROUP = `
   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
   ON CONFLICT (slug) DO NOTHING`;
 
-export async function runSeed({ pool, nodeEnv, groups = DEMO_GROUPS }) {
+export async function runSeed({ pool, nodeEnv, allowDemoSeed = false, groups = DEMO_GROUPS }) {
   // O comando de release (migrate && seed) não pode publicar grupos fictícios em produção.
-  if (nodeEnv === 'production') throw new Error(BLOCKED_IN_PRODUCTION);
+  if (nodeEnv === 'production' && !allowDemoSeed) throw new Error(BLOCKED_IN_PRODUCTION);
 
   // Import dinâmico: pool.js valida o ambiente ao carregar, e em produção sem DATABASE_URL
   // o erro de ambiente esconderia a mensagem de bloqueio acima.
@@ -49,7 +56,8 @@ export async function runSeed({ pool, nodeEnv, groups = DEMO_GROUPS }) {
 async function main() {
   await import('dotenv/config');
   // Bloqueia antes de validar o ambiente (mesmo motivo do import dinâmico em runSeed).
-  if (process.env.NODE_ENV === 'production') {
+  const allowDemoSeed = demoSeedAllowed(process.env.ALLOW_DEMO_SEED);
+  if (process.env.NODE_ENV === 'production' && !allowDemoSeed) {
     console.error(BLOCKED_IN_PRODUCTION);
     process.exitCode = 1;
     return;
@@ -61,10 +69,13 @@ async function main() {
   const target = describeDatabaseUrl(connectionString);
   const pool = createPool(connectionString);
   try {
-    const { inserted, total } = await runSeed({ pool, nodeEnv: env.NODE_ENV });
+    const { inserted, total } = await runSeed({ pool, nodeEnv: env.NODE_ENV, allowDemoSeed });
     console.log(
       `Seed: ${inserted} de ${total} grupos demo inseridos (${total - inserted} já existiam).`,
     );
+    if (env.NODE_ENV === 'production') {
+      console.log('Produção: grupos demo publicados por ALLOW_DEMO_SEED=1.');
+    }
   } catch (err) {
     console.error(
       err.code === '42P01'

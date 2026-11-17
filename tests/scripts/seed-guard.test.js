@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { runSeed } from '../../scripts/seed.js';
+import { demoSeedAllowed, runSeed } from '../../scripts/seed.js';
 
 describe('runSeed em produção', () => {
   it('recusa com a mensagem de bloqueio sem tocar no banco', async () => {
@@ -17,5 +17,10 @@ describe('runSeed em produção', () => {
       'Seed de demonstração bloqueado em produção (NODE_ENV=production).',
     );
     expect(calls).toEqual([]);
+  });
+
+  it('demoSeedAllowed aceita só o texto exato 1', () => {
+    expect(demoSeedAllowed('1')).toBe(true);
+    for (const value of ['true', 'yes', '', undefined]) expect(demoSeedAllowed(value)).toBe(false);
   });
 });

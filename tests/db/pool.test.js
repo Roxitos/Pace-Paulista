@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { pool, tx } from '../../src/db/pool.js';
+import { createPool, pool, tx } from '../../src/db/pool.js';
 import { migrateTestDb } from '../helpers/db.js';
 
 beforeAll(async () => {
@@ -86,5 +86,28 @@ describe('tx', () => {
     expect(pool.idleCount).toBe(pool.totalCount);
     const { rows } = await pool.query('SELECT 1 AS one');
     expect(rows[0].one).toBe(1);
+  });
+});
+
+describe('statement_timeout', () => {
+  const url = pool.options.connectionString;
+
+  it('pool da app usa 5s; createPool sem opção não limita', async () => {
+    expect((await pool.query('SHOW statement_timeout')).rows[0].statement_timeout).toBe('5s');
+    const unlimited = createPool(url);
+    try {
+      expect((await unlimited.query('SHOW statement_timeout')).rows[0].statement_timeout).toBe('0');
+    } finally {
+      await unlimited.end();
+    }
+  });
+
+  it('cancela a consulta lenta com 57014', async () => {
+    const limited = createPool(url, { statementTimeoutMs: 100 });
+    try {
+      await expect(limited.query('SELECT pg_sleep(1)')).rejects.toMatchObject({ code: '57014' });
+    } finally {
+      await limited.end();
+    }
   });
 });
