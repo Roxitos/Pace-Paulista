@@ -18,13 +18,13 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 | **M4** Compatibilidade | `/encontrar` | ✅ concluído |
 | **M5** Contas | Criar conta, entrar e sair, sessão | ✅ concluído |
 | **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | ✅ concluído |
-| **M7** JS progressivo | Filtros ao vivo, modal, toast | — |
-| **M8** Produção | helmet/CSP, rate limit, deploy | — |
+| **M7** JS progressivo | Filtros ao vivo, modal "Entrar no grupo", toasts, mapa sem recarregar | ✅ concluído |
+| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | em andamento (spec 019 escrita) |
 | **M9** Conteúdo real | Grupos reais no lugar dos fictícios, mantidos atualizados | — |
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
-> ⚠️ Todas as páginas e ações funcionam sem JS: busca e detalhe, `/encontrar`, contas, cadastro de grupo, participar/sair e "Meus grupos". Ainda faltam as melhorias com JS do protótipo (filtros ao vivo, modal, toast, menu mobile — M7) e a preparação para produção (M8).
+> ⚠️ Todas as páginas e ações funcionam sem JS: busca e detalhe, `/encontrar`, contas, cadastro de grupo, participar/sair e "Meus grupos". As melhorias com JS do protótipo (filtros ao vivo, modal, toast, menu mobile e mapa sem recarregar) já existem como melhoria progressiva (M7). Falta a preparação para produção (M8).
 
 ## Stack
 
