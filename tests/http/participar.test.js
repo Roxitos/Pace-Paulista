@@ -97,6 +97,8 @@ describe('participar e sair: logado', () => {
     expect(await count()).toBe(0);
     const left = await agent.get(`/grupos/${SLUG}`);
     expect(left.text).toMatch(/role="status"><[^]*Você saiu do grupo\./);
+    expect(left.text).toContain('data-toast="Você saiu do grupo."');
+    expect(left.text).toContain('<script type="module" src="/js/participar.js"></script>');
     expect(participants(left.text)).toBe(before);
     expect(left.text).toContain('href="#participar"');
     await agent.post(`/grupos/${SLUG}/sair`).type('form').send({ _csrf: csrf }).expect(303);
@@ -108,6 +110,7 @@ describe('participar e sair: logado', () => {
     const res = await join(agent, { apelido: ' a ' });
     expect(res.status).toBe(422);
     expect(res.text).toContain('class="panel join-panel open"');
+    expect(res.text).toContain('src="/js/participar.js"');
     expect(res.text).toMatch(
       /id="e-jnome">[^]*Informe um nome ou apelido com pelo menos 2 letras\./,
     );

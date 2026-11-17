@@ -71,6 +71,15 @@ describe('GET /grupos/novo', () => {
 });
 
 describe('POST /grupos', () => {
+  it('nome com aspas e tags sai escapado no data-toast da tela de sucesso', async () => {
+    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const res = await postGroup(ana, { ...valido, nome: 'X" onmouseover="a <b>' });
+    expect(res.status).toBe(303);
+    const html = (await ana.get(res.headers.location)).text;
+    expect(html).toContain('data-toast="Grupo “X&#34; onmouseover=&#34;a &lt;b&gt;” cadastrado."');
+    expect(html).not.toContain('onmouseover="a');
+  });
+
   it('cria o grupo e mostra o sucesso só para o dono (CA3, CA4, CA5)', async () => {
     const app = createTestApp();
     const ana = await signedUp(app, 'Ana', 'ana@x.com');
@@ -97,6 +106,8 @@ describe('POST /grupos', () => {
 
     const sucesso = await ana.get(res.headers.location);
     expect(sucesso.text).toContain('Grupo cadastrado');
+    expect(sucesso.text).toContain('data-toast="Grupo “Corredores do Sul” cadastrado."');
+    expect(sucesso.text).not.toContain('participar.js');
     expect(sucesso.text).toContain('/grupos?zona=sul');
     expect(sucesso.text).toContain('/grupos/novo');
 

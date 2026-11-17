@@ -121,6 +121,7 @@ describe('GET / com ?conta=excluida', () => {
     const com = await request(app).get('/?conta=excluida');
     expect(com.text).toContain('role="status"');
     expect(com.text).toContain('Sua conta foi excluída.');
+    expect(com.text).toContain('data-toast="Sua conta foi excluída."');
     for (const url of ['/', '/?conta=x']) {
       expect((await request(app).get(url)).text).not.toContain('Sua conta foi excluída.');
     }

@@ -79,6 +79,7 @@ async function renderDetail(res, detail, join) {
   const { user } = res.locals;
   await res.renderPage('grupo-detalhe', {
     title: `${detail.group.name} · Pace Paulista`,
+    scripts: ['participar'],
     ...detail,
     join: join ?? (user ? { values: { apelido: user.displayName, ok: false }, errors: {} } : null),
   });

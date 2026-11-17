@@ -16,7 +16,7 @@
   <div class="wrap"><div class="form-layout">
     <div id="cadWrap">
 <% if (created) { %>
-    <div class="form" style="<%= zstyle(created.zone) %>"><div class="success"><span class="success-ico"><%- ic('check') %></span><h3>Grupo cadastrado</h3><p style="color:var(--muted);max-width:44ch"><b style="color:var(--ink)"><%= created.name %></b> já aparece na busca, no mapa e na <%= ZONAS[created.zone].nome %>.</p><div class="choice-row" style="justify-content:center"><a class="btn btn-primary" href="/grupos/<%= encodeURIComponent(created.slug) %>">Ver página do grupo</a><a class="btn btn-outline" href="/grupos?zona=<%= created.zone %>">Ver na busca</a><a class="btn btn-quiet" href="/grupos/novo">Cadastrar outro</a></div></div></div>
+    <div class="form" style="<%= zstyle(created.zone) %>"><div class="success"><span hidden data-toast="Grupo “<%= created.name %>” cadastrado."></span><span class="success-ico"><%- ic('check') %></span><h3>Grupo cadastrado</h3><p style="color:var(--muted);max-width:44ch"><b style="color:var(--ink)"><%= created.name %></b> já aparece na busca, no mapa e na <%= ZONAS[created.zone].nome %>.</p><div class="choice-row" style="justify-content:center"><a class="btn btn-primary" href="/grupos/<%= encodeURIComponent(created.slug) %>">Ver página do grupo</a><a class="btn btn-outline" href="/grupos?zona=<%= created.zone %>">Ver na busca</a><a class="btn btn-quiet" href="/grupos/novo">Cadastrar outro</a></div></div></div>
 <% } else { %>
     <form class="form" id="cadForm" method="post" action="/grupos" novalidate>
       <%- include('../partials/csrf') %>
