@@ -2,7 +2,7 @@
 
 Riscos aceitos, pendências e perguntas abertas levantadas pelo pipeline. **O Specifier lê este arquivo antes de cada spec** e incorpora (ou responde) os itens do marco. Ao resolver um item, marque `[x]` e cite a spec.
 
-Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md), `010` = [relatório 010](reports/010-criar-conta.md).
+Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md), `010` = [relatório 010](reports/010-criar-conta.md), `016` = [relatório 016](reports/016-filtros-ao-vivo.md), `017` = [relatório 017](reports/017-modal-participar-toasts.md).
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
@@ -91,6 +91,10 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 ## M7 — Melhorias de JS
 - [ ] Testar em aparelho real (iPhone) o campo de pace com `inputmode="numeric"` (literal do protótipo): o teclado numérico pode não ter `:`, impedindo digitar "5:30". Vale para `/encontrar` (spec 008, P5) e para o cadastro do M6. (008)
 - [x] `listPublished` devolve `contact` de todos os grupos (contrato `Group`): `GET /api/grupos` (e qualquer JSON enviado ao cliente) precisa remover `contact` para deslogado, senão o P4 vaza. (006, Hardener) — recomendação: separar `SELECT_LIST` sem `contact` (listagens) de `findPublishedBySlug` (mantém o campo) e ajustar o teste de contrato; o mapa já remove o campo no service. (007, Hardener) — spec 016: `/api/grupos` devolve só `{count, countText, query, chips, results}` (HTML dos partials), sem `contact`/`owner_id` (Hardener/QA)
+- [x] Filtros ao vivo na `/grupos` (`filtros.js` + `GET /api/grupos`). — spec 016 (QA aprovado)
+- [x] Modal "Entrar no grupo" (`participar.js`), toasts de sair/excluir/cadastrar e regressão do menu mobile e do contador de caracteres. — spec 017 (QA aprovado, CA1–CA12; P1–P5 com os defaults aceitos pelo usuário)
+- [ ] Modal só existe na página do grupo (P1 da 017): os cards de `/grupos` levam a `/grupos/<slug>#participar`, que abre o modal ao carregar. Modal por cima da listagem exigiria rota nova + fetch; fica para depois, se fizer falta. (017)
+- [ ] Spec 017, não verificado: handler de `pageshow` do botão "Entrando…" (o Voltar já traz a página renderizada de novo) e `inputmode` no iPhone. O teste do cliente (`tests/client/participar.test.js`, DOM falso) cobre só a montagem do modal, não trap de foco nem submit; esses ficam com o QA no navegador. (017, Hardener/QA)
 - [ ] `public/js/mapa.js`: selecionar no mapa sem recarregar (hoje cada clique recarrega `/mapa/<slug>`). (007)
 - [ ] Sem `aria-current` no menu em `/encontrar` (`currentNav('/encontrar')` → `''`, como no protótipo, que não tem item de menu para a página). (008, Coder)
 - [ ] No 1º carregamento, antes das webfontes chegarem, o cabeçalho e a âncora `#matchResults` ficam deslocados por um instante (fonte de fallback com outra métrica); vale para todas as âncoras do site. (008, QA)
@@ -123,6 +127,7 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - [ ] **Moderação** usando a coluna `status` já existente + página `/admin` (ver pergunta de produto).
 
 ## Riscos aceitos
+- (spec 017, Hardener) `style="…"` vindo do servidor (painel `#participar`, tela de sucesso do cadastro e demais views) segue incompatível com CSP estrita: resolver no M8 (helmet/CSP). Sem rate limit nos toasts/`data-toast` (só texto do servidor, escapado pelo EJS; `app.js` lê por `textContent`). (017)
 - (spec 013, Hardener) `groups.schemas.js` valida à mão, sem zod (AGENTS/spec pedem zod): conformidade, não segurança. Sem rate limit em `POST /grupos` (M8/moderação). `display_name` da conta aceita caracteres invisíveis (aparece em "Cadastrado por …"). Homóglifos e nomes que diferem só no acento são aceitos (slug ganha `-2`). Conta excluída entre carregar o usuário e o INSERT dá FK `23503` → 500 (corrida improvável). `/api/grupos` (M7) deve remover `owner_id` junto com `contact`. `inputmode` do pace do cadastro: testar em iPhone (M7). (013)
 - `npm audit`: 4 moderados (GHSA-g3hv-75wg-m249, minimatch via eslint 10), só devDependencies; `--omit=dev` = 0. Reavaliar quando sair eslint 10.x corrigido. (001)
 - `throw null` / `next(null)` → Express trata como "sem erro" e responde 404. (001)
