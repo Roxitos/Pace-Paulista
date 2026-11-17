@@ -20,9 +20,7 @@ services:
       - key: TZ_APP
         value: America/Sao_Paulo
       - key: TRUST_PROXY
-        value: '1'
-      # DIAG_IP fica DESLIGADA aqui de propósito: ligue (=1) no painel só durante o diagnóstico do
-      # TRUST_PROXY (docs/DEPLOY.md, "Diagnóstico do IP") e remova ao terminar.
+        value: '3'
       - key: ALLOW_DEMO_SEED
         value: '1' # produção sobe com os demos até o M9
       - key: SESSION_SECRET

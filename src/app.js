@@ -12,7 +12,6 @@ import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { securityHeaders } from './middlewares/securityHeaders.js';
 import { createRateLimits, mountRateLimits } from './middlewares/rateLimits.js';
-import { createDiagIpRouter } from './middlewares/diagIp.js';
 import { pagesRouter } from './modules/pages/pages.routes.js';
 import { groupsRouter } from './modules/groups/groups.routes.js';
 import { matchingRouter } from './modules/matching/matching.routes.js';
@@ -42,7 +41,6 @@ export function createApp({
   beforeErrorHandlers,
   trustProxy = env.TRUST_PROXY,
   rateLimits = createRateLimits(),
-  diagIp = env.DIAG_IP,
 } = {}) {
   const app = express();
 
@@ -82,8 +80,6 @@ export function createApp({
   app.get('/healthz', (req, res) =>
     res.type('text/plain').set('Cache-Control', 'no-store').send('ok'),
   );
-  // Temporário (CA11 da spec 020), desligado por padrão: sem DIAG_IP=1 a rota nem existe (404).
-  if (diagIp) app.use(createDiagIpRouter({ trustProxy }));
   app.use(express.static(path.join(root, '..', 'public')));
   app.get('/favicon.ico', (req, res) => res.redirect(301, '/favicon.svg'));
   app.use(express.urlencoded({ extended: false, limit: '16kb', parameterLimit: 200 }));
