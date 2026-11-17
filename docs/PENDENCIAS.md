@@ -39,7 +39,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Exibição do `contact` na página do grupo, inclusive quando NULL (demos). (003) — decidido (P4, usuário): **deslogado não vê**; linha "Contato" no fim da "Ficha do treino", texto puro, oculta quando vazia. Ajustar spec 006; exibição para logado entra no M5. — spec 006, CA4: serviço zera `contact` sem `viewer` e a view exige `locals.user`; reconfirmado pelo usuário em 2026-11-11
 - [x] Spec 005: toggles de zona viram checkboxes com o mesmo visual (P3 aprovado pelo usuário). (004) — spec 005, CA7
 - [x] Sem JS, ≤ 900 px: "Filtros" rola até `#filters` e o título/"Limpar filtros" ficam ~70 px atrás do cabeçalho fixo (toque acerta `/meus`). (005, QA) — spec 005: `.filters{scroll-margin-top:84px}` (a safe-area já vem do `scroll-padding-top` do `html`), reverificado pelo QA
-- [ ] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005)
+- [x] Regras CSS `[aria-pressed]` dos toggles de zona ficaram órfãs em `app.css` (cópia literal do protótipo); remover ou reaproveitar no M7. (005) — spec 018: mantidas (trecho copiado do protótipo, testado byte a byte; o mapa usa `aria-current`)
 - [x] Spec 007: `/sobre` mantém o título "Status do protótipo" (P10, usuário); banco ATIVO, login PENDENTE, item "navegador" removido. (004) — spec 007, CA7
 - [x] `/sobre`: atualizar a lista de status a cada marco (login vira ATIVO no M5 (feito na spec 011); compatibilidade/cadastro, citados no 1º ATIVO, só existem no M4/M6). (007) — compatibilidade passou a existir com a spec 008; falta cadastro (M6); login feito na spec 011. (008) — resolvida na spec 015: cadastro e entrada em grupos existem, texto do 1º ATIVO passa a valer.
 
@@ -95,10 +95,10 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] Modal "Entrar no grupo" (`participar.js`), toasts de sair/excluir/cadastrar e regressão do menu mobile e do contador de caracteres. — spec 017 (QA aprovado, CA1–CA12; P1–P5 com os defaults aceitos pelo usuário)
 - [ ] Modal só existe na página do grupo (P1 da 017): os cards de `/grupos` levam a `/grupos/<slug>#participar`, que abre o modal ao carregar. Modal por cima da listagem exigiria rota nova + fetch; fica para depois, se fizer falta. (017)
 - [ ] Spec 017, não verificado: handler de `pageshow` do botão "Entrando…" (o Voltar já traz a página renderizada de novo) e `inputmode` no iPhone. O teste do cliente (`tests/client/participar.test.js`, DOM falso) cobre só a montagem do modal, não trap de foco nem submit; esses ficam com o QA no navegador. (017, Hardener/QA)
-- [ ] `public/js/mapa.js`: selecionar no mapa sem recarregar (hoje cada clique recarrega `/mapa/<slug>`). (007)
+- [x] `public/js/mapa.js`: selecionar no mapa sem recarregar (hoje cada clique recarrega `/mapa/<slug>`). (007) — spec 018 (QA aprovado)
 - [ ] Sem `aria-current` no menu em `/encontrar` (`currentNav('/encontrar')` → `''`, como no protótipo, que não tem item de menu para a página). (008, Coder)
 - [ ] No 1º carregamento, antes das webfontes chegarem, o cabeçalho e a âncora `#matchResults` ficam deslocados por um instante (fonte de fallback com outra métrica); vale para todas as âncoras do site. (008, QA)
-- [ ] Acessibilidade do mapa (vêm do protótipo): foco de teclado discreto nos pins não selecionados (anel `r=0`, só o ponto cresce) e alvo de toque de ~9 px a 360 px (WCAG 2.5.8 pede 24 px). (007, QA)
+- [x] Acessibilidade do mapa (vêm do protótipo): foco de teclado discreto nos pins não selecionados (anel `r=0`, só o ponto cresce) e alvo de toque de ~9 px a 360 px (WCAG 2.5.8 pede 24 px). (007, QA) — spec 018: `circle.hit r=17` (alvo 24,6 px a 360 px) e anel de foco contínuo nos pins (QA aprovado)
 
 ## M8 — Produção
 - [x] Decisão (usuário, 2026-11-17): deploy no **Render** (Web Service Node) e banco no **Neon** (Postgres gerenciado). Meta: produção na quarta 25/11.
@@ -130,6 +130,7 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - [ ] **Moderação** usando a coluna `status` já existente + página `/admin` (ver pergunta de produto).
 
 ## Riscos aceitos
+- (spec 018, Hardener/QA) `GET /api/mapa/:slug` sem rate limit, helmet nem `nosniff` (spec 019); `loadMapPanel` lê toda a lista de publicados por chamada; cliente não confere `data.slug` da resposta; numa falha, pin/lista mudam antes do `location.assign` (visual, bfcache); a 360 px a largura chega a 375 antes das webfontes (igual em `/grupos`). (018)
 - (spec 017, Hardener) `style="…"` vindo do servidor (painel `#participar`, tela de sucesso do cadastro e demais views) segue incompatível com CSP estrita: resolver no M8 (helmet/CSP). Sem rate limit nos toasts/`data-toast` (só texto do servidor, escapado pelo EJS; `app.js` lê por `textContent`). (017)
 - (spec 013, Hardener) `groups.schemas.js` valida à mão, sem zod (AGENTS/spec pedem zod): conformidade, não segurança. Sem rate limit em `POST /grupos` (M8/moderação). `display_name` da conta aceita caracteres invisíveis (aparece em "Cadastrado por …"). Homóglifos e nomes que diferem só no acento são aceitos (slug ganha `-2`). Conta excluída entre carregar o usuário e o INSERT dá FK `23503` → 500 (corrida improvável). `/api/grupos` (M7) deve remover `owner_id` junto com `contact`. `inputmode` do pace do cadastro: testar em iPhone (M7). (013)
 - `npm audit`: 4 moderados (GHSA-g3hv-75wg-m249, minimatch via eslint 10), só devDependencies; `--omit=dev` = 0. Reavaliar quando sair eslint 10.x corrigido. (001)

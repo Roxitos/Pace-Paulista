@@ -36,3 +36,9 @@ Um achado (baixa), corrigido com teste antes da correção. `npm test` 829/829 e
 - Conferido sem problema: `/api/mapa/:slug` sem `contact`/`owner_id`, nome com `<script>` escapado, `Cache-Control: private, no-store` também no 404, slug inválido sem consultar o banco, `renderPartial` sem consumir flash nem serializar `res.locals`, fetch relativo, `replaceState` só com path, `AbortController`, falha → `location.assign`.
 - Riscos aceitos: sem helmet/`nosniff` e sem rate limit na API (M8, spec 019); cliente não confere `data.slug`; numa falha, pin/lista mudam antes do `location.assign` (visual, bfcache); `loadMapPanel` lê a lista inteira.
 - Alertas para o QA: CA1–CA7 e CA11–CA13 só no navegador.
+
+## QA
+APROVADO (CA1–CA14). `npm test` 53 arquivos / 829 verdes; lint e prettier ok. Detalhes em `docs/qa/018-mapa-sem-recarregar.md`.
+- Playwright 360 px e 1280 px, com e sem JS: seleção troca sem recarregar e sem nova entrada no histórico (`replaceState`); cache (3 requisições para 6 cliques); último clique vale; falha de rede ou 404 navegam para `/mapa/<slug>#mapDetail`; Ctrl/botão do meio abrem nova aba; foco de teclado com anel contínuo r=14 (`--focus`); Enter seleciona; alvo do pin 24,6 px; rolagem instantânea com `prefers-reduced-motion`; sem scroll horizontal nem erros de console; sem JS igual à 007.
+- Não bloqueante: antes das webfontes a largura a 360 px chega a 375 e estabiliza (igual em `/grupos`; pendência M7 já conhecida).
+- Pendências do Hardener seguem para o M8 (helmet/`nosniff` e rate limit na API, `loadMapPanel` lê a lista inteira).

@@ -59,3 +59,8 @@ export async function loadMapData(selectedSlug) {
   if (selectedSlug && !data.selected) return null;
   return data;
 }
+
+// Painel de um grupo para o mapa sem recarregar; null = não está entre os publicados.
+export async function loadMapPanel(slug) {
+  return (await loadMapData(slug))?.selected ?? null;
+}

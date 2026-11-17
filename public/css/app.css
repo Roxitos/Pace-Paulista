@@ -53,6 +53,10 @@ a.map-item{text-decoration:none}
 .modal .stack{grid-template-columns:minmax(0,1fr)}
 .modal-top h2{overflow-wrap:anywhere}
 
+/* Mapa (spec 018): foco de teclado visível também nos pins não selecionados (lá o anel tem r=0) e contínuo,
+   para não se confundir com o anel tracejado da seleção. */
+a.pin:focus-visible circle.ring{r:14px;stroke:var(--focus);stroke-width:3;stroke-dasharray:none}
+
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{
   --verde:#5E9A22; --verde-hover:#4F8519; --roxo:#7A3FA0; --laranja:#E8892B; --vermelho:#C8402F; --azul:#3A78C2;
