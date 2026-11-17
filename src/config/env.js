@@ -71,6 +71,8 @@ const schema = z
     DATABASE_URL_TEST: z.string().default(DEV_DATABASE_URL_TEST),
     SESSION_SECRET: z.string().optional(),
     TRUST_PROXY: z.string().optional(),
+    // Temporária (spec 020, CA11): só `1` liga o GET /diag/ip; qualquer outro valor deixa desligado.
+    DIAG_IP: z.string().optional(),
   })
   .transform((data, ctx) => {
     const production = data.NODE_ENV === 'production';
@@ -103,7 +105,7 @@ const schema = z
       invalid('SESSION_SECRET');
     }
 
-    return { ...data, DATABASE_URL, SESSION_SECRET, TRUST_PROXY };
+    return { ...data, DATABASE_URL, SESSION_SECRET, TRUST_PROXY, DIAG_IP: data.DIAG_IP === '1' };
   });
 
 export function parseEnv(source) {

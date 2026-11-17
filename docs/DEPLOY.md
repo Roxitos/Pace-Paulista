@@ -37,8 +37,19 @@ SELECT count(*) FROM groups WHERE is_demo;                          -- 11
 - A migration roda **antes** de a nova versão subir, então precisa ser compatível com o código antigo: adicione coluna/tabela em um deploy e só remova/renomeie no seguinte.
 - *Rollback* do Render volta o código, **não** o schema (migrations só vão para frente); o Neon tem restauração por horário dentro do histórico do plano Free.
 - Trocar `SESSION_SECRET` desloga todo mundo.
-- Para ensaiar uma migration arriscada, crie uma branch no Neon e rode `npm run migrate` local com `NODE_ENV=development` e a `DATABASE_URL` da branch (conexão direta).
+- Para ensaiar uma migration arriscada, crie uma branch no Neon e rode `npm run migrate` local com `NODE_ENV=development` e a `DATABASE_URL` da branch (conexão direta, com `?sslmode=verify-full`: fora de produção o `env.js` não exige TLS).
 - O migrate recusa host `-pooler`: o `pg_advisory_lock` não funciona pelo pooler.
+
+## Diagnóstico do IP (CA11)
+Serve para descobrir o `TRUST_PROXY` certo no 1º deploy (o padrão de produção é 1). Temporário.
+1. No painel do Render, crie a env `DIAG_IP=1` (não está no `render.yaml`) e aguarde o redeploy.
+2. Abra `https://<seu-serviço>.onrender.com/diag/ip` de **duas redes diferentes** (ex.: Wi-Fi e 4G).
+3. Leia o JSON:
+   - `ips` com **N** entradas e o IP real do visitante na primeira → `TRUST_PROXY = N`. Com o valor certo, `ip` é a primeira entrada de `ips` (o visitante) e `xForwardedFor` mostra a cadeia crua.
+   - Se `ip` for um IP de Cloudflare ou de outro proxy (e não o da sua rede), há mais um salto: aumente `TRUST_PROXY` em 1 e repita até `ip` ser o IP da sua rede. Os cabeçalhos `cfConnectingIp`/`trueClientIp`, quando existem, confirmam o IP real.
+   - Redes diferentes devem dar `ip` diferentes; se derem o mesmo, o valor ainda está baixo.
+4. Ajuste só `TRUST_PROXY` no painel (sem código) e confira de novo.
+5. **Desligue:** apague `DIAG_IP` no painel ao terminar. A rota é pública e limitada a 30/min por IP; não deixe ligada.
 
 ## 6. M9: tirar os demos
 Remova `ALLOW_DEMO_SEED` **e** o `&& npm run seed` do `buildCommand` no `render.yaml`, no mesmo PR (sem a flag o seed sai com código 1 e o build falha). Depois apague os demos do banco.

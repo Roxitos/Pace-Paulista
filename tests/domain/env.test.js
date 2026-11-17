@@ -11,7 +11,15 @@ describe('parseEnv', () => {
       DATABASE_URL_TEST: 'postgres://pace:pace@localhost:5432/pace_paulista_test',
       SESSION_SECRET: 'dev-inseguro-nao-usar-em-producao',
       TRUST_PROXY: 0,
+      DIAG_IP: false,
     });
+  });
+
+  it('DIAG_IP: só "1" liga o diagnóstico', () => {
+    expect(parseEnv({ DIAG_IP: '1' }).DIAG_IP).toBe(true);
+    for (const other of ['0', 'true', '']) {
+      expect(parseEnv({ DIAG_IP: other }).DIAG_IP).toBe(false);
+    }
   });
 
   it('converte PORT de string para número', () => {

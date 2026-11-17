@@ -28,3 +28,33 @@ Dois ajustes, sem mudar comportamento (`npm test` 864 verdes, lint ok):
 - `src/db/pool.js`: `CONNECTION_TIMEOUT_MS` deixou de ser exportada (só o próprio arquivo usa).
 - `tests/http/seguranca.test.js`: o `for` com `if (method === 'get')` no teste do `/healthz` virou `it.each(['get', 'head'])`; a checagem do corpo `ok` ficou só em `banco-indisponivel.test.js`, que já a cobre. Status e cabeçalhos seguem checados para GET e HEAD (+1 teste).
 - Restante do diff já estava limpo (sem `console.log`, sem imports sem uso, camadas respeitadas).
+
+## Hardener
+Revisou os commits do Coder (ffb226f) e do Cleaner (a5f0ab8). Três achados de baixa severidade, cada um com teste escrito antes (visto falhar) e depois corrigido. `npm test` 866 verdes, `npm run lint` ok, `npm audit --omit=dev` 0 vulnerabilidades. Sem commit/push.
+- **Trava do migrate contra o pooler** (`scripts/migrate.js`): `assertDirectConnection` olhava só o host da URL, e o `pg` deixa `?host=` na query sobrescrevê-lo, então o `-pooler` passava e o `pg_advisory_lock` não funcionaria. Agora confere o host da URL e todos os `host` da query, sem diferenciar maiúsculas. Teste em `tests/scripts/migrate-errors.test.js`.
+- **Desligamento** (`src/lifecycle.js`): se `pool.end()` falhasse, o erro ficava solto (stack trace e saída fora do caminho previsto). Agora loga `Erro ao fechar o pool do Postgres: <mensagem>` e sai com código 1. Teste em `tests/server/lifecycle.test.js`.
+- **Documentação** (`docs/DEPLOY.md` §5): o ensaio de migration local com `NODE_ENV=development` agora lembra `?sslmode=verify-full` (fora de produção o `env.js` não exige).
+- Sem achado: `/healthz` (antes de sessão/CSRF/rate limit, sem cookie, sem banco, `no-store`, helmet), `render.yaml` (sem segredos; `SESSION_SECRET` gerado com 44 caracteres), pool/SSL com `verify-full`, logs do migrate/seed sem URL nem senha, prazo de desligamento (10 s) coerente com `statement_timeout` (5 s) e os 30 s do Render.
+- Riscos aceitos: (1) produção aceita `sslmode=require` por regra da 019/AGENTS §9; com `uselibpqcompat=true` o `pg` não verifica o certificado, e o `DEPLOY.md` manda usar `verify-full`; (2) **CA11 é o ponto crítico do deploy real**: se houver mais de um proxy na frente (ex.: Cloudflare), `TRUST_PROXY=1` faz todos dividirem o IP do proxy nos rate limits; a correção é só trocar `TRUST_PROXY` no painel.
+- Pendente de deploy real: CA7–CA13 (inclusive CA8b), e `healthCheckPath`/`autoDeployTrigger`/região/env no build do plano Free.
+
+## Coder (extra: diagnóstico do IP para o CA11)
+Pedido do usuário para reduzir o risco do CA11 (quantos proxies o Render põe na frente; valor certo de `TRUST_PROXY`). `npm test` 872 verdes (57 arquivos), lint ok. Sem dependência nova, sem migration, sem commit/push.
+- `GET /diag/ip` (`src/middlewares/diagIp.js`): só existe com `DIAG_IP=1` (desligada por padrão; sem ela a rota nem é registrada e dá o 404 normal). Registrada após `securityHeaders` e antes de static/sessão/CSRF (sem cookie, fora do rate limit de leitura). Limite próprio de 30/min por IP (429 em JSON, `no-store`).
+- Resposta JSON `no-store` só com: `ip`, `ips`, `trustProxy`, `xForwardedFor`, `socketRemoteAddress`, `cfConnectingIp`, `trueClientIp`. Sem dump de `req.headers`, env ou URL do banco.
+- `env.js`: `DIAG_IP` (só `'1'` liga). `createApp` ganhou a opção `diagIp` (default `env.DIAG_IP`).
+- Testes: `tests/http/diag-ip.test.js` (404 sem a flag; campos, `no-store`, sem `Set-Cookie`; `X-Forwarded-For` forjado com trust proxy 1 e 2; sem vazar Cookie/Authorization; 31º pedido → 429) e `tests/domain/env.test.js`.
+- Docs: `.env.example`, comentário no `render.yaml` (não ligada), `docs/DEPLOY.md` nova seção "Diagnóstico do IP (CA11)" (ligar no painel, abrir de duas redes, ler `ips`, desligar ao terminar). A spec 020 não foi alterada: o CA11 deve passar a apontar para essa seção.
+- Próximo: Hardener antes do QA. Depois do diagnóstico, apagar `DIAG_IP` no painel (ou remover o router).
+
+## Hardener (extra: `/diag/ip`)
+Sem achado que exigisse correção; nenhum código alterado, nenhum teste novo. Testes de `diag-ip` e `env` (43) verdes e lint ok. Sondagem com teste temporário (já apagado):
+- `xForwardedFor` cru ecoado (testado com `<script>`): JSON com `nosniff` e CSP, sem XSS; o valor só volta a quem enviou.
+- GET/HEAD sem cookie; POST cai no CSRF (403) sem cookie; sem `DIAG_IP` → 404; `no-store` no 200 e no 429; só os 7 campos saem; ordem em `app.js` correta.
+- Riscos aceitos: (1) o limite de 30/min usa `req.ip`, então girar `X-Forwarded-For` o contorna quando `TRUST_PROXY` está acima do nº real de proxies (justamente o cenário investigado; a rota não toca no banco e custa como o `/healthz`); (2) o teste "sem DIAG_IP" depende do env (falha se `DIAG_IP=1` no `.env` local); (3) remover a rota e a variável depois do diagnóstico.
+
+## QA
+**APROVADO** para CA1–CA6 e a parte local do CA11 (`docs/qa/020-deploy-render-neon.md`). `npm test` 872/872 (57 arquivos), lint ok, `npm audit --omit=dev` sem vulnerabilidades, `package.json` intacto. Migrate idempotente (6 migrations em dia) e seed idempotente (0 de 11). Páginas principais 200; `/meus` e `/grupos/novo` redirecionam para o login.
+- Pendentes de verificação manual no deploy real: CA7–CA10, o 429 da 121ª chamada em `/grupos` (CA11), CA12 e CA13. Também registrar cold start e se o 1º acesso após o Neon suspender dá 500.
+- Não rodados: Playwright/360 px (spec sem mudança de UI).
+- Sugestão: remover `/diag/ip` e `DIAG_IP` após descobrir o `TRUST_PROXY`.

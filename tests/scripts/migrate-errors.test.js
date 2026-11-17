@@ -88,6 +88,13 @@ describe('assertDirectConnection', () => {
     }
   });
 
+  // O pg deixa o parâmetro `host` da query sobrepor o host da URL.
+  it('recusa o pooler passado no parâmetro host da query', () => {
+    const url =
+      'postgresql://u:p@ep-x-123.us-east-1.aws.neon.tech/neondb?host=ep-x-123-pooler.us-east-1.aws.neon.tech&sslmode=verify-full';
+    expect(() => assertDirectConnection(url)).toThrow('host sem -pooler');
+  });
+
   it('aceita o host direto e localhost', () => {
     expect(() => assertDirectConnection(POOLER.replace('-pooler', ''))).not.toThrow();
     expect(() => assertDirectConnection('postgres://pace:pace@localhost:5432/pace')).not.toThrow();

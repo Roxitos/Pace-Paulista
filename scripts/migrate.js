@@ -49,9 +49,11 @@ function verifyApplied(applied, migrations) {
 }
 
 // O pooler do Neon (pgbouncer em modo transação) não mantém o pg_advisory_lock entre comandos.
+// O pg deixa o parâmetro `host` da query sobrepor o host da URL: confere os dois.
 export function assertDirectConnection(connectionString) {
-  const { hostname } = new URL(connectionString);
-  if (hostname.split('.')[0].endsWith('-pooler')) {
+  const url = new URL(connectionString);
+  const hosts = [url.hostname, ...url.searchParams.getAll('host')];
+  if (hosts.some((host) => host.toLowerCase().split('.')[0].endsWith('-pooler'))) {
     throw new Error(
       'O migrate precisa da conexão direta do Neon (host sem -pooler): o pg_advisory_lock não funciona pelo pooler.',
     );

@@ -14,7 +14,14 @@ export function gracefulShutdown({
     log('Encerrando: aguardando requisições em andamento.');
     setTimeout(() => exit(1), timeoutMs).unref();
     await new Promise((resolve) => server.close(resolve));
-    await pool.end();
+    try {
+      await pool.end();
+    } catch (err) {
+      // Sem o catch, a rejeição solta derrubaria o processo com stack trace no log.
+      log(`Erro ao fechar o pool do Postgres: ${err.message}`);
+      exit(1);
+      return;
+    }
     exit(0);
   };
 }

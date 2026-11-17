@@ -39,6 +39,17 @@ describe('gracefulShutdown', () => {
     expect(pool.end).not.toHaveBeenCalled();
   });
 
+  it('sai com 1, sem rejeição solta, se o pool.end falhar', async () => {
+    const { pool, exit, log, handler } = setup();
+    pool.end.mockRejectedValueOnce(new Error('Connection terminated unexpectedly'));
+    await expect(handler()).resolves.toBeUndefined();
+    expect(exit).toHaveBeenCalledWith(1);
+    expect(exit).not.toHaveBeenCalledWith(0);
+    expect(log).toHaveBeenCalledWith(
+      'Erro ao fechar o pool do Postgres: Connection terminated unexpectedly',
+    );
+  });
+
   it('ignora a segunda chamada', async () => {
     const { server, pool, exit, handler } = setup();
     await handler();
