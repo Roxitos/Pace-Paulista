@@ -22,3 +22,10 @@ Spec 018 implementada. `npm test` (53 arquivos, 828 testes) e `npm run lint` pas
 - Alterados: `mapa.ejs` (usa o partial; `circle.hit r=17` em cada pin), `pages.service.js` (`loadMapPanel`), `pages.routes.js` (`scripts: ['mapa']` só nos 200; `GET /api/mapa/:slug`), `app.css` (foco do pin, antes do marcador `/* Layout: cabeçalho fixo`), `tests/http/mapa.test.js`.
 - Testes: CA8–CA12 e CA14 por HTTP/cliente; testes antigos do mapa passam sem alteração (CA9). CA1–CA7 e CA11–CA13 só no navegador (QA); o Coder não rodou Chromium.
 - Alertas: `loadMapPanel` lê a lista inteira de publicados a cada chamada (rate limit/cache no M8). Seguem abertas e fora da spec: rolagem do `/encontrar`, `aria-current` em `/encontrar`, webfonts.
+
+## Cleaner
+Sem mudança de comportamento. `npm test` 828/828 e `npm run lint` OK.
+- `pages.routes.js`: helper `renderMap(res, data)` no lugar da repetição de `title`/`scripts` nas duas rotas de `/mapa`.
+- `map-detail.ejs`: includes de `zone-chip` e `demo-tag` com caminho relativo ao partial, como em `group-card.ejs`.
+- `mapa.js`: `catch {` sem `err` e guarda só `controller !== mine` (a checagem de `AbortError` era redundante).
+- Alertas para o Hardener: `loadMapPanel` lê toda a lista de publicados a cada chamada (M8); testes de cliente com DOM falso, então CA1–CA7 e CA11–CA13 ficam para o QA no navegador.
