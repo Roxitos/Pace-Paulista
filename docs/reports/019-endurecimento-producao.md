@@ -13,3 +13,5 @@ Spec 019 escrita, primeira do M8 (só código; `render.yaml`, Neon e deploy fica
 
 Perguntas em aberto (defaults na spec): P1 limites; P2 tela do 429 (genérica × mensagem da 011); P3 `style-src-attr 'unsafe-inline'` (atualiza AGENTS §9); P4 `TRUST_PROXY=1`; P5 SSL do banco sem exceção para localhost (recomenda `verify-full`); P6 outras rotas sem limite; P7 timeout 5 s; P8 favicon só SVG.
 Para a 020: `-pooler` do Neon pode recusar `statement_timeout` na conexão; Safari < 15.4 não entende `style-src-attr`; rate limit em memória zera a cada deploy. Docs a atualizar com OK: AGENTS §3, §9 e §10.
+
+Aprovação: usuário aceitou os defaults de P1–P8 (limites da tabela; 429 com a página genérica; `style-src-attr 'unsafe-inline'` com AGENTS §9 atualizado; `TRUST_PROXY=1` em produção; SSL do banco sem exceção para localhost; demais rotas sem limite; `statement_timeout` 5 s; favicon só SVG).
