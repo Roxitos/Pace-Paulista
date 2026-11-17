@@ -19,7 +19,7 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 | **M5** Contas | Criar conta, entrar e sair, sessão | ✅ concluído |
 | **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | ✅ concluído |
 | **M7** JS progressivo | Filtros ao vivo, modal "Entrar no grupo", toasts, mapa sem recarregar | ✅ concluído |
-| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | em andamento (specs 019–020) |
+| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | código pronto (specs 019–020); falta o deploy real e sua verificação |
 | **M9** Conteúdo real | Grupos reais no lugar dos fictícios, mantidos atualizados | — |
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
