@@ -6,7 +6,7 @@ import { connectionStringFor, env } from '../config/env.js';
 const APP_STATEMENT_TIMEOUT_MS = 5000;
 // Cobre o wake do compute do Neon Free (suspenso após ~5 min ocioso). Fica acima do statement_timeout
 // de propósito: este só conta a execução, que começa depois da conexão.
-export const CONNECTION_TIMEOUT_MS = 15000;
+const CONNECTION_TIMEOUT_MS = 15000;
 
 export function createPool(connectionString, { statementTimeoutMs } = {}) {
   const config = { connectionString, connectionTimeoutMillis: CONNECTION_TIMEOUT_MS };

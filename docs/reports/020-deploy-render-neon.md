@@ -22,3 +22,9 @@ Spec 020 implementada. `npm test` 863/863 (56 arquivos), `npm run lint` e `npm a
 - CA1 e CA5 por inspeção; CA2, CA3, CA4, CA5b e CA6 cobertos por testes; CA7–CA13 só no ambiente publicado (ficam para o QA, após o deploy).
 - Base: a 019 (c404e17) não estava na branch; por decisão do usuário, `main` local foi avançada (fast-forward) para a 019 e a branch da 020 foi rebaseada sobre ela. Nada foi enviado ao remoto.
 - Incertezas do Free a confirmar no 1º deploy: `healthCheckPath`/`autoDeployTrigger` (senão `autoDeploy: true`), env no build, região `virginia`, troca de versão.
+
+## Cleaner
+Dois ajustes, sem mudar comportamento (`npm test` 864 verdes, lint ok):
+- `src/db/pool.js`: `CONNECTION_TIMEOUT_MS` deixou de ser exportada (só o próprio arquivo usa).
+- `tests/http/seguranca.test.js`: o `for` com `if (method === 'get')` no teste do `/healthz` virou `it.each(['get', 'head'])`; a checagem do corpo `ok` ficou só em `banco-indisponivel.test.js`, que já a cobre. Status e cabeçalhos seguem checados para GET e HEAD (+1 teste).
+- Restante do diff já estava limpo (sem `console.log`, sem imports sem uso, camadas respeitadas).

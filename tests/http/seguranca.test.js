@@ -67,19 +67,18 @@ describe('cabeçalhos de segurança', () => {
 });
 
 describe('GET /healthz', () => {
-  it('responde ok em texto, sem cookie, com no-store e cabeçalhos de segurança', async () => {
-    const app = createTestApp();
-    for (const method of ['get', 'head']) {
-      const res = await request(app)[method]('/healthz');
+  it.each(['get', 'head'])(
+    '%s responde 200 em texto, sem cookie, com no-store e cabeçalhos de segurança',
+    async (method) => {
+      const res = await request(createTestApp())[method]('/healthz');
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toBe('text/plain; charset=utf-8');
       expect(res.headers['cache-control']).toBe('no-store');
       expect(res.headers['set-cookie']).toBeUndefined();
       expect(res.headers['content-security-policy']).toContain("default-src 'self'");
       expect(res.headers['x-content-type-options']).toBe('nosniff');
-      if (method === 'get') expect(res.text).toBe('ok');
-    }
-  });
+    },
+  );
 
   it('não entra no rate limit de leitura', async () => {
     const app = createTestApp({ rateLimits: createRateLimits({ read: { limit: 1 } }) });
