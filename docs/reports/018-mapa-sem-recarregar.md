@@ -29,3 +29,10 @@ Sem mudança de comportamento. `npm test` 828/828 e `npm run lint` OK.
 - `map-detail.ejs`: includes de `zone-chip` e `demo-tag` com caminho relativo ao partial, como em `group-card.ejs`.
 - `mapa.js`: `catch {` sem `err` e guarda só `controller !== mine` (a checagem de `AbortError` era redundante).
 - Alertas para o Hardener: `loadMapPanel` lê toda a lista de publicados a cada chamada (M8); testes de cliente com DOM falso, então CA1–CA7 e CA11–CA13 ficam para o QA no navegador.
+
+## Hardener
+Um achado (baixa), corrigido com teste antes da correção. `npm test` 829/829 e `npm run lint` OK.
+- `public/js/mapa.js` aceitava qualquer `data-id`: valor como `..` iria para `/api/` e um `panel` na resposta cairia no `innerHTML`. Só seria explorável com slug fora do padrão no banco. Agora o clique só é interceptado se `data-id` casar com `^[a-z0-9-]{1,60}$` (mesmo formato do `isSlug` do servidor); fora disso, navegação normal. Teste: `tests/client/mapa.test.js` ("data-id fora do formato de slug…").
+- Conferido sem problema: `/api/mapa/:slug` sem `contact`/`owner_id`, nome com `<script>` escapado, `Cache-Control: private, no-store` também no 404, slug inválido sem consultar o banco, `renderPartial` sem consumir flash nem serializar `res.locals`, fetch relativo, `replaceState` só com path, `AbortController`, falha → `location.assign`.
+- Riscos aceitos: sem helmet/`nosniff` e sem rate limit na API (M8, spec 019); cliente não confere `data.slug`; numa falha, pin/lista mudam antes do `location.assign` (visual, bfcache); `loadMapPanel` lê a lista inteira.
+- Alertas para o QA: CA1–CA7 e CA11–CA13 só no navegador.
