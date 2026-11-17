@@ -14,3 +14,11 @@ Spec 020 escrita, segunda do M8 (deploy). Sem migration nem dependência nova. *
 - Perguntas com defaults: P1 **Free (decidido)**; P2 virginia + us-east-1; P3 conexão direta; P4 seed no build; P5 healthcheck sem banco; P6 deploy após CI verde; P7 só `*.onrender.com`; P8 sem staging; P9 Neon Free (sessões a cada 15 min reacordam o banco; ping externo aumenta o consumo); P10 só `verify-full`; P11 OK na spec vale para os textos de docs.
 - Incertezas a confirmar no 1º deploy (não testadas): `healthCheckPath`/`autoDeployTrigger` aceitos no Free; env vars disponíveis no build; região `virginia` no Free; sem zero downtime garantido; regras de ping externo contra a hibernação.
 - Alertas: seed só ignora conflito de slug (no M9, tirar a flag e `&& npm run seed` do `buildCommand` no mesmo PR); `lock_timeout` do migrate segue fora; rate limit em memória zera a cada hibernação.
+
+## Coder
+Spec 020 implementada. `npm test` 863/863 (56 arquivos), `npm run lint` e `npm audit --omit=dev` (0 vulnerabilidades) passam. Sem dependência nova, sem migration. Sem commit/push.
+- Criados: `render.yaml`, `docs/DEPLOY.md`, `src/lifecycle.js`, `tests/server/lifecycle.test.js`.
+- Alterados: `src/app.js` (`/healthz` sem banco, após `securityHeaders`, antes do `express.static`), `src/server.js` (SIGTERM/SIGINT → `gracefulShutdown`), `src/db/pool.js` (`CONNECTION_TIMEOUT_MS = 15000`), `scripts/migrate.js` (`assertDirectConnection` antes de `createPool`, `pool?.end()` no `finally`), `.env.example`, `AGENTS.md` (§3/§9/§10), `README.md`, testes de pool, segurança, banco-indisponível e migrate-errors.
+- CA1 e CA5 por inspeção; CA2, CA3, CA4, CA5b e CA6 cobertos por testes; CA7–CA13 só no ambiente publicado (ficam para o QA, após o deploy).
+- Base: a 019 (c404e17) não estava na branch; por decisão do usuário, `main` local foi avançada (fast-forward) para a 019 e a branch da 020 foi rebaseada sobre ela. Nada foi enviado ao remoto.
+- Incertezas do Free a confirmar no 1º deploy: `healthCheckPath`/`autoDeployTrigger` (senão `autoDeploy: true`), env no build, região `virginia`, troca de versão.

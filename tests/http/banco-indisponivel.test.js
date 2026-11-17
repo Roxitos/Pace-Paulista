@@ -46,3 +46,11 @@ describe('banco indisponível: o que não depende dele continua no ar', () => {
     expect(res.text).toContain('id="matchForm"');
   });
 });
+
+describe('banco indisponível: healthcheck', () => {
+  it('GET /healthz responde 200 sem consultar o banco', async () => {
+    const res = await request(app).get('/healthz');
+    expect(res.status).toBe(200);
+    expect(res.text).toBe('ok');
+  });
+});

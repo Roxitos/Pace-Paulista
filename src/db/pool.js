@@ -4,9 +4,12 @@ import { connectionStringFor, env } from '../config/env.js';
 // Só o pool da app usa: um lock longo em `groups` pendurava `/` e `/zonas` até o timeout do cliente.
 // migrate/seed criam o pool sem limite (uma migration pode demorar).
 const APP_STATEMENT_TIMEOUT_MS = 5000;
+// Cobre o wake do compute do Neon Free (suspenso após ~5 min ocioso). Fica acima do statement_timeout
+// de propósito: este só conta a execução, que começa depois da conexão.
+export const CONNECTION_TIMEOUT_MS = 15000;
 
 export function createPool(connectionString, { statementTimeoutMs } = {}) {
-  const config = { connectionString, connectionTimeoutMillis: 5000 };
+  const config = { connectionString, connectionTimeoutMillis: CONNECTION_TIMEOUT_MS };
   if (statementTimeoutMs) config.statement_timeout = statementTimeoutMs;
   const pool = new pg.Pool(config);
   // Sem este listener, uma conexão ociosa derrubada pelo servidor mata o processo.

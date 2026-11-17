@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { pool } from '../../src/db/pool.js';
+import { createRateLimits } from '../../src/middlewares/rateLimits.js';
 import { securityHeaders } from '../../src/middlewares/securityHeaders.js';
 import { createTestApp } from '../helpers/auth.js';
 import { migrateTestDb } from '../helpers/db.js';
@@ -62,6 +63,29 @@ describe('cabeçalhos de segurança', () => {
       ...EXPECTED_CSP,
       'upgrade-insecure-requests',
     ]);
+  });
+});
+
+describe('GET /healthz', () => {
+  it('responde ok em texto, sem cookie, com no-store e cabeçalhos de segurança', async () => {
+    const app = createTestApp();
+    for (const method of ['get', 'head']) {
+      const res = await request(app)[method]('/healthz');
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toBe('text/plain; charset=utf-8');
+      expect(res.headers['cache-control']).toBe('no-store');
+      expect(res.headers['set-cookie']).toBeUndefined();
+      expect(res.headers['content-security-policy']).toContain("default-src 'self'");
+      expect(res.headers['x-content-type-options']).toBe('nosniff');
+      if (method === 'get') expect(res.text).toBe('ok');
+    }
+  });
+
+  it('não entra no rate limit de leitura', async () => {
+    const app = createTestApp({ rateLimits: createRateLimits({ read: { limit: 1 } }) });
+    for (let i = 0; i < 4; i += 1) {
+      expect((await request(app).get('/healthz')).status).toBe(200);
+    }
   });
 });
 

@@ -75,6 +75,11 @@ export function createApp({
 
   // Antes do static: os arquivos estáticos também recebem os cabeçalhos.
   app.use(securityHeaders(env));
+  // Sem banco de propósito: com o Neon hibernando, um SELECT 1 a cada checagem o manteria acordado,
+  // e reiniciar a app não conserta banco fora do ar. Antes de sessão e rate limit: sem cookie.
+  app.get('/healthz', (req, res) =>
+    res.type('text/plain').set('Cache-Control', 'no-store').send('ok'),
+  );
   app.use(express.static(path.join(root, '..', 'public')));
   app.get('/favicon.ico', (req, res) => res.redirect(301, '/favicon.svg'));
   app.use(express.urlencoded({ extended: false, limit: '16kb', parameterLimit: 200 }));

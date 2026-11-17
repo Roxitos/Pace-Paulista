@@ -48,6 +48,16 @@ function verifyApplied(applied, migrations) {
   }
 }
 
+// O pooler do Neon (pgbouncer em modo transação) não mantém o pg_advisory_lock entre comandos.
+export function assertDirectConnection(connectionString) {
+  const { hostname } = new URL(connectionString);
+  if (hostname.split('.')[0].endsWith('-pooler')) {
+    throw new Error(
+      'O migrate precisa da conexão direta do Neon (host sem -pooler): o pg_advisory_lock não funciona pelo pooler.',
+    );
+  }
+}
+
 export async function runMigrations({ pool, dir = DEFAULT_DIR, log = () => {} }) {
   const client = await pool.connect();
   let locked = false;
@@ -114,8 +124,10 @@ export async function runMigrations({ pool, dir = DEFAULT_DIR, log = () => {} })
 if (isMain(import.meta.url)) {
   const connectionString = connectionStringFor(env);
   const target = describeDatabaseUrl(connectionString);
-  const pool = createPool(connectionString);
+  let pool;
   try {
+    assertDirectConnection(connectionString);
+    pool = createPool(connectionString);
     const { applied, total } = await runMigrations({ pool, log: console.log });
     console.log(
       applied.length > 0
@@ -126,6 +138,6 @@ if (isMain(import.meta.url)) {
     console.error(cliErrorMessage(err, target));
     process.exitCode = 1;
   } finally {
-    await pool.end();
+    await pool?.end();
   }
 }

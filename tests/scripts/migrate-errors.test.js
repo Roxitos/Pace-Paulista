@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { runMigrations } from '../../scripts/migrate.js';
+import { assertDirectConnection, runMigrations } from '../../scripts/migrate.js';
 
 // Cliente falso: responde às queries do executor e falha nas que `failures` mandar.
 function fakePool(failures) {
@@ -70,5 +70,26 @@ describe('runMigrations com a conexão caindo no meio', () => {
     const { pool, released } = fakePool(() => null);
     await runMigrations({ pool, dir });
     expect(released).toEqual([undefined]);
+  });
+});
+
+describe('assertDirectConnection', () => {
+  const POOLER =
+    'postgresql://u:senha-secreta@ep-x-123-pooler.us-east-1.aws.neon.tech/neondb?sslmode=verify-full';
+
+  it('recusa host -pooler com a mensagem exata, sem credenciais nem host', () => {
+    const message =
+      'O migrate precisa da conexão direta do Neon (host sem -pooler): o pg_advisory_lock não funciona pelo pooler.';
+    expect(() => assertDirectConnection(POOLER)).toThrow(message);
+    try {
+      assertDirectConnection(POOLER);
+    } catch (err) {
+      expect(err.message).not.toMatch(/senha-secreta|ep-x-123|neon\.tech/);
+    }
+  });
+
+  it('aceita o host direto e localhost', () => {
+    expect(() => assertDirectConnection(POOLER.replace('-pooler', ''))).not.toThrow();
+    expect(() => assertDirectConnection('postgres://pace:pace@localhost:5432/pace')).not.toThrow();
   });
 });

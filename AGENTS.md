@@ -74,9 +74,10 @@ pace-paulista/
 ├── docs/
 │   ├── prototipo.html        ← protótipo original (referência visual; não editar)
 │   ├── CONVENTIONS.md        ← estilo de código, testes e git
-│   ├── MILESTONES.md, PENDENCIAS.md
+│   ├── MILESTONES.md, PENDENCIAS.md, DEPLOY.md ← DEPLOY.md: passo a passo Render + Neon
 │   └── specs/, reports/, qa/ ← saídas do pipeline, numeradas NNN-slug.md
 ├── docker-compose.yml        ← Postgres local
+├── render.yaml               ← Blueprint do Render (Web Service Free; migrate e seed no build)
 ├── .env.example
 ├── package.json
 ├── scripts/
@@ -88,11 +89,13 @@ pace-paulista/
 │   │   ├── 002_users.sql
 │   │   ├── 003_groups.sql
 │   │   ├── 004_memberships.sql
-│   │   └── 005_sessions.sql
+│   │   ├── 005_sessions.sql
+│   │   └── 006_groups_start_time_check.sql
 │   └── seeds/
 │       └── demo-groups.js
 ├── src/
-│   ├── server.js             ← só faz app.listen
+│   ├── server.js             ← só faz app.listen e registra SIGTERM/SIGINT
+│   ├── lifecycle.js          ← gracefulShutdown: fecha o servidor e o pool no deploy
 │   ├── app.js                ← monta o Express (middlewares, rotas, erros); exportado p/ testes
 │   ├── config/env.js         ← lê e valida variáveis de ambiente (zod)
 │   ├── db/pool.js            ← Pool do pg + helper tx(fn) para transações
@@ -117,6 +120,8 @@ pace-paulista/
 │   │   ├── currentUser.js    ← res.locals.user a partir da sessão (sem password_hash)
 │   │   ├── requireAuth.js    ← redireciona p/ /conta/entrar?next=...
 │   │   ├── redirectIfAuthenticated.js ← páginas "só deslogado"
+│   │   ├── securityHeaders.js ← helmet/CSP
+│   │   ├── rateLimits.js     ← limites de leitura, API, cadastro de grupo e participar/sair
 │   │   ├── notFound.js
 │   │   └── errorHandler.js
 │   └── views/
@@ -127,6 +132,7 @@ pace-paulista/
 │       └── pages/            ← home, grupos, grupo-detalhe, zonas, mapa, encontrar, grupo-novo,
 │                                meus, sobre, conta-entrar, conta-criar, 404, 500
 ├── public/
+│   ├── favicon.svg
 │   ├── css/app.css           ← CSS do protótipo extraído (ver §8)
 │   └── js/
 │       ├── app.js            ← menu mobile, toast, modal "Entrar no grupo", contador de caracteres
@@ -381,8 +387,10 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 
 - Toda query **parametrizada**. Proibido concatenar input em SQL.
 - CSRF em todo POST. Cookies de sessão: `httpOnly`, `sameSite=lax`, `secure` em produção, `maxAge` 30 dias.
-- `helmet` com CSP permitindo apenas `self`, `fonts.googleapis.com` e `fonts.gstatic.com`. Sem scripts inline (mover `<script>` para `public/js`).
-- Rate limit em `/conta/entrar` e `/conta/criar`.
+- `helmet` com CSP permitindo apenas `self`, `fonts.googleapis.com` e `fonts.gstatic.com`. Sem scripts e handlers inline (mover `<script>` para `public/js`); única exceção: `style-src-attr 'unsafe-inline'`, porque as cores das zonas e `--p` vão em `style="…"`.
+- Rate limit em `/conta/entrar` e `/conta/criar`; leitura (`/grupos`, `/encontrar`) 120/min por IP, API 300/min por IP, `POST /grupos` 20/h por usuário, participar/sair 60/15 min por usuário.
+- `trust proxy` vem de `TRUST_PROXY` (número de proxies; 1 em produção, nunca `true`).
+- `DATABASE_URL` de produção exige `sslmode` `require`, `verify-ca` ou `verify-full` (usar `verify-full`).
 - `?next=` só aceita caminhos internos (começam com `/` e não com `//`).
 - Dados pessoais mínimos: e-mail, nome de exibição, apelido por grupo. Contato do grupo deve ser canal público do grupo (hint já existe no form).
 - "Excluir minha conta" apaga de verdade (LGPD). Texto da página `/sobre` e do rodapé deve deixar de dizer "Nenhum dado é enviado a servidores".
@@ -399,6 +407,8 @@ DATABASE_URL=postgres://pace:pace@localhost:5432/pace_paulista
 DATABASE_URL_TEST=postgres://pace:pace@localhost:5432/pace_paulista_test
 SESSION_SECRET=troque-por-uma-string-longa-e-aleatoria
 TZ_APP=America/Sao_Paulo
+# TRUST_PROXY=1
+# ALLOW_DEMO_SEED=1
 ```
 
 Scripts esperados no `package.json`:
@@ -407,14 +417,14 @@ npm run dev        # node --watch src/server.js
 npm start          # node src/server.js
 npm run db:up      # docker compose up -d --wait db (Postgres só em 127.0.0.1:5432; cria também pace_paulista_test)
 npm run migrate    # node scripts/migrate.js
-npm run seed       # node scripts/seed.js (bloqueado com NODE_ENV=production)
+npm run seed       # node scripts/seed.js (bloqueado com NODE_ENV=production, salvo ALLOW_DEMO_SEED=1)
 npm test           # vitest run (usa banco de teste: DATABASE_URL_TEST; precisa do Postgres de pé)
 npm run lint
 ```
 
 Primeira execução: `npm i && npm run db:up && npm run migrate && npm run seed && npm run dev` → http://localhost:3000.
 
-Deploy sugerido (v1): um serviço Node + Postgres gerenciado (Render, Railway ou Fly.io). `npm run migrate` roda no release, antes de subir a nova versão.
+Deploy (v1): Render (Web Service, `render.yaml`) + Neon (Postgres 16, conexão direta, `sslmode=verify-full`); plano Free; `npm run migrate && npm run seed` no build; healthcheck `GET /healthz`; o serviço hiberna após ~15 min ocioso (cold start ~50 s). Passo a passo em `docs/DEPLOY.md`.
 
 ---
 

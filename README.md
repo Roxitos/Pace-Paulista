@@ -19,12 +19,12 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 | **M5** Contas | Criar conta, entrar e sair, sessão | ✅ concluído |
 | **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | ✅ concluído |
 | **M7** JS progressivo | Filtros ao vivo, modal "Entrar no grupo", toasts, mapa sem recarregar | ✅ concluído |
-| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | em andamento (spec 019 escrita) |
+| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | em andamento (specs 019–020) |
 | **M9** Conteúdo real | Grupos reais no lugar dos fictícios, mantidos atualizados | — |
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
-> ⚠️ Todas as páginas e ações funcionam sem JS: busca e detalhe, `/encontrar`, contas, cadastro de grupo, participar/sair e "Meus grupos". As melhorias com JS do protótipo (filtros ao vivo, modal, toast, menu mobile e mapa sem recarregar) já existem como melhoria progressiva (M7). Falta a preparação para produção (M8).
+> ⚠️ Todas as páginas e ações funcionam sem JS: busca e detalhe, `/encontrar`, contas, cadastro de grupo, participar/sair e "Meus grupos". As melhorias com JS do protótipo (filtros ao vivo, modal, toast, menu mobile e mapa sem recarregar) já existem como melhoria progressiva (M7).
 
 ## Stack
 
@@ -57,7 +57,7 @@ O site lê os grupos do banco: `npm run dev` e `npm start` **precisam do Postgre
 | `npm start` | Sobe o servidor |
 | `npm run db:up` | Sobe o Postgres local (`docker compose`) e espera ele ficar saudável |
 | `npm run migrate` | Aplica as migrations pendentes de `db/migrations/` |
-| `npm run seed` | Insere os grupos de demonstração (idempotente; bloqueado em produção) |
+| `npm run seed` | Insere os grupos de demonstração (idempotente; em produção só com `ALLOW_DEMO_SEED=1`) |
 | `npm test` | Roda os testes (vitest); precisa do Postgres de pé (`npm run db:up`) |
 | `npm run lint` | Roda ESLint e `prettier --check` |
 | `npm run format` | Formata o código com Prettier |
@@ -72,6 +72,10 @@ O CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) roda `npm run lint
 
 Variáveis de ambiente: veja [`.env.example`](.env.example). `TZ_APP` precisa ser um fuso IANA válido (padrão `America/Sao_Paulo`).
 
+## Produção
+
+O site publica no Render (Web Service, plano Free) com o banco no Neon (Free), tudo sem custo. O `render.yaml` na raiz descreve o serviço; o passo a passo está em [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Estrutura
 
 ```
@@ -85,7 +89,7 @@ src/
   views/                 layout, partials e páginas EJS
 public/                  CSS do protótipo e JS progressivo
 scripts/                 migrate.js e seed.js (CLI)
-db/migrations/           migrations .sql numeradas (001–005)
+db/migrations/           migrations .sql numeradas (001–006)
 db/seeds/                grupos de demonstração
 db/docker-init/          cria o banco de teste no primeiro docker compose up
 docker-compose.yml       Postgres 16 local
@@ -106,4 +110,4 @@ Convenções de código, testes e git estão em [`docs/CONVENTIONS.md`](docs/CON
 
 ## Dados de demonstração
 
-Os 11 grupos exibidos hoje são **fictícios**, marcados como "Fictício · demo" e criados só para demonstrar a plataforma. Eles não têm contato e o `npm run seed` se recusa a rodar com `NODE_ENV=production`, para não irem parar no site publicado. O plano para trocá-los por grupos reais e mantê-los atualizados está no marco **M9** ([`docs/PENDENCIAS.md`](docs/PENDENCIAS.md)).
+Os 11 grupos exibidos hoje são **fictícios**, marcados como "Fictício · demo" e criados só para demonstrar a plataforma. Eles não têm contato e o `npm run seed` só roda em produção com `ALLOW_DEMO_SEED=1`: o site publicado sobe com os demos e o aviso “Versão de demonstração” até o M9. O plano para trocá-los por grupos reais e mantê-los atualizados está no marco **M9** ([`docs/PENDENCIAS.md`](docs/PENDENCIAS.md)).
