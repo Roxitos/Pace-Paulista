@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { isSlug } from '../../domain/slug.js';
 import { renderNotFound } from '../../middlewares/notFound.js';
-import { loadHomeData, loadMapData, loadZonesData } from './pages.service.js';
+import { loadHomeData, loadMapData, loadMapPanel, loadZonesData } from './pages.service.js';
 
 export const pagesRouter = Router();
 
 const MAP_TITLE = 'Mapa e rotas · Pace Paulista';
+
+const renderMap = (res, data) =>
+  res.renderPage('mapa', { title: MAP_TITLE, scripts: ['mapa'], ...data });
 
 pagesRouter.get('/', async (req, res) => {
   await res.renderPage('home', {
@@ -21,7 +24,7 @@ pagesRouter.get('/zonas', async (req, res) => {
 });
 
 pagesRouter.get('/mapa', async (req, res) => {
-  await res.renderPage('mapa', { title: MAP_TITLE, ...(await loadMapData()) });
+  await renderMap(res, await loadMapData());
 });
 
 // Slug inexistente responde 404 (P8), em vez de cair no grupo padrão como no protótipo.
@@ -30,7 +33,16 @@ pagesRouter.get('/mapa/:slug', async (req, res) => {
   if (!isSlug(slug)) return renderNotFound(res);
   const data = await loadMapData(slug);
   if (!data) return renderNotFound(res);
-  await res.renderPage('mapa', { title: MAP_TITLE, ...data });
+  await renderMap(res, data);
+});
+
+// JSON só para o mapa sem recarregar; o painel vem do mesmo partial da página.
+pagesRouter.get('/api/mapa/:slug', async (req, res) => {
+  const { slug } = req.params;
+  res.set('Cache-Control', 'private, no-store');
+  const g = isSlug(slug) ? await loadMapPanel(slug) : null;
+  if (!g) return res.status(404).json({ error: 'not_found' });
+  res.json({ slug: g.slug, panel: await res.renderPartial('map-detail', { g }) });
 });
 
 pagesRouter.get('/sobre', async (req, res) => {

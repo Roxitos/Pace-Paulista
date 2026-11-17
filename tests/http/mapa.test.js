@@ -315,3 +315,79 @@ describe('CSS do mapa sem JS (CA3, CA9)', () => {
     expect(css.indexOf(rule)).toBeLessThan(css.indexOf('/* Layout: cabeçalho fixo'));
   });
 });
+
+describe('GET /api/mapa/:slug (CA8)', () => {
+  it('devolve só slug e panel, igual ao miolo de #mapDetail da página, sem cache', async () => {
+    const res = await request(app).get('/api/mapa/pace-da-oca');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/application\/json/);
+    expect(res.headers['cache-control']).toBe('private, no-store');
+    expect(Object.keys(res.body)).toEqual(['slug', 'panel']);
+    expect(res.body.slug).toBe('pace-da-oca');
+    // `detail` inclui o fechamento do próprio #mapDetail e o espaço antes da lista.
+    const page = detail(await getMapa('/mapa/pace-da-oca'));
+    expect(res.body.panel).toBe(page.replace(/<\/div>\s*$/, ''));
+  });
+
+  it('slug fora do formato responde 404 JSON sem consultar o banco', async () => {
+    const spy = vi.spyOn(pool, 'query');
+    const res = await request(app).get('/api/mapa/ABC');
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: 'not_found' });
+    expect(res.headers['cache-control']).toBe('private, no-store');
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it.each(['nao-existe', 'pace-da-oca'])(
+    '%s não publicado ou inexistente responde 404',
+    async (slug) => {
+      await pool.query("UPDATE groups SET status = 'pending' WHERE slug = 'pace-da-oca'");
+      const res = await request(app).get(`/api/mapa/${slug}`);
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: 'not_found' });
+    },
+  );
+
+  it('não expõe contato nem owner_id e escapa <script> no panel', async () => {
+    const owner = await insertUser(pool, XSS);
+    await pool.query(
+      `UPDATE groups SET name = $1, contact = 'https://chat.whatsapp.com/SegredoDoGrupo123',
+         is_demo = false, owner_id = $2 WHERE slug = 'pace-da-oca'`,
+      [XSS, owner],
+    );
+    const res = await request(app).get('/api/mapa/pace-da-oca');
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain('SegredoDoGrupo123');
+    expect(res.text).not.toContain('owner_id');
+    expect(res.body.panel).not.toContain('<script>alert');
+    expect(res.body.panel).toContain(XSS_ESC);
+  });
+});
+
+describe('Mapa com JS: pins, script e CSS (CA9 a CA12)', () => {
+  it('todo pin começa com a área de toque transparente antes do anel', async () => {
+    const list = pins(await getMapa());
+    expect(list).toHaveLength(11);
+    for (const p of list) {
+      expect(p).toMatch(
+        /^<a class="pin"[^>]*><circle class="hit" r="17" fill="transparent"\/><circle class="ring"/,
+      );
+    }
+  });
+
+  it('carrega mapa.js só no mapa (200)', async () => {
+    const tag = '<script type="module" src="/js/mapa.js"></script>';
+    expect(await getMapa()).toContain(tag);
+    expect(await getMapa('/mapa/pace-da-oca')).toContain(tag);
+    expect((await request(app).get('/mapa/nao-existe')).text).not.toContain('/js/mapa.js');
+    expect((await request(app).get('/grupos')).text).not.toContain('/js/mapa.js');
+  });
+
+  it('tem a regra de foco dos pins antes do bloco do protótipo', async () => {
+    const css = (await request(app).get('/css/app.css')).text;
+    const rule =
+      'a.pin:focus-visible circle.ring{r:14px;stroke:var(--focus);stroke-width:3;stroke-dasharray:none}';
+    expect(css).toContain(rule);
+    expect(css.indexOf(rule)).toBeLessThan(css.indexOf('/* Layout: cabeçalho fixo'));
+  });
+});
