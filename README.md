@@ -1,12 +1,14 @@
 # Pace Paulista
 
-[![CI](https://github.com/Roxitos/Site-Corrida/actions/workflows/ci.yml/badge.svg)](https://github.com/Roxitos/Site-Corrida/actions/workflows/ci.yml)
+[![CI](https://github.com/Roxitos/Pace-Paulista/actions/workflows/ci.yml/badge.svg)](https://github.com/Roxitos/Pace-Paulista/actions/workflows/ci.yml)
 
 > Encontre seu grupo. Encontre seu ritmo.
 
+**No ar:** https://pace-paulista.onrender.com/
+
 O Pace Paulista ajuda corredores de São Paulo a achar grupos de corrida que combinam com a **zona da cidade**, o **pace**, os **dias e horários** e o **nível** de cada um.
 
-O projeto começou como um protótipo de página única ([`docs/prototipo.html`](docs/prototipo.html)) e está virando um site monolítico com renderização no servidor, banco PostgreSQL e contas de usuário.
+O projeto começou como um protótipo de página única ([`docs/prototipo.html`](docs/prototipo.html)) e virou um site monolítico com renderização no servidor, banco PostgreSQL e contas de usuário.
 
 ## Status
 
@@ -19,7 +21,7 @@ O projeto começou como um protótipo de página única ([`docs/prototipo.html`]
 | **M5** Contas | Criar conta, entrar e sair, sessão | ✅ concluído |
 | **M6** Escrita | Cadastrar grupo, participar, "Meus grupos", excluir conta | ✅ concluído |
 | **M7** JS progressivo | Filtros ao vivo, modal "Entrar no grupo", toasts, mapa sem recarregar | ✅ concluído |
-| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | código pronto (specs 019–020); falta o deploy real e sua verificação |
+| **M8** Produção | helmet/CSP, rate limit, deploy no Render + banco no Neon | ✅ concluído (specs 019–021; no ar desde 2026-11-17) |
 | **M9** Conteúdo real | Grupos reais no lugar dos fictícios, mantidos atualizados | — |
 
 Os detalhes de cada marco estão em [`docs/MILESTONES.md`](docs/MILESTONES.md).
@@ -74,18 +76,20 @@ Variáveis de ambiente: veja [`.env.example`](.env.example). `TZ_APP` precisa se
 
 ## Produção
 
-O site publica no Render (Web Service, plano Free) com o banco no Neon (Free), tudo sem custo. O `render.yaml` na raiz descreve o serviço; o passo a passo está em [`docs/DEPLOY.md`](docs/DEPLOY.md).
+O site está publicado em https://pace-paulista.onrender.com/, no Render (Web Service, plano Free), com o banco no Neon (Free), tudo sem custo. Cada merge na `main` com o CI verde gera um deploy novo; se o build falhar, a versão anterior continua no ar. No plano Free o serviço hiberna após ~15 min sem visitas, e o primeiro acesso depois disso leva cerca de 50 s. O `render.yaml` na raiz descreve o serviço; o passo a passo está em [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Estrutura
 
 ```
 src/
   app.js, server.js      montagem do Express e app.listen
+  lifecycle.js           desligamento gracioso (fecha servidor e pool no deploy)
   config/env.js          variáveis de ambiente validadas com zod
   db/pool.js             pool do pg e helper tx(fn) para transações
   domain/                funções puras (pace, agenda, constantes), sem I/O
   modules/<nome>/        routes → service → repo, por domínio
-  middlewares/           locals, 404 e tratamento de erros
+  middlewares/           sessão, CSRF, usuário atual, auth, helmet/CSP, rate limit,
+                         locals, 404 e tratamento de erros
   views/                 layout, partials e páginas EJS
 public/                  CSS do protótipo e JS progressivo
 scripts/                 migrate.js e seed.js (CLI)
