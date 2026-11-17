@@ -15,3 +15,10 @@ Perguntas em aberto (defaults na spec), aguardando o usuário: P1 (`replaceState
 Fora da spec e abertas: rolagem suave do `/encontrar`, `aria-current` em `/encontrar`, deslocamento antes das webfontes.
 
 Aprovação: usuário aceitou os defaults de P1–P4 (`replaceState`; área de toque `r=17`; anel de foco contínuo; sem `aria-live` no painel).
+
+## Coder
+Spec 018 implementada. `npm test` (53 arquivos, 828 testes) e `npm run lint` passam.
+- Novos: `public/js/mapa.js`, `src/views/partials/map-detail.ejs` (extraído de `mapa.ejs`), `tests/client/mapa.test.js` (DOM falso).
+- Alterados: `mapa.ejs` (usa o partial; `circle.hit r=17` em cada pin), `pages.service.js` (`loadMapPanel`), `pages.routes.js` (`scripts: ['mapa']` só nos 200; `GET /api/mapa/:slug`), `app.css` (foco do pin, antes do marcador `/* Layout: cabeçalho fixo`), `tests/http/mapa.test.js`.
+- Testes: CA8–CA12 e CA14 por HTTP/cliente; testes antigos do mapa passam sem alteração (CA9). CA1–CA7 e CA11–CA13 só no navegador (QA); o Coder não rodou Chromium.
+- Alertas: `loadMapPanel` lê a lista inteira de publicados a cada chamada (rate limit/cache no M8). Seguem abertas e fora da spec: rolagem do `/encontrar`, `aria-current` em `/encontrar`, webfonts.
