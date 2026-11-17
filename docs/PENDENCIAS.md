@@ -108,7 +108,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] helmet + CSP (`self`, fonts.googleapis.com, fonts.gstatic.com). `style="--z:…"`, `style="font-size:14px"` e o `extra` do 404/500 exigem `style-src-attr 'unsafe-inline'` ou classes CSS. (001, 002)
 - [ ] Não publicar antes de M3/M5: links da home levam a 404. (002) — `/encontrar` deixou de ser um deles (spec 008); "Entrar no grupo" dos cards de `/encontrar` leva a `/conta/entrar` (404 até o M5). (008, QA)
 - [x] Seed dos grupos demo **não roda** com `NODE_ENV=production` (ou demos removidos/despublicados antes de abrir o site). O aviso "Versão de demonstração" some sozinho quando não houver demo publicado (`hasDemo`). (conteúdo) — spec 003, CA6
-- [ ] **Pergunta**: ambiente publicado (staging/preview) com grupos demo antes do M9? Hoje o seed fica bloqueado com `NODE_ENV=production` sem flag. Opções: flag explícita (ex. `ALLOW_DEMO_SEED=1`) ou staging com outro `NODE_ENV`. (003)
+- [x] (decidido pelo usuário, 2026-11-17) Produção na quarta 25/11 sobe **com demos**: flag explícita `ALLOW_DEMO_SEED=1` no seed e aviso "Versão de demonstração" mantido. — spec 019. (antes: ambiente publicado com grupos demo antes do M9?)
 - [ ] Release exige `DATABASE_URL` e `SESSION_SECRET` ≥ 32 caracteres; conferir extensão `citext` no Postgres gerenciado. (003)
 - [ ] `pg_advisory_lock` do migrate espera sem limite se outro migrate travar segurando o lock — avaliar `lock_timeout` no release. (003)
 - [ ] `ensureTestDb` não trava host remoto (um banco remoto `*_test` passaria); decidir junto com o CI (service container). (003) — CI criado em `.github/workflows/ci.yml` com service container em `localhost`; a trava de host continua em aberto.
