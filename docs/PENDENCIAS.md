@@ -6,7 +6,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
-- [ ] **M3 (005)** — P2: botão "Aplicar filtros" no form sem JS; manter "Os resultados atualizam na hora." antes do M7? (004) — spec 005 seguiu o default (botão "Aplicar filtros", texto literal); confirmar o texto ou trocá-lo até o M7. (005)
+- [x] **M3 (005)** — P2: botão "Aplicar filtros" no form sem JS; manter "Os resultados atualizam na hora." antes do M7? (004) — spec 005 seguiu o default (botão "Aplicar filtros", texto literal); confirmar o texto ou trocá-lo até o M7. (005) — spec 016, P3: texto mantido, agora verdadeiro com JS (QA aprovado)
 - [ ] **M3+** — Sem JS, a URL após enviar o form leva campos vazios (`&local=&dia=…`). Redirecionar para a URL limpa? (005, QA)
 - [x] **M3 (006)** — P6: texto do 404 de grupo ("Esse grupo não foi encontrado. Ele pode ter sido removido."); P7: manter "Confirmações por encontro dependem do banco de dados."? (004) — spec 006: defaults aceitos pelo usuário
 - [ ] **Futuro** — Contato do grupo vira link (Instagram/site/e-mail) com validação de URL; hoje é texto puro (P4). (006, usuário)
@@ -90,7 +90,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 
 ## M7 — Melhorias de JS
 - [ ] Testar em aparelho real (iPhone) o campo de pace com `inputmode="numeric"` (literal do protótipo): o teclado numérico pode não ter `:`, impedindo digitar "5:30". Vale para `/encontrar` (spec 008, P5) e para o cadastro do M6. (008)
-- [ ] `listPublished` devolve `contact` de todos os grupos (contrato `Group`): `GET /api/grupos` (e qualquer JSON enviado ao cliente) precisa remover `contact` para deslogado, senão o P4 vaza. (006, Hardener) — recomendação: separar `SELECT_LIST` sem `contact` (listagens) de `findPublishedBySlug` (mantém o campo) e ajustar o teste de contrato; o mapa já remove o campo no service. (007, Hardener)
+- [x] `listPublished` devolve `contact` de todos os grupos (contrato `Group`): `GET /api/grupos` (e qualquer JSON enviado ao cliente) precisa remover `contact` para deslogado, senão o P4 vaza. (006, Hardener) — recomendação: separar `SELECT_LIST` sem `contact` (listagens) de `findPublishedBySlug` (mantém o campo) e ajustar o teste de contrato; o mapa já remove o campo no service. (007, Hardener) — spec 016: `/api/grupos` devolve só `{count, countText, query, chips, results}` (HTML dos partials), sem `contact`/`owner_id` (Hardener/QA)
 - [ ] `public/js/mapa.js`: selecionar no mapa sem recarregar (hoje cada clique recarrega `/mapa/<slug>`). (007)
 - [ ] Sem `aria-current` no menu em `/encontrar` (`currentNav('/encontrar')` → `''`, como no protótipo, que não tem item de menu para a página). (008, Coder)
 - [ ] No 1º carregamento, antes das webfontes chegarem, o cabeçalho e a âncora `#matchResults` ficam deslocados por um instante (fonte de fallback com outra métrica); vale para todas as âncoras do site. (008, QA)
@@ -156,4 +156,5 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - Página pública anônima pode ir para cache sem `Vary: Cookie`; um logado pode receber a versão sem contato (funcional, não segurança). (009, Hardener)
 - [ ] (spec 011, Hardener/QA) `trust proxy` também afeta o limite de `/conta/entrar` (global atrás de proxy, permite travar o login de uma vítima); limiter em memória por processo; chave IP+e-mail não segura credential stuffing nem ataque distribuído (decisão da spec); senha de exatamente 72 bytes aceita sufixo (bcrypt); `bcrypt.hashSync` no boot (~250 ms). Observação do QA: medição única de 375 px sem JS em `/conta/entrar` não reproduziu.
 - [ ] `/favicon.ico` devolve 404 (erro no console com JS ligado); adicionar favicon ou `<link rel="icon">`. (015, QA)
-- [ ] M7: o JSON de `/api/grupos` deve vir do repo, nunca de `res.locals` (`joinedSlugs`). Custo aceito: 1 consulta extra por página para logado (P8). (015, Hardener/QA)
+- [x] M7: o JSON de `/api/grupos` deve vir do repo, nunca de `res.locals` (`joinedSlugs`). Custo aceito: 1 consulta extra por página para logado (P8). (015, Hardener/QA) — spec 016: `joinedSlugs` só vem do middleware; nada serializa `res.locals`
+- (spec 016, Hardener/QA) `/api/grupos` sem rate limit nem helmet/CSP/`nosniff` (M8); 500 da API volta em HTML e consome flash pendente (raro); `change` ao sair de "Nome"/"Local" repete a busca após o debounce e o esqueleto pisca (UX); QA não comparou screenshot com `docs/prototipo.html`. (016)

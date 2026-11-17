@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EMPTY_FILTERS,
   activeChips,
+  countLabel,
   escapeLike,
   filtersToQuery,
   parseFilters,
@@ -233,6 +234,14 @@ describe('activeChips', () => {
     const f = { ...ALL, zonas: [...ALL.zonas] };
     activeChips(f);
     expect(f).toEqual(ALL);
+  });
+});
+
+describe('countLabel', () => {
+  it('singular só para 1', () => {
+    expect(countLabel(0)).toBe('0 grupos encontrados');
+    expect(countLabel(1)).toBe('1 grupo encontrado');
+    expect(countLabel(11)).toBe('11 grupos encontrados');
   });
 });
 

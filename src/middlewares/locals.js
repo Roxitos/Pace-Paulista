@@ -20,11 +20,15 @@ export function locals(req, res, next) {
     // Só página renderizada consome o flash: redirects e POSTs não o perdem.
     const flash = req.session?.flash ?? null;
     if (flash) delete req.session.flash;
-    const data = { flash, ...res.locals, ...pageLocals };
+    const data = { flash, scripts: [], ...res.locals, ...pageLocals };
     const body = await render(req.app, `pages/${view}`, data);
     const html = await render(req.app, 'layout', { ...data, body });
     res.type('html').send(html);
   };
+
+  // Fragmento de HTML (para /api/grupos); não consome o flash.
+  res.renderPartial = (view, data = {}) =>
+    render(req.app, `partials/${view}`, { ...res.locals, ...data });
 
   next();
 }

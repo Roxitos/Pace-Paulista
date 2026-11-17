@@ -26,6 +26,7 @@ import {
   ZONAS,
 } from './domain/constants.js';
 import { gmapsBusca, gmapsRota, ZLABEL, ZPOLY } from './domain/map.js';
+import { countLabel } from './domain/filters.js';
 import { fmtFaixa, fmtPace } from './domain/pace.js';
 import { fmtDiasCurto, fmtDiasLongo, fmtHora } from './domain/schedule.js';
 
@@ -51,6 +52,7 @@ export function createApp({ beforeErrorHandlers } = {}) {
     DIA_ORDEM,
     PERIODOS,
     PACE_FAIXAS,
+    countLabel,
     fmtPace,
     fmtFaixa,
     fmtHora,

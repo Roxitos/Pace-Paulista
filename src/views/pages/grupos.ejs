@@ -3,7 +3,6 @@
   title: 'Grupos de corrida em SP',
   text: 'Filtre por zona, dia, horário, pace e nível. Os resultados atualizam na hora.',
 }) %>
-<% const n = groups.length; -%>
   <div class="wrap"><div class="search-layout">
     <form class="filters" id="filters" method="get" action="/grupos" role="search" aria-label="Filtros">
       <h2>Filtros <a class="link" href="/grupos" style="font-family:var(--f-body);font-size:14px;text-transform:none">Limpar filtros</a></h2>
@@ -20,10 +19,10 @@
     </form>
     <section aria-label="Resultados">
       <div class="results-bar">
-        <span class="count" id="count" aria-live="polite"><%= n %> <%= n === 1 ? 'grupo encontrado' : 'grupos encontrados' %></span>
+        <span class="count" id="count" aria-live="polite"><%= countLabel(groups.length) %></span>
         <a class="btn btn-outline btn-sm filters-toggle" href="#filters" aria-controls="filters"><%- ic('filter', 'ico-sm') %> Filtros</a>
       </div>
-      <div class="active-chips" id="chips" style="margin-bottom:16px"><% for (const chip of chips) { %><a class="achip" href="<%= chip.href %>" aria-label="Remover filtro <%= chip.label %>"><%= chip.label %> <%- ic('x', 'ico-sm') %></a><% } %></div>
-      <div id="results"><% if (n > 0) { %><div class="grid-cards"><% for (const g of groups) { %><%- include('../partials/group-card', { g }) %><% } %></div><% } else { %><div class="empty"><%- ic('run') %><h3>Nenhum grupo nesse ritmo</h3><p>Nenhum grupo atende a todos os filtros. Tente ampliar a faixa de pace, escolher outro dia ou incluir mais zonas.</p><a class="btn btn-primary" href="/grupos">Limpar filtros</a></div><% } %></div>
+      <div class="active-chips" id="chips" style="margin-bottom:16px"><%- include('../partials/search-chips', { chips }) %></div>
+      <div id="results"><%- include('../partials/search-results', { groups }) %></div>
     </section>
   </div></div>
