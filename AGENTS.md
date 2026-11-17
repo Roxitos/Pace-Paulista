@@ -24,11 +24,17 @@ Transformar o protótipo em um **site real, monolítico**, com:
 
 Todo o resto do protótipo (busca, filtros, detalhes, zonas, mapa esquemático, "Encontrar meu grupo", cadastro de grupo) deve continuar funcionando igual, agora persistido no servidor.
 
-### Fora do escopo da v1 (não implementar sem pedido explícito)
-- Moderação/aprovação de grupos (deixar só a coluna `status` preparada).
+### Estado atual
+- **v1 no ar desde 2026-11-17**: https://pace-paulista.onrender.com/ (Render Free + Neon Free; ver §10 e `docs/DEPLOY.md`).
+- Marcos **M1–M8 concluídos** (specs 001–021). Produção roda **com os grupos demo** até o M9 (`ALLOW_DEMO_SEED=1`).
+- **Fase atual: M10 — Recuperar senha por e-mail** (decisão do usuário, 2026-11-17; vem antes do M9). Regras em §6 "Recuperar senha" e §9.
+
+### Fora do escopo (não implementar sem pedido explícito)
+- Moderação/aprovação de grupos (deixar só a coluna `status` preparada) — M9.
 - Mapa real (Leaflet/OSM com coordenadas). Manter o mapa esquemático em SVG.
 - Notificações, confirmação de presença por encontro, chat.
-- Login social (Google etc.), recuperação de senha por e-mail.
+- **Qualquer e-mail além da recuperação de senha**: boas-vindas, confirmação de e-mail, avisos ao dono do grupo (pendências em `docs/PENDENCIAS.md`).
+- Login social (Google etc.).
 - SPA/React. Este é um monólito com renderização no servidor.
 
 ---
@@ -47,6 +53,7 @@ Todo o resto do protótipo (busca, filtros, detalhes, zonas, mapa esquemático, 
 | Senhas | **`bcrypt`** (cost 12) | |
 | Validação | **`zod`** | Mesmo schema valida form e gera mensagens |
 | Segurança | `helmet`, `express-rate-limit`, CSRF por token na sessão (`csrf-sync`) | |
+| E-mail (M10) | **API HTTP do provedor via `fetch` nativo**, sem SDK nem `nodemailer` | O Render Free bloqueia SMTP (portas 25/465/587); `fetch` evita dependência nova. Provedor com plano grátis a escolher na spec (ex.: Resend, Brevo) |
 | Testes | **`vitest` + `supertest`** | |
 | Dev | `docker compose` (Postgres), `node --watch`, `dotenv` | |
 | Lint/format | ESLint + Prettier | |
@@ -81,22 +88,24 @@ pace-paulista/
 ├── .env.example
 ├── package.json
 ├── scripts/
-│   ├── migrate.js            ← aplica db/migrations/*.sql em ordem
+│   ├── cli.js                ← utilitários dos scripts: isMain(), mensagens de erro de conexão
+│   ├── migrate.js            ← aplica db/migrations/*.sql em ordem (confere checksum; recusa host -pooler)
 │   └── seed.js               ← insere os grupos de demonstração
 ├── db/
+│   ├── docker-init/          ← cria o banco pace_paulista_test no 1º `db:up`
 │   ├── migrations/
 │   │   ├── 001_extensions.sql
 │   │   ├── 002_users.sql
 │   │   ├── 003_groups.sql
 │   │   ├── 004_memberships.sql
 │   │   ├── 005_sessions.sql
-│   │   └── 006_groups_start_time_check.sql
+│   │   └── 006_groups_start_time_check.sql   ← próxima livre: 007 (M10)
 │   └── seeds/
 │       └── demo-groups.js
 ├── src/
 │   ├── server.js             ← só faz app.listen e registra SIGTERM/SIGINT
 │   ├── lifecycle.js          ← gracefulShutdown: fecha o servidor e o pool no deploy
-│   ├── app.js                ← monta o Express (middlewares, rotas, erros); exportado p/ testes
+│   ├── app.js                ← monta o Express (middlewares, rotas, /healthz, erros); exportado p/ testes
 │   ├── config/env.js         ← lê e valida variáveis de ambiente (zod)
 │   ├── db/pool.js            ← Pool do pg + helper tx(fn) para transações
 │   ├── domain/
@@ -105,19 +114,24 @@ pace-paulista/
 │   │   ├── schedule.js       ← periodoDe, proximos (fuso America/Sao_Paulo), fmtHora, fmtDias*
 │   │   ├── filters.js        ← normaliza a query string dos filtros e monta os chips (o WHERE fica no groups.repo)
 │   │   ├── match.js          ← calcMatch (algoritmo de compatibilidade)
+│   │   ├── map.js            ← ZPOLY, ZLABEL, ZCENTRO e pins do mapa esquemático
+│   │   ├── redirect.js       ← valida o ?next= (só caminhos internos)
 │   │   └── slug.js
 │   ├── modules/
-│   │   ├── account/          ← account.routes.js (páginas de conta: /conta/entrar, /conta/criar; spec 010+)
-│   │   ├── auth/             ← auth.routes.js, auth.service.js, users.repo.js, auth.schemas.js
-│   │   ├── groups/           ← groups.routes.js, groups.service.js, groups.repo.js, groups.schemas.js
-│   │   ├── memberships/      ← memberships.routes.js, memberships.service.js, memberships.repo.js
+│   │   ├── account/          ← account.routes.js (/conta/*, /meus; usa o auth.service)
+│   │   ├── auth/             ← auth.service.js, users.repo.js, auth.schemas.js (sem rotas próprias)
+│   │   ├── groups/           ← groups.routes.js (inclui participar/sair), .service, .repo, .schemas
+│   │   ├── memberships/      ← memberships.service.js, .repo.js, .schemas.js (rotas no groups.routes)
 │   │   ├── matching/         ← matching.routes.js, matching.service.js, matching.schemas.js (usa domain/match.js)
-│   │   └── pages/            ← pages.routes.js (home, zonas, mapa, sobre)
+│   │   ├── pages/            ← pages.routes.js, pages.service.js (home, zonas, mapa, sobre, /api/mapa/:slug)
+│   │   └── email/            ← M10 (a criar): email.service.js — sendEmail() via fetch na API do provedor;
+│   │                            em dev/teste, transporte em memória/console (ver §6 "Recuperar senha")
 │   ├── middlewares/
 │   │   ├── locals.js         ← res.locals.currentPath, flash, helpers de view
 │   │   ├── session.js        ← express-session + connect-pg-simple
 │   │   ├── csrf.js           ← csrf-sync; res.locals.csrfToken() (marca a resposta Cache-Control: private, no-store)
 │   │   ├── currentUser.js    ← res.locals.user a partir da sessão (sem password_hash)
+│   │   ├── joinedGroups.js   ← slugs dos grupos do usuário (cards e badge do cabeçalho)
 │   │   ├── requireAuth.js    ← redireciona p/ /conta/entrar?next=...
 │   │   ├── redirectIfAuthenticated.js ← páginas "só deslogado"
 │   │   ├── securityHeaders.js ← helmet/CSP
@@ -125,22 +139,28 @@ pace-paulista/
 │   │   ├── notFound.js
 │   │   └── errorHandler.js
 │   └── views/
+│       ├── helpers.js        ← P + ic() (ícones), SEAL + seal(), zstyle(), currentNav()
 │       ├── layout.ejs
-│       ├── partials/         ← header, footer, icons (função ic), seal, zone-chip, level-meter,
-│       │                        group-card, page-head, track-deco, empty-state, form-errors, flash,
-│       │                        filter-options, match-card
+│       ├── partials/         ← header, footer, csrf, demo-tag, zone-chip, level-meter, group-card,
+│       │                        page-head, track-deco, form-errors, filter-options, search-chips,
+│       │                        search-results, match-card, map-detail
 │       └── pages/            ← home, grupos, grupo-detalhe, zonas, mapa, encontrar, grupo-novo,
-│                                meus, sobre, conta-entrar, conta-criar, 404, 500
+│                                meus, sobre, conta-entrar, conta-criar, csrf (sessão expirada), 404, 500
 ├── public/
 │   ├── favicon.svg
 │   ├── css/app.css           ← CSS do protótipo extraído (ver §8)
-│   └── js/
-│       ├── app.js            ← menu mobile, toast, modal "Entrar no grupo", contador de caracteres
+│   └── js/                   ← módulos ES, sem bundler
+│       ├── ui.js             ← compartilhado: ic() (cópia do P), toast(), isPlainClick()
+│       ├── app.js            ← todas as páginas: menu mobile, avisos do servidor → toast, contador de caracteres
+│       ├── participar.js     ← modal "Entrar no grupo" (trap de foco, Esc)
 │       ├── filtros.js        ← filtros ao vivo na /grupos (progressive enhancement)
-│       └── mapa.js           ← seleção de pin/lista no mapa esquemático
+│       └── mapa.js           ← seleção de pin/lista no mapa esquemático (/api/mapa/:slug)
 └── tests/
-    ├── domain/*.test.js
-    └── http/*.test.js
+    ├── domain/   ← funções puras, schemas, services com repo falso
+    ├── db/       ← migrate, seed, schema, repos (banco de teste)
+    ├── http/     ← supertest, um arquivo por fluxo/página
+    ├── client/   ← JS do navegador
+    ├── scripts/, server/, helpers/
 ```
 
 ---
@@ -205,6 +225,17 @@ CREATE TABLE memberships (
 CREATE INDEX memberships_group_idx ON memberships (group_id);
 
 -- 005_sessions.sql  → usar o schema oficial do connect-pg-simple (tabela "session")
+-- 006_groups_start_time_check.sql → CHECK (start_time < '24:00'): TIME aceita '24:00:00'
+
+-- 007 (M10, proposta; a spec fecha os detalhes): tokens de recuperação de senha
+CREATE TABLE password_resets (
+  token_hash  TEXT        PRIMARY KEY,            -- SHA-256 do token; o token em claro só vai no e-mail
+  user_id     BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used_at     TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX password_resets_user_idx ON password_resets (user_id);
 ```
 
 ### Regras derivadas
@@ -246,10 +277,20 @@ URLs reais (sem `#hash`). Todas em português, iguais às do protótipo onde pos
 | `POST /conta/sair` | ✅ | Destroi sessão (logout é sempre POST) |
 | `POST /conta/excluir` | ✅ | Substitui o "Apagar meus dados deste navegador". Pede confirmação (mesma UI de 2 passos do protótipo) |
 
-### JSON (só para melhoria progressiva)
+### Recuperar senha (M10 — nomes propostos; a spec confirma)
+| Rota | Auth | O que faz |
+|---|---|---|
+| `GET /conta/recuperar` | só deslogado | Form com o e-mail. Link "Esqueci minha senha" em `/conta/entrar` |
+| `POST /conta/recuperar` | só deslogado | Se a conta existir, gera token e envia o e-mail. **Sempre** a mesma resposta (PRG + flash), exista ou não a conta |
+| `GET /conta/redefinir/:token` | só deslogado | Token válido → form de nova senha; inválido/expirado/usado → página de erro com link para pedir outro |
+| `POST /conta/redefinir/:token` | só deslogado | Troca a senha, marca o token como usado, encerra as outras sessões do usuário, redirect `/conta/entrar` com flash |
+
+### Infra e JSON
 | Rota | Uso |
 |---|---|
+| `GET /healthz` | Healthcheck do Render. Não consulta o banco |
 | `GET /api/grupos?<mesmos filtros>` | `public/js/filtros.js` atualiza resultados sem recarregar e faz `history.replaceState` com a query |
+| `GET /api/mapa/:slug` | `public/js/mapa.js` troca o grupo selecionado no mapa sem recarregar |
 
 Sem JS, o form de filtros faz GET normal em `/grupos` e tudo funciona.
 
@@ -344,6 +385,15 @@ Detalhes do protótipo que a tabela acima não mostra (spec 008, que segue o pro
 - Login com erro genérico: "E-mail ou senha incorretos." (não revelar qual dos dois).
 - `req.session.regenerate()` no login e no cadastro (evita fixação de sessão).
 
+### Recuperar senha (M10)
+- **Resposta neutra**: `POST /conta/recuperar` responde igual exista ou não a conta (mesma mensagem, mesmo redirect; não revelar cadastro). O envio não pode atrasar a resposta de forma que denuncie a conta.
+- **Token**: 32 bytes de `crypto.randomBytes` em base64url; no banco só o **SHA-256** (`token_hash`). Validade curta (proposta: **1 h**), **uso único**. Pedir de novo invalida os tokens anteriores do usuário.
+- **Nova senha**: mesmas regras do cadastro (mín. 8, bcrypt cost 12). Depois da troca: token marcado `used_at`, **todas as sessões do usuário apagadas** da tabela `session`, e o usuário entra de novo pelo login (não logar automaticamente — a spec pode mudar isto).
+- **E-mail**: assunto e corpo em pt-BR, HTML simples com o visual do site (CSS inline) + versão texto. Link absoluto montado com `APP_URL` (nunca com o `Host` da requisição: evita envenenamento do link). Falha do provedor é logada (sem o token e sem o e-mail completo) e o usuário vê a mesma resposta neutra.
+- **Envio**: `sendEmail({ to, subject, html, text })` no `modules/email`, via `fetch` na API do provedor, com timeout. Em dev/teste sem chave, transporte em memória (testes leem a mensagem enviada) ou console **só fora de produção**. Em produção a chave é obrigatória (`env.js` falha no boot sem ela).
+- **Rate limit**: `POST /conta/recuperar` por IP **e** por e-mail (proposta: 5 / 15 min); `POST /conta/redefinir/:token` por IP.
+- Mensagens (propostas; a spec fixa): "Se existir uma conta com esse e-mail, enviamos um link para criar uma nova senha." / "Esse link expirou ou já foi usado. Peça um novo."
+
 ---
 
 ## 7. Dados de demonstração (seed)
@@ -389,7 +439,8 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 - CSRF em todo POST. Cookies de sessão: `httpOnly`, `sameSite=lax`, `secure` em produção, `maxAge` 30 dias.
 - `helmet` com CSP permitindo apenas `self`, `fonts.googleapis.com` e `fonts.gstatic.com`. Sem scripts e handlers inline (mover `<script>` para `public/js`); única exceção: `style-src-attr 'unsafe-inline'`, porque as cores das zonas e `--p` vão em `style="…"`.
 - Rate limit em `/conta/entrar` e `/conta/criar`; leitura (`/grupos`, `/encontrar`) 120/min por IP, API 300/min por IP, `POST /grupos` 20/h por usuário, participar/sair 60/15 min por usuário.
-- `trust proxy` vem de `TRUST_PROXY` (número de proxies; 1 em produção, nunca `true`).
+- `trust proxy` vem de `TRUST_PROXY` (número de proxies, nunca `true`). Padrão do `env.js` em produção: 1; **no Render o valor correto é 3** (conferido em 2026-11-17, procedimento em `docs/DEPLOY.md`).
+- Recuperar senha (M10): token só como hash no banco; nunca logar token, link nem corpo do e-mail; página de redefinir com `Cache-Control: no-store` e `Referrer-Policy: no-referrer` (o token está na URL); a chave da API de e-mail é segredo (painel do Render, nunca no git).
 - `DATABASE_URL` de produção exige `sslmode` `require`, `verify-ca` ou `verify-full` (usar `verify-full`).
 - `?next=` só aceita caminhos internos (começam com `/` e não com `//`).
 - Dados pessoais mínimos: e-mail, nome de exibição, apelido por grupo. Contato do grupo deve ser canal público do grupo (hint já existe no form).
@@ -407,8 +458,12 @@ DATABASE_URL=postgres://pace:pace@localhost:5432/pace_paulista
 DATABASE_URL_TEST=postgres://pace:pace@localhost:5432/pace_paulista_test
 SESSION_SECRET=troque-por-uma-string-longa-e-aleatoria
 TZ_APP=America/Sao_Paulo
-# TRUST_PROXY=1
+# TRUST_PROXY=1        # nº de proxies; no Render é 3
 # ALLOW_DEMO_SEED=1
+# M10 (nomes propostos; a spec confirma):
+# APP_URL=http://localhost:3000   # base dos links nos e-mails; produção: https://pace-paulista.onrender.com
+# EMAIL_API_KEY=                  # obrigatória em produção; sem ela, dev/teste usam o transporte em memória
+# EMAIL_FROM="Pace Paulista <nao-responda@...>"
 ```
 
 Scripts esperados no `package.json`:
@@ -424,7 +479,14 @@ npm run lint
 
 Primeira execução: `npm i && npm run db:up && npm run migrate && npm run seed && npm run dev` → http://localhost:3000.
 
-Deploy (v1): Render (Web Service, `render.yaml`) + Neon (Postgres 16, conexão direta, `sslmode=verify-full`); plano Free; `npm run migrate && npm run seed` no build; healthcheck `GET /healthz`; o serviço hiberna após ~15 min ocioso (cold start ~50 s). Passo a passo em `docs/DEPLOY.md`.
+### Produção (no ar desde 2026-11-17)
+- URL: https://pace-paulista.onrender.com/
+- Render (Web Service Free, região Virginia, `render.yaml`) + Neon (Postgres 16 Free, us-east-1, conexão **direta**, `sslmode=verify-full`).
+- Deploy automático a cada merge na `main` com o CI verde. Build: `npm ci && npm run migrate && npm run seed` (o Free não tem pre-deploy); se falhar, a versão anterior continua no ar. Healthcheck `GET /healthz`.
+- Hiberna após ~15 min ocioso (cold start ~50 s); rate limits em memória zeram a cada hibernação/deploy.
+- Migrations rodam **antes** da troca de versão: precisam ser compatíveis com o código antigo (adicionar num deploy, remover/renomear no seguinte).
+- Env novo (ex.: `EMAIL_API_KEY`): segredo → `sync: false` no `render.yaml` e valor no painel; não-segredo → `value` no `render.yaml`.
+- Passo a passo e operação: `docs/DEPLOY.md`.
 
 ---
 
@@ -463,9 +525,10 @@ Estilo de código e comentários: `docs/CONVENTIONS.md`. Marcos M1–M8: `docs/M
 ---
 
 ## 12. Roadmap (depois da v1)
-- Moderação: grupo novo `pending` → admin aprova em `/admin`.
-- Dono edita/arquiva o próprio grupo.
+- **M10 (atual)**: recuperar senha por e-mail.
+- **M9**: conteúdo real — moderação (grupo novo `pending` → admin aprova em `/admin`), dono edita/arquiva o próprio grupo, validade dos dados (`last_confirmed_at`), tirar os demos. Detalhes em `docs/PENDENCIAS.md`.
+- Outros e-mails, reaproveitando o `modules/email` do M10: boas-vindas, confirmação de e-mail, aviso ao dono para confirmar os dados do grupo.
 - Mapa real com Leaflet + OpenStreetMap (colunas `lat`, `lng`).
 - Confirmação de presença por encontro (tabela `attendances`) e notificações.
-- Recuperação de senha por e-mail; login com Google.
+- Login com Google.
 - Migrar para TypeScript.

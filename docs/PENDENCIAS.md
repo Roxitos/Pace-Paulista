@@ -71,7 +71,7 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [x] `npm audit` não investigado. (010, Coder/Hardener) — spec 019: `npm audit --omit=dev` sem vulnerabilidades.
 - [x] `/meus` deslogado redireciona para `/conta/entrar`, que só existe na spec 011 (404 até lá). (010, QA) — resolvido na spec 011
 
-- [ ] **Pós-M5 (spec própria)** — E-mail de boas-vindas ao criar conta, com visual do site (HTML com CSS inline). Envio por SMTP/API de provedor configurável por env (`SMTP_*` ou chave da API), falha de envio não pode impedir o cadastro. Exige dependência nova justificada (ex.: `nodemailer`), atualizar AGENTS §1 (hoje "notificações/e-mail" é fora do escopo) e revisar LGPD (e-mail usado também para mensagem, não só login). Provedor ainda a escolher. (usuário, 2026-11-13)
+- [ ] **Pós-M5 (spec própria)** — E-mail de boas-vindas ao criar conta, com visual do site (HTML com CSS inline). Envio por SMTP/API de provedor configurável por env (`SMTP_*` ou chave da API), falha de envio não pode impedir o cadastro. Exige dependência nova justificada (ex.: `nodemailer`), atualizar AGENTS §1 (hoje "notificações/e-mail" é fora do escopo) e revisar LGPD (e-mail usado também para mensagem, não só login). Provedor ainda a escolher. (usuário, 2026-11-13) — 2026-11-17: adiado; o M10 entrega só recuperar senha. O envio será por API HTTP via `fetch` (sem `nodemailer`), reaproveitável aqui.
 - [x] P4/P8 textos de conta aprovados; P11 "Tem certeza que deseja excluir?" com grupos publicados; P2 página própria de CSRF. — specs 009/010/011/012
 
 ## M6 — Escrita
@@ -129,6 +129,15 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - [ ] **"Informar problema"** na página do grupo (grupo acabou, horário mudou), com fila para admin.
 - [ ] **Moderação** usando a coluna `status` já existente + página `/admin` (ver pergunta de produto).
 
+## M10 — Recuperar senha por e-mail (atual, antes do M9)
+- [x] Decisão (usuário, 2026-11-17): escopo é **só recuperar senha**; boas-vindas, confirmação de e-mail e avisos ao dono ficam para depois. Envio por **API HTTP** do provedor com `fetch` nativo (o Render Free bloqueia SMTP). Regras-base em AGENTS §5, §6 "Recuperar senha" e §9.
+- [ ] **Provedor**: qual (Resend, Brevo…)? Conferir plano grátis, limite diário e termos no dia.
+- [ ] **Remetente/domínio**: os provedores exigem domínio verificado (DNS) para enviar a qualquer destinatário; `onrender.com` não é nosso. Comprar um domínio, usar remetente único verificado (pior entrega: DMARC de Gmail/Hotmail) ou outra saída? Bloqueia o QA em produção.
+- [ ] Validade do token (proposta 1 h), limites (proposta 5 / 15 min por IP e por e-mail) e textos das mensagens: confirmar na spec.
+- [ ] Depois de redefinir: só encerrar as sessões e mandar para o login (proposta) ou já entrar logado?
+- [ ] LGPD: o e-mail passa a ser usado também para mensagens (não só login) e é enviado a um operador (o provedor). Atualizar o texto de `/sobre`/rodapé?
+- [ ] Limpeza dos tokens expirados/usados: no próprio fluxo (DELETE ao gerar) ou job? Sem job no plano Free.
+
 ## Riscos aceitos
 - (spec 019, Hardener/QA) Riscos aceitos: 429 em `POST /grupos` perde o formulário preenchido (P2); rate limit em memória (zera a cada deploy); `style-src-attr 'unsafe-inline'` (Safari < 15.4 não entende; P3); `sslmode=require` sem `uselibpqcompat` já vale como verify-full no pg atual, recomendar `verify-full` no Neon; `TRUST_PROXY=0` atrás de proxy gera aviso do `express-rate-limit`. Para a **spec 020**: pooler do Neon x `statement_timeout` como parâmetro de conexão. QA: home sem JS com scroll horizontal (+15 px a 360 px) por `.hdr-actions`, já existia no HEAD; contador de caracteres de `/grupos/novo` e 2º passo da exclusão em `/meus` sem checagem no navegador. Docs com OK pendente: AGENTS §3, §9 e §10. (019)
 - (spec 018, Hardener/QA) `GET /api/mapa/:slug` sem rate limit, helmet nem `nosniff` (spec 019); `loadMapPanel` lê toda a lista de publicados por chamada; cliente não confere `data.slug` da resposta; numa falha, pin/lista mudam antes do `location.assign` (visual, bfcache); a 360 px a largura chega a 375 antes das webfontes (igual em `/grupos`). (018)
@@ -170,4 +179,4 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - (spec 016, Hardener/QA) `/api/grupos` sem rate limit nem helmet/CSP/`nosniff` (M8); 500 da API volta em HTML e consome flash pendente (raro); `change` ao sair de "Nome"/"Local" repete a busca após o debounce e o esqueleto pisca (UX); QA não comparou screenshot com `docs/prototipo.html`. (016)
 - (spec 020, QA aprovado) Pendentes só no deploy real: CA7–CA10, 429 da 121ª chamada em `/grupos` (CA11), CA12, CA13; confirmar `healthCheckPath`/`autoDeployTrigger`/região/env no build do plano Free; registrar cold start e 500 no 1º acesso após suspensão do Neon. (020)
 - [x] Remover `GET /diag/ip` e `DIAG_IP` depois de descobrir o `TRUST_PROXY` (limite de 30/min contornável com `TRUST_PROXY` errado; teste "sem DIAG_IP" depende do env). (020) — spec 021 (`TRUST_PROXY=3`, conferido em 2026-11-17).
-- (spec 021, Hardener/QA) Risco aceito: se o Render mudar o número de proxies, `TRUST_PROXY=3` fica errado (alto → IP falsificável; baixo → rate limit coletivo); só se detecta pelo procedimento do `docs/DEPLOY.md`. Doc com OK pendente: AGENTS §9/§10 e `.env.example` falam em "1 em produção" (o padrão do `env.js`); a produção usa 3. (021)
+- (spec 021, Hardener/QA) Risco aceito: se o Render mudar o número de proxies, `TRUST_PROXY=3` fica errado (alto → IP falsificável; baixo → rate limit coletivo); só se detecta pelo procedimento do `docs/DEPLOY.md`. Doc com OK pendente: AGENTS §9/§10 e `.env.example` falam em "1 em produção" (o padrão do `env.js`); a produção usa 3. (021) — docs atualizados em 2026-11-17 (AGENTS §9/§10 e `.env.example` citam o 3 do Render).
