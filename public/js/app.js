@@ -1,4 +1,11 @@
-import { ic } from './ui.js';
+import { ic, toast } from './ui.js';
+
+// Avisos fixos do servidor viram toast com JS; havendo mais de um, vale o último.
+const toastEls = [...document.querySelectorAll('[data-toast]')];
+if (toastEls.length) {
+  toast(toastEls.at(-1).dataset.toast);
+  toastEls.forEach((el) => el.remove());
+}
 
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-act="menu"]');

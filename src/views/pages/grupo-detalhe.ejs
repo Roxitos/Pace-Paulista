@@ -15,7 +15,7 @@
   const proxima = locals.nextSession || null;
   const headTag = group.is_demo ? 'Grupo fictício · demonstração' : locals.isOwner ? 'Cadastrado por você' : group.owner_name && `Cadastrado por ${group.owner_name}`;
 -%>
-<% if (flashHere === 'left') { %><div class="wrap notice-top"><div class="form-alert good" role="status"><%- ic('check') %><span>Você saiu do grupo.</span></div></div>
+<% if (flashHere === 'left') { %><div class="wrap notice-top" data-toast="Você saiu do grupo."><div class="form-alert good" role="status"><%- ic('check') %><span>Você saiu do grupo.</span></div></div>
 <% } -%>
 <section class="detail-head" style="<%= zstyle(group.zone) %>"><div class="wrap">
     <a class="back" href="/grupos"><%- ic('back', 'ico-sm') %> Voltar para os grupos</a>

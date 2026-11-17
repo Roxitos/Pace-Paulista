@@ -49,6 +49,10 @@ a.map-item{text-decoration:none}
 .join-panel{scroll-margin-top:84px}
 .join-panel:not(:target):not(.open){display:none}
 
+/* Modal "Entrar no grupo" (spec 017): nome (50) e apelido (40) sem espaço não podem alargar o modal em 360 px. */
+.modal .stack{grid-template-columns:minmax(0,1fr)}
+.modal-top h2{overflow-wrap:anywhere}
+
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{
   --verde:#5E9A22; --verde-hover:#4F8519; --roxo:#7A3FA0; --laranja:#E8892B; --vermelho:#C8402F; --azul:#3A78C2;

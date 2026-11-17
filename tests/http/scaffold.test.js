@@ -54,6 +54,9 @@ describe('GET /', () => {
     expect(res.text).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>/);
     expect(res.text).toContain('<script type="module" src="/js/app.js"></script>');
     expect(res.text).not.toContain('filtros.js');
+    expect(res.text).not.toContain('participar.js');
+    expect(res.text.indexOf('id="modalRoot"')).toBeGreaterThan(0);
+    expect(res.text.indexOf('id="modalRoot"')).toBeLessThan(res.text.indexOf('id="toastRoot"'));
   });
 
   it('não expõe o header x-powered-by', async () => {
@@ -79,7 +82,7 @@ describe('arquivos estáticos', () => {
   });
 
   it('serve o JS do cliente', async () => {
-    for (const file of ['app', 'ui', 'filtros']) {
+    for (const file of ['app', 'ui', 'filtros', 'participar']) {
       const res = await request(app).get(`/js/${file}.js`);
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/javascript/);
