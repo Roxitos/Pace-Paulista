@@ -30,10 +30,10 @@ Nenhuma função nova (`pinPos`, `gmapsRota`, `gmapsBusca` da 007 continuam como
 | GET | `/mapa/:slug` | — | igual à 007 (404 sem banco se `!isSlug`; 404 se não publicado), mais `scripts: ['mapa']` só na resposta 200 |
 | GET | `/api/mapa/:slug` | — | **novo**. `!isSlug(slug)` → `404` JSON `{"error":"not_found"}` **sem consultar o banco**; `loadMapPanel` → `null` → mesmo 404 JSON; senão `200` JSON `{ "slug": "<slug>", "panel": "<html>" }` com `panel = await res.renderPartial('map-detail', { g })`. Sempre `Cache-Control: private, no-store` (o selo "Cadastrado por você" depende da sessão). Erro de banco segue o `errorHandler` (HTML 500), como a `/api/grupos`. |
 - **Só os campos `slug` e `panel`.** Nunca serializar o objeto do grupo, `res.locals` nem `owner_id`/`contact`.
-- `renderPartial` não consome o flash (spec 016).
+- Usar `renderPartial` (não consome o flash, spec 016).
 
 ### Views
-- `src/views/partials/map-detail.ejs` (**novo**): o conteúdo atual de `#mapDetail` em `mapa.ejs` para um grupo `g` (o `<div class="panel" …>` até o link "Ver detalhes do grupo"), **sem mudar um byte do HTML**.
+- `src/views/partials/map-detail.ejs` (**novo**): o conteúdo atual de `#mapDetail` em `mapa.ejs` para um grupo `g` (do `<div class="panel" …>` até o `</div>` depois de "Ver detalhes do grupo"), **sem mudar um byte do HTML** — inclusive sem quebra de linha a mais no fim (arquivo sem `\n` final ou fechamento com `-%>`).
 - `src/views/pages/mapa.ejs`:
   - `#mapDetail` passa a fazer `<% if (selected) { %><%- include('../partials/map-detail', { g: selected }) %><% } %>`. O HTML do painel na página fica idêntico ao de hoje (os testes da 007 continuam passando sem alteração).
   - Cada pin ganha, **como primeiro filho**, uma área de toque invisível: `<circle class="hit" r="17" fill="transparent"/>`, antes de `circle.ring` e `circle.dot` (que continuam iguais). Conta: a 360 px o SVG tem ~290 px para 400 unidades (escala ≈ 0,725); `r=17` → 34 unidades ≈ **24,6 px** (WCAG 2.5.8). O ponto visível continua com 12 unidades (≈ 9 px). Vale também sem JS.
@@ -83,9 +83,9 @@ Nenhum texto novo de UI.
 - [ ] CA5 — Cliques rápidos em A, B e C: o estado final (lista, pins, painel e URL) é o de C.
 - [ ] CA6 — Em ≤ 900 px de largura, após selecionar, o painel rola para a vista (`block:'nearest'`) e para abaixo do cabeçalho fixo; com `prefers-reduced-motion: reduce` a rolagem é instantânea.
 - [ ] CA7 — Se `/api/mapa/<slug>` responder não-2xx (ex.: grupo despublicado depois de a página abrir) ou a rede falhar, o navegador navega para `/mapa/<slug>#mapDetail` (404 "Esse endereço não existe." se o grupo sumiu).
-- [ ] CA8 — `GET /api/mapa/pace-da-oca` → 200 JSON só com `slug` e `panel`; `panel` idêntico ao miolo de `#mapDetail` de `GET /mapa/pace-da-oca`; `Cache-Control: private, no-store`. Slug fora do formato → 404 JSON sem consultar o banco; inexistente ou `pending` → 404 JSON. Com `contact` preenchido, nem ele nem `owner_id` aparecem na resposta; nome/local com `<script>` saem escapados no `panel`; a chamada não consome flash pendente.
+- [ ] CA8 — `GET /api/mapa/pace-da-oca` → 200 JSON só com `slug` e `panel`; `panel` idêntico ao miolo de `#mapDetail` de `GET /mapa/pace-da-oca`; `Cache-Control: private, no-store`. Slug fora do formato → 404 JSON sem consultar o banco; inexistente ou `pending` → 404 JSON. Com `contact` preenchido, nem ele nem `owner_id` aparecem na resposta; nome/local com `<script>` saem escapados no `panel`. A rota usa `renderPartial`, não `renderPage` (não consome flash; inspeção).
 - [ ] CA9 — **Sem JS**: `/mapa` e `/mapa/:slug` se comportam como na 007 (links, seleção pela URL, `#mapDetail`); o HTML só muda pelo `<circle class="hit" …/>` em cada pin. Todos os testes de `tests/http/mapa.test.js` continuam passando sem alteração.
-- [ ] CA10 — `<script type="module" src="/js/mapa.js">` aparece em `/mapa` e `/mapa/<slug>` (200) e **não** aparece no 404 de `/mapa/nao-existe` nem em outras páginas (ex.: `/grupos`, `/`).
+- [ ] CA10 — `<script type="module" src="/js/mapa.js">` aparece em `/mapa` e `/mapa/<slug>` (200) e **não** aparece no 404 de `/mapa/nao-existe` nem em outras páginas (ex.: `/grupos`).
 - [ ] CA11 — Teclado: Tab num pin **não selecionado** mostra anel contínuo de raio 14 na cor `--focus` (3 px); no selecionado também; clique com mouse não mostra o anel. Enter num pin focado seleciona sem recarregar (com JS) ou navega (sem JS).
 - [ ] CA12 — Toque: a 360 px, o alvo de cada pin mede ≥ 24 × 24 px (círculo `hit` de 34 unidades); tocar a ~10 px do centro do ponto seleciona o grupo. Visual do mapa inalterado (o `hit` é transparente).
 - [ ] CA13 — Responsivo em 360 px sem scroll horizontal (com e sem JS, inclusive após trocar para um grupo de nome longo); sem erros no console.
