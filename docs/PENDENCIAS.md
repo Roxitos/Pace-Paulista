@@ -101,6 +101,9 @@ Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relató
 - [ ] Acessibilidade do mapa (vêm do protótipo): foco de teclado discreto nos pins não selecionados (anel `r=0`, só o ponto cresce) e alvo de toque de ~9 px a 360 px (WCAG 2.5.8 pede 24 px). (007, QA)
 
 ## M8 — Produção
+- [x] Decisão (usuário, 2026-11-17): deploy no **Render** (Web Service Node) e banco no **Neon** (Postgres gerenciado). Meta: produção na quarta 25/11.
+- [ ] Neon: `DATABASE_URL` exige `sslmode=require`; usar a conexão **direta** (sem `-pooler`) no `npm run migrate` por causa do `pg_advisory_lock` (o pooler em modo transação não o mantém) e conferir se a app deve usar a conexão com pooler (limite de conexões do `pg.Pool`). Conferir `CREATE EXTENSION citext` no Neon e que `connect-pg-simple` cria a tabela `session`. Branch do Neon para staging (barato) em vez de segundo projeto. (usuário)
+- [ ] Render: `render.yaml` (build `npm ci`, start `npm start`, `preDeployCommand: npm run migrate`, healthcheck, `NODE_ENV=production`, `SESSION_SECRET` gerado, `TZ_APP`); `trust proxy` = 1 (Render coloca um proxy na frente); free tier hiberna e cold start de ~50 s: decidir plano. (usuário)
 - [ ] `app.set('trust proxy', 1)` junto com o cookie `secure`: sem isso, atrás do proxy do Render/Railway o cookie não é enviado. Decidir antes do rate limit por IP da 010/011 (valor errado deixa o IP ser falsificado via `X-Forwarded-For`). (009, Hardener)
 - [ ] helmet + CSP (`self`, fonts.googleapis.com, fonts.gstatic.com). `style="--z:…"`, `style="font-size:14px"` e o `extra` do 404/500 exigem `style-src-attr 'unsafe-inline'` ou classes CSS. (001, 002)
 - [ ] Não publicar antes de M3/M5: links da home levam a 404. (002) — `/encontrar` deixou de ser um deles (spec 008); "Entrar no grupo" dos cards de `/encontrar` leva a `/conta/entrar` (404 até o M5). (008, QA)

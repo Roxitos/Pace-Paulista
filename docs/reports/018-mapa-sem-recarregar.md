@@ -13,3 +13,5 @@ Spec 018 escrita, terceira do M7. Selecionar no mapa (pin ou lista) sem recarreg
 
 Perguntas em aberto (defaults na spec), aguardando o usuário: P1 (`replaceState` × `pushState`), P2 (área de toque `r=17`, pins próximos se sobrepõem; lista é o controle equivalente), P3 (anel de foco contínuo, muda o foco tracejado do selecionado), P4 (sem `aria-live` no painel, como no protótipo).
 Fora da spec e abertas: rolagem suave do `/encontrar`, `aria-current` em `/encontrar`, deslocamento antes das webfontes.
+
+Aprovação: usuário aceitou os defaults de P1–P4 (`replaceState`; área de toque `r=17`; anel de foco contínuo; sem `aria-live` no painel).
