@@ -88,6 +88,14 @@ describe('GET /healthz', () => {
   });
 });
 
+describe('GET /diag/ip', () => {
+  it('responde 404 HTML, mesmo com a opção antiga diagIp', async () => {
+    const res = await request(createTestApp({ diagIp: true, trustProxy: 1 })).get('/diag/ip');
+    expect(res.status).toBe(404);
+    expect(res.headers['content-type']).toMatch(/html/);
+  });
+});
+
 describe('trust proxy', () => {
   const headers = { 'X-Forwarded-For': '203.0.113.7', 'X-Forwarded-Proto': 'https' };
 

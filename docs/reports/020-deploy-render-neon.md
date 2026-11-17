@@ -58,3 +58,13 @@ Sem achado que exigisse correção; nenhum código alterado, nenhum teste novo. 
 - Pendentes de verificação manual no deploy real: CA7–CA10, o 429 da 121ª chamada em `/grupos` (CA11), CA12 e CA13. Também registrar cold start e se o 1º acesso após o Neon suspender dá 500.
 - Não rodados: Playwright/360 px (spec sem mudança de UI).
 - Sugestão: remover `/diag/ip` e `DIAG_IP` após descobrir o `TRUST_PROXY`.
+
+## Deploy real (2026-11-17)
+Feito pelo usuário com o orquestrador guiando; verificações HTTP feitas do ambiente do chat.
+- Neon: projeto recriado com **Postgres 16** (o padrão veio 18), AWS us-east-1, conexão direta com `sslmode=verify-full`. Render: Blueprint aplicado, plano Free, Virginia, build com migrate + seed ok; `healthCheckPath` e `autoDeployTrigger` aceitos.
+- URL: `https://pace-paulista.onrender.com`. Páginas públicas 200; `/grupos/zona/sul` 301; `/meus` e `/grupos/novo` 302 para o login; 404 ok; 11 grupos demo e aviso "Versão de demonstração".
+- Cabeçalhos: cookie `pp.sid` `HttpOnly; Secure; SameSite=Lax` (30 dias), CSP conforme a spec, HSTS, `nosniff`, `X-Frame-Options: DENY`, `no-store` nas páginas de conta; `/healthz` 200 `ok`, `no-store`, sem cookie.
+- **CA11:** `/diag/ip` mostrou 3 saltos (Cloudflare → LB `10.x` → proxy local `::1`). Com `TRUST_PROXY=1` todo visitante virava `10.x` (limite compartilhado). Painel ajustado para **3**: `ip` = `cfConnectingIp`, `X-Forwarded-For` forjado ignorado, Wi-Fi e 4G com IPs diferentes. `DIAG_IP` apagada, `/diag/ip` → 404.
+- Fluxo completo no navegador (criar conta → participar → Meus grupos → sair do grupo → sair → entrar → excluir conta): ok, segundo o usuário.
+- Não verificado: 429 na 121ª chamada de `/grupos` (a saída do chat troca de IP a cada requisição); cold start medido; 1º acesso após o Neon suspender.
+- Observação do usuário: nenhum e-mail na criação de conta. Esperado (e-mail fora da v1, AGENTS §1).

@@ -40,16 +40,17 @@ SELECT count(*) FROM groups WHERE is_demo;                          -- 11
 - Para ensaiar uma migration arriscada, crie uma branch no Neon e rode `npm run migrate` local com `NODE_ENV=development` e a `DATABASE_URL` da branch (conexão direta, com `?sslmode=verify-full`: fora de produção o `env.js` não exige TLS).
 - O migrate recusa host `-pooler`: o `pg_advisory_lock` não funciona pelo pooler.
 
-## Diagnóstico do IP (CA11)
-Serve para descobrir o `TRUST_PROXY` certo no 1º deploy (o padrão de produção é 1). Temporário.
-1. No painel do Render, crie a env `DIAG_IP=1` (não está no `render.yaml`) e aguarde o redeploy.
-2. Abra `https://<seu-serviço>.onrender.com/diag/ip` de **duas redes diferentes** (ex.: Wi-Fi e 4G).
-3. Leia o JSON:
-   - `ips` com **N** entradas e o IP real do visitante na primeira → `TRUST_PROXY = N`. Com o valor certo, `ip` é a primeira entrada de `ips` (o visitante) e `xForwardedFor` mostra a cadeia crua.
-   - Se `ip` for um IP de Cloudflare ou de outro proxy (e não o da sua rede), há mais um salto: aumente `TRUST_PROXY` em 1 e repita até `ip` ser o IP da sua rede. Os cabeçalhos `cfConnectingIp`/`trueClientIp`, quando existem, confirmam o IP real.
-   - Redes diferentes devem dar `ip` diferentes; se derem o mesmo, o valor ainda está baixo.
-4. Ajuste só `TRUST_PROXY` no painel (sem código) e confira de novo.
-5. **Desligue:** apague `DIAG_IP` no painel ao terminar. A rota é pública e limitada a 30/min por IP; não deixe ligada.
+## IP real do visitante (`TRUST_PROXY`)
+Valor em produção: **`TRUST_PROXY=3`** (conferido em 2026-11-17). É o número de proxies na frente da app; os rate limits por IP dependem dele.
+Para conferir de novo (ex.: o Render mudou a rede), sem código:
+1. Do mesmo computador, faça 121 `GET /grupos` seguidos em menos de 1 min:
+   `for i in $(seq 121); do curl -s -o /dev/null -w '%{http_code}\n' https://<seu-serviço>.onrender.com/grupos; done | sort | uniq -c`
+   → 120 respostas `200` e 1 `429`.
+2. Na mesma janela de 1 min, abra `/grupos` de outra rede (ex.: celular no 4G) → `200`.
+3. Repita o passo 1 com `-H 'X-Forwarded-For: 203.0.113.9'` → continua `429`.
+- Outra rede também recebe `429` → todo mundo divide o IP do proxy: o valor está **baixo**, aumente 1.
+- Com o `X-Forwarded-For` forjado volta `200` → o IP é falsificável: o valor está **alto**, diminua 1.
+Ajuste só `TRUST_PROXY` no painel (e no `render.yaml`, para o Blueprint não desfazer) e repita. O limite fica em memória e zera quando o serviço hiberna ou é reimplantado.
 
 ## 6. M9: tirar os demos
 Remova `ALLOW_DEMO_SEED` **e** o `&& npm run seed` do `buildCommand` no `render.yaml`, no mesmo PR (sem a flag o seed sai com código 1 e o build falha). Depois apague os demos do banco.
