@@ -129,6 +129,14 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - [ ] **"Informar problema"** na página do grupo (grupo acabou, horário mudou), com fila para admin.
 - [ ] **Moderação** usando a coluna `status` já existente + página `/admin` (ver pergunta de produto).
 
+## Spec 023 — Nome e apelido do participante (antes do M10)
+- [ ] Pedido do usuário (2026-11-17): hoje apelidos podem se repetir (não há unicidade em `memberships.nickname` nem em `users.display_name`). Em vez de unicidade, o usuário quer **dois campos**: "Nome completo" e "Apelido (opcional)"; nos grupos aparece o **nome completo por padrão** e o apelido só se a pessoa preencher. Spec separada da 022.
+- [x] Onde ficam os campos (usuário, 2026-11-17): o **cadastro da conta** pede **Nome completo, E-mail e Senha** (hoje: "Nome de exibição", e-mail, senha). Leitura do orquestrador, a confirmar na spec: "Nome completo" substitui o "Nome de exibição" (`users.display_name`), e o apelido continua no form "Entrar no grupo", agora **opcional**; vazio → usa o nome completo. Confirmado pelo usuário (2026-11-17): o campo do "Entrar no grupo" fica como **"Como gostaria de ser chamado?"** (hoje "Como o grupo pode te chamar? *"), opcional; **vazio = nome completo**.
+- [ ] Contas já existentes: o `display_name` atual passa a valer como nome completo (sem pedir de novo)? Limite de 40 caracteres do `display_name` (CHECK no banco) basta para nome completo ou precisa de migration (ex.: 80)?
+- [ ] "Cadastrado por {display_name}" passa a mostrar o nome completo publicamente: manter, ou mostrar só o primeiro nome?
+- [ ] "Aparece nos grupos": hoje nenhuma tela lista os participantes de um grupo; o apelido só aparece no flash "Bem-vindo(a), {apelido}!". Criar uma lista de participantes faz parte da 023?
+- [ ] LGPD (AGENTS §9 pede dados mínimos): nome completo é dado pessoal a mais e, se exibido, fica público. Confirmar finalidade, texto de `/sobre` e se o padrão deve mesmo ser o nome completo (e não o apelido).
+
 ## M10 — Recuperar senha por e-mail (atual, antes do M9)
 - [x] Decisão (usuário, 2026-11-17): escopo é **só recuperar senha**; boas-vindas, confirmação de e-mail e avisos ao dono ficam para depois. Envio por **API HTTP** do provedor com `fetch` nativo (o Render Free bloqueia SMTP). Regras-base em AGENTS §5, §6 "Recuperar senha" e §9.
 - [ ] **Provedor**: qual (Resend, Brevo…)? Conferir plano grátis, limite diário e termos no dia.
