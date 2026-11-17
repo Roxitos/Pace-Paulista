@@ -44,6 +44,10 @@ function zoneInput(html, zone) {
 }
 
 describe('GET /grupos', () => {
+  it('carrega o filtros.js como módulo (CA6)', async () => {
+    expect(await getGrupos()).toContain('<script type="module" src="/js/filtros.js"></script>');
+  });
+
   it('lista os 11 grupos com o cabeçalho e o formulário do protótipo', async () => {
     const html = await getGrupos();
     expect(html).toContain('<title>Grupos de corrida em SP · Pace Paulista</title>');

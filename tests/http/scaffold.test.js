@@ -52,7 +52,8 @@ describe('GET /', () => {
     const res = await request(app).get('/');
     expect(res.text).not.toContain('href="#');
     expect(res.text).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>/);
-    expect(res.text).toContain('<script src="/js/app.js" defer></script>');
+    expect(res.text).toContain('<script type="module" src="/js/app.js"></script>');
+    expect(res.text).not.toContain('filtros.js');
   });
 
   it('não expõe o header x-powered-by', async () => {
@@ -78,9 +79,11 @@ describe('arquivos estáticos', () => {
   });
 
   it('serve o JS do cliente', async () => {
-    const res = await request(app).get('/js/app.js');
-    expect(res.status).toBe(200);
-    expect(res.headers['content-type']).toMatch(/javascript/);
+    for (const file of ['app', 'ui', 'filtros']) {
+      const res = await request(app).get(`/js/${file}.js`);
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toMatch(/javascript/);
+    }
   });
 });
 

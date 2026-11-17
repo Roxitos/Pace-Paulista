@@ -76,6 +76,10 @@ export function filtersToQuery(f) {
   return params.toString();
 }
 
+export function countLabel(n) {
+  return `${n} ${n === 1 ? 'grupo encontrado' : 'grupos encontrados'}`;
+}
+
 export function searchHref(f) {
   const query = filtersToQuery(f);
   return query ? `/grupos?${query}` : '/grupos';

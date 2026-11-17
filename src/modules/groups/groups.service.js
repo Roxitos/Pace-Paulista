@@ -1,5 +1,5 @@
 import { env } from '../../config/env.js';
-import { activeChips, parseFilters } from '../../domain/filters.js';
+import { activeChips, filtersToQuery, parseFilters } from '../../domain/filters.js';
 import { fmtDataCurta, fmtDataLonga, fmtEncontro, proximos } from '../../domain/schedule.js';
 import { slugify, nextSlug } from '../../domain/slug.js';
 import { parseGroupForm } from './groups.schemas.js';
@@ -16,7 +16,12 @@ export function listGroupsForMatching() {
 
 export async function searchGroups(query) {
   const filters = parseFilters(query);
-  return { filters, groups: await listPublishedGroups(filters), chips: activeChips(filters) };
+  return {
+    filters,
+    groups: await listPublishedGroups(filters),
+    chips: activeChips(filters),
+    query: filtersToQuery(filters),
+  };
 }
 
 // O contato só é exibido para quem está logado (P4): para visitante ele nem chega à view,

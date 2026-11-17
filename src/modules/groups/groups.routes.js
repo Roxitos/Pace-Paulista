@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ZONA_ORDEM } from '../../domain/constants.js';
+import { countLabel } from '../../domain/filters.js';
 import { isSlug } from '../../domain/slug.js';
 import { renderNotFound } from '../../middlewares/notFound.js';
 import { requireAuth } from '../../middlewares/requireAuth.js';
@@ -13,7 +14,24 @@ const GROUP_NOT_FOUND = 'Esse grupo não foi encontrado. Ele pode ter sido remov
 groupsRouter.get('/grupos', async (req, res) => {
   await res.renderPage('grupos', {
     title: 'Grupos de corrida em SP · Pace Paulista',
+    scripts: ['filtros'],
     ...(await searchGroups(req.query)),
+  });
+});
+
+// JSON só para o filtro ao vivo; o HTML vem dos mesmos partials da /grupos.
+groupsRouter.get('/api/grupos', async (req, res) => {
+  const { groups, chips, query } = await searchGroups(req.query);
+  const [chipsHtml, results] = await Promise.all([
+    res.renderPartial('search-chips', { chips }),
+    res.renderPartial('search-results', { groups }),
+  ]);
+  res.set('Cache-Control', 'private, no-store').json({
+    count: groups.length,
+    countText: countLabel(groups.length),
+    query,
+    chips: chipsHtml,
+    results,
   });
 });
 
