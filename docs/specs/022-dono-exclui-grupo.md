@@ -1,5 +1,5 @@
 # 022 — Dono exclui o próprio grupo e não entra nele
-Marco: correção pós-M8 (antes do M10) · Status: aguardando OK do usuário (P1–P4 e textos marcados como **proposta**), depois pronta para Coder
+Marco: correção pós-M8 (antes do M10) · Status: **pronta para Coder** (OK do usuário e P1–P4 respondidas em 2026-11-18: todas as propostas aprovadas)
 Depende de: 012 (confirmação em 2 passos), 013 (cadastro/dono), 014 (participar/sair), 015 (`/meus`)
 
 Decisões do usuário em 2026-11-17 (não reabrir): o dono **exclui** (DELETE de verdade, sem migration) o grupo que cadastrou, com a mesma confirmação em 2 passos da exclusão de conta, na página do grupo e em `/meus`; grupos demo não são excluíveis; o dono **não entra** no próprio grupo ("Participantes hoje" do cadastro já o inclui), e a contagem ignora participações do dono que já existem no banco. Edição do grupo continua fora do escopo.
@@ -116,6 +116,8 @@ Nenhuma migration. `memberships.group_id … ON DELETE CASCADE` já existe (004)
 - http (`tests/http/meus.test.js`): CA8 (lista e badge), CA9 (um card em `/grupos` e um em `/encontrar`) e CA10.
 
 ## Riscos / perguntas em aberto
+> **Respondidas pelo usuário em 2026-11-18**: P1 esconder tudo (default), P2 não apagar agora (default), P3 só omitir o botão (default), P4 textos aprovados como estão. Os textos marcados **proposta** abaixo valem como finais.
+
 - **P1 — Participações antigas do dono nas outras telas** (produção já tem esse caso). **Proposta (default)**: tratá-las como inexistentes em todo lugar (CA8): fora de "Grupos em que você entrou", fora do badge, sem `Você participa` nos cards, sem "Sair do grupo" na página (o dono vê `Você organiza este grupo.`); `POST /sair` continua funcionando, mas sem botão. Alternativa: manter "Sair do grupo" visível para o dono que tem participação antiga, para ele mesmo limpar. Confirmar.
 - **P2 — Apagar essas participações do banco?** Com o default do P1, o apelido do dono fica gravado e invisível até ele excluir o grupo ou a conta (o texto do painel diz "é apagado quando você sai do grupo ou exclui a conta"). **Proposta (default)**: não apagar nesta spec. Alternativas: (a) `DELETE` único, feito à mão no Neon e registrado em `docs/DEPLOY.md`; (b) migration de dados (seria a 007, que o M10 reservou — exigiria renumerar o M10). Confirmar.
 - **P3 — Cards para o dono.** **Proposta (default)**: só omitir "Entrar no grupo" (sem texto novo; o card já diz "Cadastrado por você"). Alternativa: botão `btn-quiet` com texto novo (ex.: "Você organiza · ver grupo"). Confirmar.
