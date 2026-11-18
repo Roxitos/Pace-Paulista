@@ -65,10 +65,10 @@
         <dl class="spec"><div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= group.location %></dd></div><div><dt><%- ic('cal', 'ico-sm') %>Próximo treino</dt><dd><%= proxima ? proxima.curta + ' · ' + hora : '—' %></dd></div><div><dt><%- ic('gauge', 'ico-sm') %>Pace</dt><dd class="mono"><%= faixa %></dd></div></dl>
         <form method="post" action="/grupos/<%= slugUrl %>/participar#participar" class="stack" novalidate>
           <%- include('../partials/csrf') %>
-          <div class="field"><label for="j-nome">Como o grupo pode te chamar? *</label><input class="input" id="j-nome" name="apelido" maxlength="40" placeholder="Seu primeiro nome ou apelido" autocomplete="given-name" aria-describedby="e-jnome" value="<%= joinValues.apelido %>"<%- joinErrors.apelido ? ' aria-invalid="true"' : '' %><%- joinFirstError === 'apelido' ? ' autofocus' : '' %>><span class="err" id="e-jnome"><%- joinErrors.apelido ? ic('alert', 'ico-sm') : '' %><%= joinErrors.apelido ?? '' %></span></div>
+          <div class="field"><label for="j-nome">Como gostaria de ser chamado?</label><input class="input" id="j-nome" name="apelido" maxlength="40" placeholder="Seu primeiro nome ou apelido" autocomplete="nickname" aria-describedby="h-jnome e-jnome" value="<%= joinValues.apelido %>"<%- joinErrors.apelido ? ' aria-invalid="true"' : '' %><%- joinFirstError === 'apelido' ? ' autofocus' : '' %>><span class="hint" id="h-jnome">Opcional. Se deixar em branco, usamos seu nome completo (<%= user.displayName %>).</span><span class="err" id="e-jnome"><%- joinErrors.apelido ? ic('alert', 'ico-sm') : '' %><%= joinErrors.apelido ?? '' %></span></div>
           <label class="check"><input type="checkbox" name="ok" id="j-ok" aria-describedby="e-jok"<%= joinValues.ok ? ' checked' : '' %><%- joinFirstError === 'ok' ? ' autofocus' : '' %>><span>Li as orientações: chegar no horário, levar água e respeitar o ritmo do grupo. *</span></label><span class="err" id="e-jok"><%- joinErrors.ok ? ic('alert', 'ico-sm') : '' %><%= joinErrors.ok ?? '' %></span>
           <button class="btn btn-primary btn-lg btn-block" type="submit" id="joinBtn">Confirmar entrada</button>
-          <p style="font-size:12.5px;color:var(--muted)">Pedimos só um apelido. Ele fica na sua conta e é apagado quando você sai do grupo ou exclui a conta.</p>
+          <p style="font-size:12.5px;color:var(--muted)">O apelido é opcional. Ele fica na sua conta e é apagado quando você sai do grupo ou exclui a conta.</p>
         </form>
         <% } %>
       </div><% } %>

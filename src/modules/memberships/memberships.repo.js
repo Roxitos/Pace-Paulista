@@ -30,9 +30,13 @@ export async function deleteMembership(userId, slug) {
   return rowCount > 0;
 }
 
+// Nome efetivo: sem apelido (NULL), vale o nome completo da conta.
 export async function findNickname(userId, slug) {
   const { rows } = await pool.query(
-    `SELECT m.nickname FROM memberships m JOIN groups g ON g.id = m.group_id
+    `SELECT COALESCE(m.nickname, u.display_name) AS nickname
+       FROM memberships m
+       JOIN groups g ON g.id = m.group_id
+       JOIN users u ON u.id = m.user_id
      WHERE m.user_id = $1 AND g.slug = $2 AND g.owner_id IS DISTINCT FROM m.user_id`,
     [userId, slug],
   );

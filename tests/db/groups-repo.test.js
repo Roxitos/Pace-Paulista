@@ -432,6 +432,14 @@ describe('spec 022: dono e participações', () => {
     expect(all.find((g) => g.slug === 'pace-da-oca').participants).toBe(57);
   });
 
+  it('findNickname devolve o nome completo quando o apelido é NULL', async () => {
+    const bia = await createUser('Bia Costa');
+    await insertMembership(pool, bia, 'pace-da-oca', null);
+    expect(await findNickname(bia, 'pace-da-oca')).toBe('Bia Costa');
+    await pool.query('UPDATE memberships SET nickname = $1', ['Bibi']);
+    expect(await findNickname(bia, 'pace-da-oca')).toBe('Bibi');
+  });
+
   it('listJoinedBy ignora o grupo próprio', async () => {
     const ana = await createUser('Ana');
     await ownedGroup(ana);

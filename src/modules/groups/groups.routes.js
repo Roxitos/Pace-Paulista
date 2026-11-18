@@ -82,7 +82,7 @@ async function renderDetail(res, detail, join, extra = {}) {
     scripts: ['participar'],
     ...detail,
     ...extra,
-    join: join ?? (user ? { values: { apelido: user.displayName, ok: false }, errors: {} } : null),
+    join: join ?? (user ? { values: { apelido: '', ok: false }, errors: {} } : null),
   });
 }
 

@@ -26,7 +26,7 @@ describe('fluxo da conta (M5)', () => {
     let csrf = await getCsrf(agent, '/conta/criar');
     await form('/conta/criar', {
       _csrf: csrf,
-      nome: 'Ana',
+      nome: 'Ana Souza',
       email: 'ana@x.com',
       senha: 'abcdefg!',
     }).expect(303);
@@ -49,7 +49,7 @@ describe('fluxo da conta (M5)', () => {
   it('entrar, excluir a conta e não conseguir mais entrar (CA7)', async () => {
     const agent = request.agent(createTestApp());
     const form = (path, body) => agent.post(path).type('form').send(body);
-    const dados = { nome: 'Ana', email: 'ana@x.com', senha: 'abcdefg!' };
+    const dados = { nome: 'Ana Souza', email: 'ana@x.com', senha: 'abcdefg!' };
 
     let csrf = await getCsrf(agent, '/conta/criar');
     await form('/conta/criar', { _csrf: csrf, ...dados }).expect(303);

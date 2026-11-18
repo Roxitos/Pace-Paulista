@@ -46,7 +46,7 @@ describe('participar e sair: deslogado', () => {
 });
 
 describe('participar e sair: logado', () => {
-  it('mostra o painel fechado com o apelido pré-preenchido', async () => {
+  it('mostra o painel fechado com apelido opcional e vazio (CA6)', async () => {
     const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const { text } = await agent.get(`/grupos/${SLUG}`);
     expect(text).toContain('href="#participar"');
@@ -55,9 +55,25 @@ describe('participar e sair: logado', () => {
     expect(text).toMatch(/Próximo treino<\/dt><dd>\w{3}\., \d+ de \w+\. · 6h</);
     expect(text).toContain(`action="/grupos/${SLUG}/participar#participar"`);
     expect(text).toContain('name="apelido" maxlength="40"');
-    expect(text).toContain('value="Ana Souza"');
+    expect(text).toContain('Como gostaria de ser chamado?</label>');
+    expect(text).toMatch(/name="apelido"[^>]*value=""/);
+    expect(text).toContain('autocomplete="nickname" aria-describedby="h-jnome e-jnome"');
+    expect(text).toContain('Opcional. Se deixar em branco, usamos seu nome completo (Ana Souza).');
+    expect(text).toContain('O apelido é opcional.');
     expect(text).toContain('Confirmar entrada');
     expect(text).not.toMatch(/name="ok"[^>]*checked/);
+  });
+
+  it('apelido vazio grava NULL e as telas usam o nome completo (CA7)', async () => {
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
+    const res = await join(agent, { apelido: '   ', ok: 'on' });
+    expect(res.status).toBe(303);
+    expect((await pool.query('SELECT nickname FROM memberships')).rows).toEqual([
+      { nickname: null },
+    ]);
+    const page = await agent.get(`/grupos/${SLUG}`);
+    expect(page.text).toContain('Bem-vindo(a), Ana Souza!');
+    expect(page.text).toContain('Você entrou como <b>Ana Souza</b>');
   });
 
   it('entra (idempotente), mostra boas-vindas uma vez e sai', async () => {
@@ -111,9 +127,7 @@ describe('participar e sair: logado', () => {
     expect(res.status).toBe(422);
     expect(res.text).toContain('class="panel join-panel open"');
     expect(res.text).toContain('src="/js/participar.js"');
-    expect(res.text).toMatch(
-      /id="e-jnome">[^]*Informe um nome ou apelido com pelo menos 2 letras\./,
-    );
+    expect(res.text).toMatch(/id="e-jnome">[^]*Use pelo menos 2 letras ou deixe em branco\./);
     expect(res.text).toMatch(/id="e-jok">[^]*Confirme que leu as orientações\./);
     expect(res.text).toMatch(/id="j-nome"[^>]*aria-invalid="true"[^>]*autofocus/);
     expect(res.text).toContain('value="a"');
@@ -200,7 +214,7 @@ describe('Apelido longo sem espaço em 360 px (CA11)', () => {
 
 describe('dono do grupo (spec 022)', () => {
   async function ownerOf() {
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const { rows } = await pool.query("SELECT id FROM users WHERE email = 'ana@exemplo.com'");
     await pool.query('UPDATE groups SET owner_id = $1, is_demo = false WHERE slug = $2', [
       rows[0].id,

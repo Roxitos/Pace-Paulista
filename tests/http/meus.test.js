@@ -19,7 +19,7 @@ afterAll(() => pool.end());
 
 describe('/meus', () => {
   it('conta nova: dois vazios e o painel da conta (CA1)', async () => {
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const { text } = await agent.get('/meus');
     expect(text).toContain('Você ainda não entrou em nenhum grupo');
     expect(text).toContain(
@@ -35,7 +35,7 @@ describe('/meus', () => {
   });
 
   it('lista participações e grupos cadastrados; pending some (CA2, CA4)', async () => {
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const id = await userId('ana@exemplo.com');
     await insertMembership(pool, id, 'pace-da-oca', 'Ana');
     await insertMembership(pool, id, 'correria-do-carmo', 'Ana');
@@ -75,7 +75,7 @@ describe('cards conforme quem vê (CA3)', () => {
     expect(visitante).not.toContain('Você participa');
     expect(visitante).not.toContain('badge-count');
 
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const logado = (await agent.get('/grupos')).text;
     expect(logado).toContain(JOIN);
     expect(logado).not.toContain(LOGIN);
@@ -91,7 +91,7 @@ describe('cards conforme quem vê (CA3)', () => {
   it('/encontrar: participante vê "Você já participa"', async () => {
     const q = '/encontrar?zona=sul&pace=4%3A30&dias=seg&nivel=avancado';
     expect((await request(app).get(q)).text).toContain(LOGIN);
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     expect((await agent.get(q)).text).toContain(JOIN);
     await insertMembership(pool, await userId('ana@exemplo.com'), SLUG, 'Ana');
     const { text } = await agent.get(q);
@@ -102,7 +102,7 @@ describe('cards conforme quem vê (CA3)', () => {
 
 describe('fluxo do M6 (CA5, CA10)', () => {
   it('conta, grupo, outro usuário participa e sai, dono exclui o grupo', async () => {
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     let csrf = await getCsrf(agent, '/grupos/novo');
     await agent
       .post('/grupos')
@@ -129,7 +129,7 @@ describe('fluxo do M6 (CA5, CA10)', () => {
     );
     expect((await agent.get(`/grupos/${slug}`)).text).toContain('Você organiza este grupo.');
 
-    const bia = await signedUp(app, 'Bia', 'bia@exemplo.com');
+    const bia = await signedUp(app, 'Bia Costa', 'bia@exemplo.com');
     csrf = await getCsrf(bia, `/grupos/${slug}`);
     await bia
       .post(`/grupos/${slug}/participar`)
@@ -158,5 +158,16 @@ describe('fluxo do M6 (CA5, CA10)', () => {
     await agent.post(`/grupos/${slug}/excluir`).type('form').send({ _csrf: csrf }).expect(303);
     expect((await pool.query('SELECT 1 FROM groups WHERE slug = $1', [slug])).rowCount).toBe(0);
     expect((await pool.query('SELECT 1 FROM memberships')).rowCount).toBe(0);
+  });
+});
+
+describe('Nome completo longo em 360 px (spec 023, CA10)', () => {
+  it('a linha "Você entrou como" quebra o nome e fica fora do bloco literal do protótipo', async () => {
+    const css = (await request(app).get('/css/app.css')).text;
+    expect(css).toContain('.account-line{overflow-wrap:anywhere}');
+    expect(css.indexOf('.account-line')).toBeLessThan(css.indexOf('/* Layout: cabeçalho fixo'));
+    const nome = `${'W'.repeat(40)} ${'W'.repeat(39)}`;
+    const agent = await signedUp(app, nome, 'longo@exemplo.com');
+    expect((await agent.get('/meus')).text).toContain('<p class="account-line"');
   });
 });
