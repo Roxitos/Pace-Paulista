@@ -3,10 +3,17 @@ import { pool } from '../../src/db/pool.js';
 import { parseFilters } from '../../src/domain/filters.js';
 import { DEMO_GROUPS } from '../../db/seeds/demo-groups.js';
 import {
+  deleteOwned,
   findPublishedBySlug,
+  listJoinedBy,
   listPublished,
   listPublishedByCreation,
 } from '../../src/modules/groups/groups.repo.js';
+import {
+  findNickname,
+  insertMembership as insertMembershipRepo,
+  listJoinedSlugs,
+} from '../../src/modules/memberships/memberships.repo.js';
 import { insertMembership, insertUser, migrateTestDb, seedDemo } from '../helpers/db.js';
 
 const GROUP_KEYS = [
@@ -398,5 +405,59 @@ describe('groupsRepo.listPublishedByCreation', () => {
     const g = (await listPublishedByCreation()).find((x) => x.slug === 'pace-da-oca');
     expect(g).toEqual(await bySlug('pace-da-oca'));
     expect(g.participants).toBe(57);
+  });
+});
+
+describe('spec 022: dono e participações', () => {
+  async function ownedGroup(ownerId) {
+    await pool.query(
+      `INSERT INTO groups (slug, name, zone, location, days, start_time, pace_min_s, pace_max_s,
+                           level, description, base_participants, owner_id)
+       VALUES ('meu-grupo', 'Meu Grupo', 'sul', 'Parque', ARRAY['seg'], '06:00', 300, 360,
+               'iniciante', 'Descrição com mais de trinta caracteres aqui.', 5, $1)`,
+      [ownerId],
+    );
+  }
+
+  it('a participação do dono não conta; a dos outros e a dos demos sim', async () => {
+    const ana = await createUser('Ana');
+    const bia = await createUser('Bia');
+    await ownedGroup(ana);
+    await insertMembership(pool, ana, 'meu-grupo', 'Ana');
+    await insertMembership(pool, bia, 'meu-grupo', 'Bia');
+    await insertMembership(pool, ana, 'pace-da-oca', 'Ana');
+    expect((await findPublishedBySlug('meu-grupo')).participants).toBe(6);
+    const all = await listPublished();
+    expect(all.find((g) => g.slug === 'meu-grupo').participants).toBe(6);
+    expect(all.find((g) => g.slug === 'pace-da-oca').participants).toBe(57);
+  });
+
+  it('listJoinedBy ignora o grupo próprio', async () => {
+    const ana = await createUser('Ana');
+    await ownedGroup(ana);
+    await insertMembership(pool, ana, 'meu-grupo', 'Ana');
+    await insertMembership(pool, ana, 'pace-da-oca', 'Ana');
+    expect((await listJoinedBy(ana)).map((g) => g.slug)).toEqual(['pace-da-oca']);
+  });
+
+  it('deleteOwned apaga com cascata só para o dono e nunca para demo', async () => {
+    const ana = await createUser('Ana');
+    const bia = await createUser('Bia');
+    await ownedGroup(ana);
+    await insertMembership(pool, bia, 'meu-grupo', 'Bia');
+    expect(await deleteOwned('meu-grupo', String(bia))).toBeNull();
+    expect(await deleteOwned('pace-da-oca', String(ana))).toBeNull();
+    expect(await deleteOwned('meu-grupo', String(ana))).toEqual({ name: 'Meu Grupo' });
+    expect((await pool.query('SELECT 1 FROM memberships')).rowCount).toBe(0);
+  });
+
+  it('insertMembership, findNickname e listJoinedSlugs ignoram o dono', async () => {
+    const ana = await createUser('Ana');
+    await ownedGroup(ana);
+    const { rows } = await pool.query("SELECT id::text AS id FROM groups WHERE slug = 'meu-grupo'");
+    expect(await insertMembershipRepo(ana, rows[0].id, 'Ana')).toBe(false);
+    await insertMembership(pool, ana, 'meu-grupo', 'Ana'); // como em produção: direto no banco
+    expect(await findNickname(ana, 'meu-grupo')).toBeNull();
+    expect(await listJoinedSlugs(ana)).toEqual([]);
   });
 });

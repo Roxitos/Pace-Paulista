@@ -67,6 +67,24 @@ describe('rate limit por usuário', () => {
     await agent.post('/grupos').type('form').send({ _csrf: csrf }).expect(422);
     await agent.post('/grupos').type('form').send({ _csrf: csrf }).expect(429);
   });
+
+  it('POST /grupos/:slug/excluir divide o balde do cadastro: 429 e nada apagado', async () => {
+    const app = appWith({ createGroup: { limit: 1 } });
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
+    const { rows } = await pool.query(`SELECT id FROM users WHERE email = 'ana@exemplo.com'`);
+    await pool.query(
+      `INSERT INTO groups (slug, name, zone, location, days, start_time, pace_min_s, pace_max_s,
+                           level, description, owner_id)
+       VALUES ('meu-grupo', 'Meu Grupo', 'sul', 'Parque', ARRAY['seg'], '06:00', 300, 360,
+               'iniciante', 'Descrição com mais de trinta caracteres aqui.', $1)`,
+      [rows[0].id],
+    );
+    const csrf = await getCsrf(agent, '/grupos/novo');
+    await agent.post('/grupos').type('form').send({ _csrf: csrf }).expect(422);
+    await agent.post('/grupos/meu-grupo/excluir').type('form').send({ _csrf: csrf }).expect(429);
+    const { rows: left } = await pool.query(`SELECT 1 FROM groups WHERE slug = 'meu-grupo'`);
+    expect(left).toHaveLength(1);
+  });
 });
 
 describe('rate limit atrás do proxy', () => {

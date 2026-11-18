@@ -10,7 +10,7 @@
   const joinErrors = (locals.join && locals.join.errors) || {};
   const joinValues = (locals.join && locals.join.values) || { apelido: '', ok: false };
   const joinFirstError = Object.keys(joinErrors)[0];
-  const showPanel = loggedIn && (!locals.membership || joinedNow);
+  const showPanel = loggedIn && !locals.isOwner && (!locals.membership || joinedNow);
   const panelOpen = joinedNow || Boolean(joinFirstError);
   const proxima = locals.nextSession || null;
   const headTag = group.is_demo ? 'Grupo fictício · demonstração' : locals.isOwner ? 'Cadastrado por você' : group.owner_name && `Cadastrado por ${group.owner_name}`;
@@ -48,12 +48,14 @@
           <% if (locals.user && group.contact) { %><div><dt><%- ic('ext', 'ico-sm') %>Contato</dt><dd><%= group.contact %></dd></div><% } %>
         </dl>
         <div class="stack" style="margin-top:16px">
-          <% if (locals.membership) { %><div class="form-alert good"><%- ic('check') %><span>Você entrou como <b><%= membership.nickname %></b>. Te esperamos no próximo encontro.</span></div>
+          <% if (locals.isOwner) { %><div class="form-alert good"><%- ic('check') %><span>Você organiza este grupo.</span></div>
+          <% } else if (locals.membership) { %><div class="form-alert good"><%- ic('check') %><span>Você entrou como <b><%= membership.nickname %></b>. Te esperamos no próximo encontro.</span></div>
           <form method="post" action="/grupos/<%= slugUrl %>/sair" class="stack"><%- include('../partials/csrf') %><button class="btn btn-outline" type="submit">Sair do grupo</button></form>
           <% } else if (loggedIn) { %><a class="btn btn-primary btn-lg" href="#participar"><%- ic('plus') %> Entrar no grupo</a>
           <% } else { %><a class="btn btn-primary btn-lg" href="/conta/entrar?next=/grupos/<%= slugUrl %>%23participar"><%- ic('plus') %> Entrar no grupo</a>
           <% } %>
           <a class="btn btn-outline" href="/mapa/<%= slugUrl %>"><%- ic('map', 'ico-sm') %> Ver rota no mapa</a>
+          <% if (locals.isOwner) { %><%- include('../partials/group-delete', { slug: group.slug, confirm: Boolean(locals.confirmDelete), askHref: `/grupos/${slugUrl}?excluir=1#excluir`, cancelHref: `/grupos/${slugUrl}#excluir`, boxId: 'excluir' }) %><% } %>
         </div>
       </div>
       <% if (showPanel) { %><div class="panel join-panel<%= panelOpen ? ' open' : '' %>" id="participar">

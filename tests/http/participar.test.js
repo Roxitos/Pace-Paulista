@@ -169,7 +169,7 @@ describe('participar e sair: logado', () => {
 });
 
 describe('memberships.repo.insertMembership', () => {
-  // Grupo despublicado entre o findPublishedGroupId e o INSERT: o INSERT confere o status de novo.
+  // Grupo despublicado entre o findPublishedGroup e o INSERT: o INSERT confere o status de novo.
   it('não grava participação em grupo que deixou de estar publicado', async () => {
     const userId = await insertUser(pool, 'Ana Souza');
     const { rows } = await pool.query(
@@ -195,5 +195,50 @@ describe('Apelido longo sem espaço em 360 px (CA11)', () => {
     expect(css.indexOf('.form-alert > span')).toBeLessThan(
       css.indexOf('/* Layout: cabeçalho fixo'),
     );
+  });
+});
+
+describe('dono do grupo (spec 022)', () => {
+  async function ownerOf() {
+    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const { rows } = await pool.query("SELECT id FROM users WHERE email = 'ana@exemplo.com'");
+    await pool.query('UPDATE groups SET owner_id = $1, is_demo = false WHERE slug = $2', [
+      rows[0].id,
+      SLUG,
+    ]);
+    return { agent, id: rows[0].id };
+  }
+
+  it('participar: 303 para a página, sem gravar, mesmo com form inválido', async () => {
+    const { agent } = await ownerOf();
+    const csrf = await getCsrf(agent, '/meus');
+    for (const body of [{ apelido: 'Ana', ok: 'on' }, {}]) {
+      const res = await agent
+        .post(`/grupos/${SLUG}/participar`)
+        .type('form')
+        .send({ _csrf: csrf, ...body });
+      expect(res.status).toBe(303);
+      expect(res.headers.location).toBe(`/grupos/${SLUG}`);
+    }
+    expect(await count()).toBe(0);
+  });
+
+  it('participação antiga fica invisível; sair ainda apaga a linha', async () => {
+    const { agent, id } = await ownerOf();
+    await pool.query(
+      'INSERT INTO memberships (user_id, group_id, nickname) SELECT $1, id, $3 FROM groups WHERE slug = $2',
+      [id, SLUG, 'Ana'],
+    );
+    const meus = (await agent.get('/meus')).text;
+    expect(meus).toContain('Você ainda não entrou em nenhum grupo');
+    expect(meus).not.toContain('badge-count');
+    const grupos = (await agent.get('/grupos')).text;
+    expect(grupos).not.toContain('Você participa');
+    expect(grupos).not.toContain('No grupo · ver encontros');
+
+    const csrf = await getCsrf(agent, '/meus');
+    const res = await agent.post(`/grupos/${SLUG}/sair`).type('form').send({ _csrf: csrf });
+    expect(res.status).toBe(303);
+    expect(await count()).toBe(0);
   });
 });

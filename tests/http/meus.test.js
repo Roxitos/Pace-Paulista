@@ -100,8 +100,8 @@ describe('cards conforme quem vê (CA3)', () => {
   });
 });
 
-describe('fluxo do M6 (CA5)', () => {
-  it('conta, grupo, participar, /meus, sair, excluir conta', async () => {
+describe('fluxo do M6 (CA5, CA10)', () => {
+  it('conta, grupo, outro usuário participa e sai, dono exclui o grupo', async () => {
     const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
     let csrf = await getCsrf(agent, '/grupos/novo');
     await agent
@@ -123,34 +123,40 @@ describe('fluxo do M6 (CA5)', () => {
       })
       .expect(303);
     const slug = 'corredores-do-sul';
-
-    csrf = await getCsrf(agent, `/grupos/${slug}`);
-    await agent
-      .post(`/grupos/${slug}/participar`)
-      .type('form')
-      .send({ _csrf: csrf, apelido: 'Ana', ok: 'on' })
-      .expect(303);
     let { text } = await agent.get('/meus');
-    expect(sectionOf(text, 'Grupos em que você entrou', 'Grupos que você cadastrou')).toContain(
-      'Corredores do Sul',
-    );
     expect(sectionOf(text, 'Grupos que você cadastrou', 'Conta e dados')).toContain(
       'Corredores do Sul',
     );
-    expect(text).toContain('<span class="badge-count">1</span>');
+    expect((await agent.get(`/grupos/${slug}`)).text).toContain('Você organiza este grupo.');
 
-    csrf = await getCsrf(agent, `/grupos/${slug}`);
-    await agent.post(`/grupos/${slug}/sair`).type('form').send({ _csrf: csrf }).expect(303);
-    text = (await agent.get('/meus')).text;
+    const bia = await signedUp(app, 'Bia', 'bia@exemplo.com');
+    csrf = await getCsrf(bia, `/grupos/${slug}`);
+    await bia
+      .post(`/grupos/${slug}/participar`)
+      .type('form')
+      .send({ _csrf: csrf, apelido: 'Bia', ok: 'on' })
+      .expect(303);
+    text = (await bia.get('/meus')).text;
+    expect(sectionOf(text, 'Grupos em que você entrou', 'Grupos que você cadastrou')).toContain(
+      'Corredores do Sul',
+    );
+    expect(text).toContain('<span class="badge-count">1</span>');
+    csrf = await getCsrf(bia, `/grupos/${slug}`);
+    await bia.post(`/grupos/${slug}/sair`).type('form').send({ _csrf: csrf }).expect(303);
+    text = (await bia.get('/meus')).text;
     expect(sectionOf(text, 'Grupos em que você entrou', 'Grupos que você cadastrou')).toContain(
       'Você ainda não entrou em nenhum grupo',
     );
+    csrf = await getCsrf(bia, `/grupos/${slug}`);
+    await bia
+      .post(`/grupos/${slug}/participar`)
+      .type('form')
+      .send({ _csrf: csrf, apelido: 'Bia', ok: 'on' })
+      .expect(303);
 
-    csrf = await getCsrf(agent, '/meus');
-    await agent.post('/conta/excluir').type('form').send({ _csrf: csrf }).expect(303);
-    const { rows } = await pool.query('SELECT status, owner_id FROM groups WHERE slug = $1', [
-      slug,
-    ]);
-    expect(rows).toEqual([{ status: 'published', owner_id: null }]);
+    csrf = await getCsrf(agent, `/grupos/${slug}?excluir=1`);
+    await agent.post(`/grupos/${slug}/excluir`).type('form').send({ _csrf: csrf }).expect(303);
+    expect((await pool.query('SELECT 1 FROM groups WHERE slug = $1', [slug])).rowCount).toBe(0);
+    expect((await pool.query('SELECT 1 FROM memberships')).rowCount).toBe(0);
   });
 });

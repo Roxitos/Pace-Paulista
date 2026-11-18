@@ -2,7 +2,7 @@
 
 Riscos aceitos, pendências e perguntas abertas levantadas pelo pipeline. **O Specifier lê este arquivo antes de cada spec** e incorpora (ou responde) os itens do marco. Ao resolver um item, marque `[x]` e cite a spec.
 
-Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md), `010` = [relatório 010](reports/010-criar-conta.md), `016` = [relatório 016](reports/016-filtros-ao-vivo.md), `017` = [relatório 017](reports/017-modal-participar-toasts.md).
+Origem: `001` = [relatório 001](reports/001-scaffold-base.md), `002` = [relatório 002](reports/002-home-estatica.md), `003` = [relatório 003](reports/003-banco-migrations-seed.md), `004` = [relatório 004](reports/004-leitura-banco-home-zonas.md), `005` = [relatório 005](reports/005-busca-filtros.md), `006` = [relatório 006](reports/006-detalhe-grupo.md), `007` = [relatório 007](reports/007-mapa-sobre.md), `008` = [relatório 008](reports/008-encontrar-compatibilidade.md), `010` = [relatório 010](reports/010-criar-conta.md), `016` = [relatório 016](reports/016-filtros-ao-vivo.md), `017` = [relatório 017](reports/017-modal-participar-toasts.md), `022` = [relatório 022](reports/022-dono-exclui-grupo.md).
 
 ## Perguntas de produto em aberto
 - [x] **M3** — Home sem grupos: qual texto/layout de "sem grupos" e estado vazio dos destaques? Hoje: pace omitido, "0 grupos cadastrados", zonas "0 grupos", destaques vazios. (002) — spec 004, P1: mantém o comportamento atual
@@ -128,6 +128,11 @@ Estratégia para trocar os grupos fictícios por reais e mantê-los em dia depoi
 - [ ] **Validade dos dados**: nova migration com `last_confirmed_at TIMESTAMPTZ`; job periódico (cron do provedor ou `node-cron`) — 90 dias sem confirmação → pedir ao dono para confirmar; 120 dias → selo "não confirmado recentemente" ou sair da busca. Exige canal de aviso ao dono (e-mail está fora da v1 — decidir).
 - [ ] **"Informar problema"** na página do grupo (grupo acabou, horário mudou), com fila para admin.
 - [ ] **Moderação** usando a coluna `status` já existente + página `/admin` (ver pergunta de produto).
+
+## Spec 022 — Dono exclui o próprio grupo e não entra nele
+- [x] Problemas achados pelo usuário na produção (2026-11-17): dono não conseguia excluir o próprio grupo e podia entrar nele (contado duas vezes). — spec 022 (QA aprovado, CA1–CA12): `POST /grupos/:slug/excluir` com 2 passos sem JS (página do grupo e `/meus`), cascata nas participações; dono vê "Você organiza este grupo." e a contagem ignora o dono.
+- [ ] Riscos aceitos: membros não são avisados quando o grupo é excluído (sem notificações na v1); participações antigas do dono seguem gravadas e invisíveis (P1/P2; só somem via `POST /sair`, sem botão); grupos de conta excluída (`owner_id` NULL, não demo) ficam sem ninguém que possa excluí-los até o `/admin` do M9. (022, Hardener)
+- [ ] Não carregar `participar.js` na página do dono (hoje inerte, sem `#participar`). Deslogado com token CSRF inválido recebe 403 antes do `requireAuth` (CSRF global; com token válido, 303 para o login). (022, QA)
 
 ## Spec 023 — Nome e apelido do participante (antes do M10)
 - [ ] Pedido do usuário (2026-11-17): hoje apelidos podem se repetir (não há unicidade em `memberships.nickname` nem em `users.display_name`). Em vez de unicidade, o usuário quer **dois campos**: "Nome completo" e "Apelido (opcional)"; nos grupos aparece o **nome completo por padrão** e o apelido só se a pessoa preencher. Spec separada da 022.

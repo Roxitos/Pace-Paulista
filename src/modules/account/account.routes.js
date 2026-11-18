@@ -65,11 +65,13 @@ export function createAccountRouter() {
 
   router.get('/meus', requireAuth, async (req, res) => {
     const { joined, mine } = await listMyGroups(req.user.id);
+    // Só cards de grupos próprios são renderizados: um slug estranho não abre 2º passo.
     await res.renderPage('meus', {
       title: 'Meus grupos · Pace Paulista',
       joined,
       mine,
       confirmDelete: req.query.excluir === '1',
+      confirmGroup: req.query['excluir-grupo'],
     });
   });
 

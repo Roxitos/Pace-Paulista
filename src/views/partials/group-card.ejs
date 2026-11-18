@@ -1,4 +1,4 @@
-<% const j = locals.joinedSlugs?.has(g.slug); const slug = encodeURIComponent(g.slug); -%>
+<% const j = locals.joinedSlugs?.has(g.slug); const own = Boolean(locals.user) && g.owner_id === String(user.id); const slug = encodeURIComponent(g.slug); -%>
 <article class="card" style="<%= zstyle(g.zone) %>">
     <div class="card-top"><%- include('zone-chip', { zone: g.zone }) -%><% if (j) { %><span class="joined-pill"><%- ic('check', 'ico-sm') %>Você participa</span><% } else { %><%- include('demo-tag', { g }) -%><% } %></div>
     <h3><a href="/grupos/<%= slug %>"><%= g.name %></a></h3>
@@ -12,7 +12,7 @@
     <%- include('level-meter', { level: g.level }) -%>
     <div class="card-actions">
       <% if (j) { %><a class="btn btn-quiet" href="/grupos/<%= slug %>"><%- ic('check', 'ico-sm') %> No grupo · ver encontros</a>
-      <% } else if (locals.user) { %><a class="btn btn-primary" href="/grupos/<%= slug %>#participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a>
+      <% } else if (own) { %><% } else if (locals.user) { %><a class="btn btn-primary" href="/grupos/<%= slug %>#participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a>
       <% } else { %><a class="btn btn-primary" href="/conta/entrar?next=/grupos/<%= slug %>%23participar"><%- ic('plus', 'ico-sm') %> Entrar no grupo</a><% } %>
       <a class="btn btn-outline btn-sm" href="/grupos/<%= slug %>">Ver detalhes</a>
       <a class="btn btn-outline btn-sm" href="/mapa/<%= slug %>"><%- ic('route', 'ico-sm') %> Ver rota</a>

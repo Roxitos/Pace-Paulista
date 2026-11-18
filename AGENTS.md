@@ -239,9 +239,9 @@ CREATE INDEX password_resets_user_idx ON password_resets (user_id);
 ```
 
 ### Regras derivadas
-- **Participantes exibidos** = `base_participants + COUNT(memberships)` do grupo. Calcular na query (subquery ou `LEFT JOIN ... GROUP BY`), nunca guardar o total.
+- **Participantes exibidos** = `base_participants + COUNT(memberships do grupo exceto a do dono)`. Calcular na query (subquery ou `LEFT JOIN ... GROUP BY`), nunca guardar o total.
 - **Grupo público** = `status = 'published'`. Na v1 todo grupo novo já nasce `published`.
-- **Dono do grupo** (`owner_id`) é quem cadastrou. Na v1 o dono não edita/exclui pela UI (v2), mas a coluna existe.
+- **Dono do grupo** (`owner_id`) é quem cadastrou. Na v1 o dono **exclui** o próprio grupo pela UI (spec 022; participações caem em cascata) e **não edita** (v2). Grupos demo não são excluíveis. O dono **não entra** no próprio grupo: `base_participants` já o inclui.
 - **Excluir conta** apaga o usuário → `memberships` caem em cascata, grupos dele ficam com `owner_id = NULL`.
 
 ---
@@ -270,8 +270,9 @@ URLs reais (sem `#hash`). Todas em português, iguais às do protótipo onde pos
 | Rota | Auth | O que faz |
 |---|---|---|
 | `POST /grupos` | ✅ | Cria grupo. Erro → re-renderiza o form com valores e mensagens (status 422). Sucesso → redirect `/grupos/:slug?criado=1` (tela de sucesso do protótipo) |
-| `POST /grupos/:slug/participar` | ✅ | Body: `apelido`, `ok`. Idempotente (`ON CONFLICT DO NOTHING`) |
+| `POST /grupos/:slug/participar` | ✅ | Body: `apelido`, `ok`. Idempotente (`ON CONFLICT DO NOTHING`); dono → 303 para a página do grupo, sem gravar |
 | `POST /grupos/:slug/sair` | ✅ | Remove membership |
+| `POST /grupos/:slug/excluir` | ✅ | Só o dono; grupo demo ou de outro → 404. Confirmação em 2 passos (`?excluir=1` na página do grupo, `?excluir-grupo=<slug>` em `/meus`). Sucesso → flash e redirect `/meus` |
 | `POST /conta/criar` | — | Cria usuário, já loga, redirect `next` ou `/meus` |
 | `POST /conta/entrar` | — | Rate limit: 10 tentativas / 15 min por IP+email |
 | `POST /conta/sair` | ✅ | Destroi sessão (logout é sempre POST) |
@@ -297,6 +298,7 @@ Sem JS, o form de filtros faz GET normal em `/grupos` e tudo funciona.
 ### Fluxo "Entrar no grupo"
 - Visitante **deslogado** clica "Entrar no grupo" → vai para `/conta/entrar?next=/grupos/<slug>%23participar`.
 - **Logado** → abre o modal do protótipo (JS) com campo apelido pré-preenchido com `display_name`; sem JS, `/grupos/:slug#participar` mostra o mesmo form inline.
+- Dono vê "Você organiza este grupo." no lugar do botão; sem painel/modal.
 - Sucesso → flash "Bem-vindo(a), {apelido}!" + próximo treino, e redirect para a página do grupo.
 
 ---
@@ -526,7 +528,7 @@ Estilo de código e comentários: `docs/CONVENTIONS.md`. Marcos M1–M8: `docs/M
 
 ## 12. Roadmap (depois da v1)
 - **M10 (atual)**: recuperar senha por e-mail.
-- **M9**: conteúdo real — moderação (grupo novo `pending` → admin aprova em `/admin`), dono edita/arquiva o próprio grupo, validade dos dados (`last_confirmed_at`), tirar os demos. Detalhes em `docs/PENDENCIAS.md`.
+- **M9**: conteúdo real — moderação (grupo novo `pending` → admin aprova em `/admin`), dono edita/arquiva o próprio grupo (excluir já existe desde a spec 022), validade dos dados (`last_confirmed_at`), tirar os demos. Detalhes em `docs/PENDENCIAS.md`.
 - Outros e-mails, reaproveitando o `modules/email` do M10: boas-vindas, confirmação de e-mail, aviso ao dono para confirmar os dados do grupo.
 - Mapa real com Leaflet + OpenStreetMap (colunas `lat`, `lng`).
 - Confirmação de presença por encontro (tabela `attendances`) e notificações.
