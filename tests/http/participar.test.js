@@ -46,7 +46,7 @@ describe('participar e sair: deslogado', () => {
 });
 
 describe('participar e sair: logado', () => {
-  it('mostra o painel fechado com o apelido pré-preenchido', async () => {
+  it('mostra o painel fechado com apelido opcional e vazio (CA6)', async () => {
     const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const { text } = await agent.get(`/grupos/${SLUG}`);
     expect(text).toContain('href="#participar"');
@@ -55,9 +55,25 @@ describe('participar e sair: logado', () => {
     expect(text).toMatch(/Próximo treino<\/dt><dd>\w{3}\., \d+ de \w+\. · 6h</);
     expect(text).toContain(`action="/grupos/${SLUG}/participar#participar"`);
     expect(text).toContain('name="apelido" maxlength="40"');
-    expect(text).toContain('value="Ana Souza"');
+    expect(text).toContain('Como gostaria de ser chamado?</label>');
+    expect(text).toMatch(/name="apelido"[^>]*value=""/);
+    expect(text).toContain('autocomplete="nickname" aria-describedby="h-jnome e-jnome"');
+    expect(text).toContain('Opcional. Se deixar em branco, usamos seu nome completo (Ana Souza).');
+    expect(text).toContain('O apelido é opcional.');
     expect(text).toContain('Confirmar entrada');
     expect(text).not.toMatch(/name="ok"[^>]*checked/);
+  });
+
+  it('apelido vazio grava NULL e as telas usam o nome completo (CA7)', async () => {
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
+    const res = await join(agent, { apelido: '   ', ok: 'on' });
+    expect(res.status).toBe(303);
+    expect((await pool.query('SELECT nickname FROM memberships')).rows).toEqual([
+      { nickname: null },
+    ]);
+    const page = await agent.get(`/grupos/${SLUG}`);
+    expect(page.text).toContain('Bem-vindo(a), Ana Souza!');
+    expect(page.text).toContain('Você entrou como <b>Ana Souza</b>');
   });
 
   it('entra (idempotente), mostra boas-vindas uma vez e sai', async () => {
@@ -111,9 +127,7 @@ describe('participar e sair: logado', () => {
     expect(res.status).toBe(422);
     expect(res.text).toContain('class="panel join-panel open"');
     expect(res.text).toContain('src="/js/participar.js"');
-    expect(res.text).toMatch(
-      /id="e-jnome">[^]*Informe um nome ou apelido com pelo menos 2 letras\./,
-    );
+    expect(res.text).toMatch(/id="e-jnome">[^]*Use pelo menos 2 letras ou deixe em branco\./);
     expect(res.text).toMatch(/id="e-jok">[^]*Confirme que leu as orientações\./);
     expect(res.text).toMatch(/id="j-nome"[^>]*aria-invalid="true"[^>]*autofocus/);
     expect(res.text).toContain('value="a"');
@@ -169,7 +183,7 @@ describe('participar e sair: logado', () => {
 });
 
 describe('memberships.repo.insertMembership', () => {
-  // Grupo despublicado entre o findPublishedGroupId e o INSERT: o INSERT confere o status de novo.
+  // Grupo despublicado entre o findPublishedGroup e o INSERT: o INSERT confere o status de novo.
   it('não grava participação em grupo que deixou de estar publicado', async () => {
     const userId = await insertUser(pool, 'Ana Souza');
     const { rows } = await pool.query(
@@ -195,5 +209,50 @@ describe('Apelido longo sem espaço em 360 px (CA11)', () => {
     expect(css.indexOf('.form-alert > span')).toBeLessThan(
       css.indexOf('/* Layout: cabeçalho fixo'),
     );
+  });
+});
+
+describe('dono do grupo (spec 022)', () => {
+  async function ownerOf() {
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
+    const { rows } = await pool.query("SELECT id FROM users WHERE email = 'ana@exemplo.com'");
+    await pool.query('UPDATE groups SET owner_id = $1, is_demo = false WHERE slug = $2', [
+      rows[0].id,
+      SLUG,
+    ]);
+    return { agent, id: rows[0].id };
+  }
+
+  it('participar: 303 para a página, sem gravar, mesmo com form inválido', async () => {
+    const { agent } = await ownerOf();
+    const csrf = await getCsrf(agent, '/meus');
+    for (const body of [{ apelido: 'Ana', ok: 'on' }, {}]) {
+      const res = await agent
+        .post(`/grupos/${SLUG}/participar`)
+        .type('form')
+        .send({ _csrf: csrf, ...body });
+      expect(res.status).toBe(303);
+      expect(res.headers.location).toBe(`/grupos/${SLUG}`);
+    }
+    expect(await count()).toBe(0);
+  });
+
+  it('participação antiga fica invisível; sair ainda apaga a linha', async () => {
+    const { agent, id } = await ownerOf();
+    await pool.query(
+      'INSERT INTO memberships (user_id, group_id, nickname) SELECT $1, id, $3 FROM groups WHERE slug = $2',
+      [id, SLUG, 'Ana'],
+    );
+    const meus = (await agent.get('/meus')).text;
+    expect(meus).toContain('Você ainda não entrou em nenhum grupo');
+    expect(meus).not.toContain('badge-count');
+    const grupos = (await agent.get('/grupos')).text;
+    expect(grupos).not.toContain('Você participa');
+    expect(grupos).not.toContain('No grupo · ver encontros');
+
+    const csrf = await getCsrf(agent, '/meus');
+    const res = await agent.post(`/grupos/${SLUG}/sair`).type('form').send({ _csrf: csrf });
+    expect(res.status).toBe(303);
+    expect(await count()).toBe(0);
   });
 });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const MSG = {
-  nicknameShort: 'Informe um nome ou apelido com pelo menos 2 letras.',
+  nicknameShort: 'Use pelo menos 2 letras ou deixe em branco.',
   nicknameLong: 'Use no máximo 40 caracteres.',
   ok: 'Confirme que leu as orientações.',
 };
@@ -15,7 +15,8 @@ function text(value) {
 const joinSchema = z.object({
   apelido: z
     .string()
-    .refine((s) => [...s].length >= 2, { error: MSG.nicknameShort, abort: true })
+    // Vazio = usar o nome completo da conta.
+    .refine((s) => s === '' || [...s].length >= 2, { error: MSG.nicknameShort, abort: true })
     .refine((s) => [...s].length <= 40, { error: MSG.nicknameLong }),
   ok: z.boolean().refine(Boolean, { error: MSG.ok }),
 });
@@ -40,5 +41,9 @@ export function parseJoinForm(body) {
       if (issue) errors[key] = issue.message;
     }
   }
-  return { values: { apelido, ok }, errors, data: result.success ? { nickname: apelido } : null };
+  return {
+    values: { apelido, ok },
+    errors,
+    data: result.success ? { nickname: apelido || null } : null,
+  };
 }

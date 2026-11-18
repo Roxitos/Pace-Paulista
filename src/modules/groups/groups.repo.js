@@ -26,7 +26,7 @@ const SELECT_PUBLISHED = `
          g.map_pin
     FROM groups g
     LEFT JOIN users u ON u.id = g.owner_id
-    LEFT JOIN memberships m ON m.group_id = g.id`;
+    LEFT JOIN memberships m ON m.group_id = g.id AND m.user_id IS DISTINCT FROM g.owner_id`;
 
 // O GROUP BY acompanha os JOINs de SELECT_PUBLISHED; fica aqui para as consultas não divergirem.
 function selectPublished(where) {
@@ -92,7 +92,8 @@ export async function listPublishedByCreation() {
 export async function listJoinedBy(userId) {
   const { rows } = await pool.query(
     `${selectPublished(`g.status = 'published'
-     AND EXISTS (SELECT 1 FROM memberships mm WHERE mm.group_id = g.id AND mm.user_id = $1)`)}
+     AND EXISTS (SELECT 1 FROM memberships mm WHERE mm.group_id = g.id AND mm.user_id = $1
+                      AND g.owner_id IS DISTINCT FROM mm.user_id)`)}
    ORDER BY g.id`,
     [userId],
   );
@@ -106,6 +107,16 @@ export async function listOwnedBy(userId) {
     [userId],
   );
   return rows;
+}
+
+// A autorização está no próprio WHERE: um único comando, sem corrida entre conferir e apagar.
+// Demo (owner_id NULL) nunca casa. As memberships caem em cascata (004).
+export async function deleteOwned(slug, ownerId) {
+  const { rows } = await pool.query(
+    'DELETE FROM groups WHERE slug = $1 AND owner_id = $2 AND is_demo = false RETURNING name',
+    [slug, ownerId],
+  );
+  return rows[0] ?? null;
 }
 
 // citext: sem diferença de caixa. Considera todos os status, pois o UNIQUE do banco também.

@@ -5,7 +5,7 @@ import { isSlug } from '../../domain/slug.js';
 import { renderNotFound } from '../../middlewares/notFound.js';
 import { requireAuth } from '../../middlewares/requireAuth.js';
 import { joinGroup, leaveGroup } from '../memberships/memberships.service.js';
-import { createGroup, getGroupDetail, searchGroups } from './groups.service.js';
+import { createGroup, deleteOwnGroup, getGroupDetail, searchGroups } from './groups.service.js';
 
 export const groupsRouter = Router();
 
@@ -75,13 +75,14 @@ groupsRouter.post('/grupos', requireAuth, async (req, res) => {
 });
 
 // Mesma página para o GET e para o 422 do participar (mesmo título e dados).
-async function renderDetail(res, detail, join) {
+async function renderDetail(res, detail, join, extra = {}) {
   const { user } = res.locals;
   await res.renderPage('grupo-detalhe', {
     title: `${detail.group.name} · Pace Paulista`,
     scripts: ['participar'],
     ...detail,
-    join: join ?? (user ? { values: { apelido: user.displayName, ok: false }, errors: {} } : null),
+    ...extra,
+    join: join ?? (user ? { values: { apelido: '', ok: false }, errors: {} } : null),
   });
 }
 
@@ -98,7 +99,9 @@ groupsRouter.get('/grupos/:slug', async (req, res) => {
       errors: {},
     });
   }
-  await renderDetail(res, detail);
+  await renderDetail(res, detail, undefined, {
+    confirmDelete: detail.isOwner && req.query.excluir === '1',
+  });
 });
 
 groupsRouter.post('/grupos/:slug/participar', requireAuth, async (req, res) => {
@@ -106,6 +109,7 @@ groupsRouter.post('/grupos/:slug/participar', requireAuth, async (req, res) => {
   if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
   const result = await joinGroup(slug, req.user.id, req.body);
   if (result.notFound) return renderNotFound(res, GROUP_NOT_FOUND);
+  if (result.isOwner) return res.redirect(303, `/grupos/${slug}`);
   if (result.errors) {
     const detail = await getGroupDetail(slug, new Date(), { viewer: req.user });
     if (!detail) return renderNotFound(res, GROUP_NOT_FOUND);
@@ -121,4 +125,14 @@ groupsRouter.post('/grupos/:slug/sair', requireAuth, async (req, res) => {
   if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
   if (await leaveGroup(slug, req.user.id)) req.session.flash = { kind: 'left', slug };
   res.redirect(303, `/grupos/${slug}`);
+});
+
+// 404 também para "não é seu" e "é demo": a resposta não revela nada além da página pública.
+groupsRouter.post('/grupos/:slug/excluir', requireAuth, async (req, res) => {
+  const { slug } = req.params;
+  if (!isSlug(slug)) return renderNotFound(res, GROUP_NOT_FOUND);
+  const deleted = await deleteOwnGroup(slug, req.user.id);
+  if (!deleted) return renderNotFound(res, GROUP_NOT_FOUND);
+  req.session.flash = { kind: 'group-deleted', name: deleted.name };
+  res.redirect(303, '/meus');
 });

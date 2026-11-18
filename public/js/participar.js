@@ -145,10 +145,9 @@ function init() {
   form?.addEventListener('submit', (e) => {
     const nome = form.elements.apelido;
     const ok = form.elements.ok;
+    // Vazio vale: o servidor usa o nome completo da conta.
     const nomeMsg =
-      [...nome.value.trim()].length < 2
-        ? 'Informe um nome ou apelido com pelo menos 2 letras.'
-        : '';
+      [...nome.value.trim()].length === 1 ? 'Use pelo menos 2 letras ou deixe em branco.' : '';
     const okMsg = ok.checked ? '' : 'Confirme que leu as orientações.';
     setError('#e-jnome', nome, nomeMsg);
     setError('#e-jok', null, okMsg);

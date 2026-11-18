@@ -1,18 +1,19 @@
 import { pool } from '../../db/pool.js';
 
-export async function findPublishedGroupId(slug) {
+export async function findPublishedGroup(slug) {
   const { rows } = await pool.query(
-    `SELECT id::text AS id FROM groups WHERE slug = $1 AND status = 'published'`,
+    `SELECT id::text AS id, owner_id::text AS "ownerId"
+       FROM groups WHERE slug = $1 AND status = 'published'`,
     [slug],
   );
-  return rows[0]?.id ?? null;
+  return rows[0] ?? null;
 }
 
-// Reconfere o status no próprio INSERT: o grupo pode sair do ar depois do findPublishedGroupId.
+// Reconfere o status no próprio INSERT: o grupo pode sair do ar depois do findPublishedGroup.
 export async function insertMembership(userId, groupId, nickname) {
   const { rowCount } = await pool.query(
     `INSERT INTO memberships (user_id, group_id, nickname)
-     SELECT $1, id, $3 FROM groups WHERE id = $2 AND status = 'published'
+     SELECT $1, id, $3 FROM groups WHERE id = $2 AND status = 'published' AND owner_id IS DISTINCT FROM $1
      ON CONFLICT (user_id, group_id) DO NOTHING`,
     [userId, groupId, nickname],
   );
@@ -29,10 +30,14 @@ export async function deleteMembership(userId, slug) {
   return rowCount > 0;
 }
 
+// Nome efetivo: sem apelido (NULL), vale o nome completo da conta.
 export async function findNickname(userId, slug) {
   const { rows } = await pool.query(
-    `SELECT m.nickname FROM memberships m JOIN groups g ON g.id = m.group_id
-     WHERE m.user_id = $1 AND g.slug = $2`,
+    `SELECT COALESCE(m.nickname, u.display_name) AS nickname
+       FROM memberships m
+       JOIN groups g ON g.id = m.group_id
+       JOIN users u ON u.id = m.user_id
+     WHERE m.user_id = $1 AND g.slug = $2 AND g.owner_id IS DISTINCT FROM m.user_id`,
     [userId, slug],
   );
   return rows[0]?.nickname ?? null;
@@ -41,7 +46,8 @@ export async function findNickname(userId, slug) {
 export async function listJoinedSlugs(userId) {
   const { rows } = await pool.query(
     `SELECT g.slug FROM memberships m JOIN groups g ON g.id = m.group_id
-     WHERE m.user_id = $1 AND g.status = 'published'`,
+     WHERE m.user_id = $1 AND g.status = 'published'
+       AND g.owner_id IS DISTINCT FROM m.user_id`,
     [userId],
   );
   return rows.map((r) => r.slug);

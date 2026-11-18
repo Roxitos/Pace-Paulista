@@ -99,7 +99,8 @@ pace-paulista/
 │   │   ├── 003_groups.sql
 │   │   ├── 004_memberships.sql
 │   │   ├── 005_sessions.sql
-│   │   └── 006_groups_start_time_check.sql   ← próxima livre: 007 (M10)
+│   │   ├── 006_groups_start_time_check.sql
+│   │   └── 007_full_name_optional_nickname.sql   ← próxima livre: 008 (M10)
 │   └── seeds/
 │       └── demo-groups.js
 ├── src/
@@ -178,7 +179,7 @@ CREATE TABLE users (
   id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   email          CITEXT NOT NULL UNIQUE,
   password_hash  TEXT   NOT NULL,
-  display_name   TEXT   NOT NULL CHECK (char_length(display_name) BETWEEN 2 AND 40),
+  display_name   TEXT   NOT NULL CHECK (char_length(display_name) BETWEEN 2 AND 80), -- nome completo (spec 023)
   role           TEXT   NOT NULL DEFAULT 'user' CHECK (role IN ('user','admin')),
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -218,7 +219,7 @@ CREATE INDEX groups_days_idx  ON groups USING GIN (days);
 CREATE TABLE memberships (
   user_id    BIGINT NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
   group_id   BIGINT NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-  nickname   TEXT   NOT NULL CHECK (char_length(nickname) BETWEEN 2 AND 40),
+  nickname   TEXT   CHECK (char_length(nickname) BETWEEN 2 AND 40), -- NULL = nome completo da conta (spec 023)
   joined_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (user_id, group_id)
 );
@@ -226,8 +227,9 @@ CREATE INDEX memberships_group_idx ON memberships (group_id);
 
 -- 005_sessions.sql  → usar o schema oficial do connect-pg-simple (tabela "session")
 -- 006_groups_start_time_check.sql → CHECK (start_time < '24:00'): TIME aceita '24:00:00'
+-- 007_full_name_optional_nickname.sql → display_name até 80; memberships.nickname nullable
 
--- 007 (M10, proposta; a spec fecha os detalhes): tokens de recuperação de senha
+-- 008 (M10, proposta; a spec fecha os detalhes): tokens de recuperação de senha
 CREATE TABLE password_resets (
   token_hash  TEXT        PRIMARY KEY,            -- SHA-256 do token; o token em claro só vai no e-mail
   user_id     BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -239,9 +241,9 @@ CREATE INDEX password_resets_user_idx ON password_resets (user_id);
 ```
 
 ### Regras derivadas
-- **Participantes exibidos** = `base_participants + COUNT(memberships)` do grupo. Calcular na query (subquery ou `LEFT JOIN ... GROUP BY`), nunca guardar o total.
+- **Participantes exibidos** = `base_participants + COUNT(memberships do grupo exceto a do dono)`. Calcular na query (subquery ou `LEFT JOIN ... GROUP BY`), nunca guardar o total.
 - **Grupo público** = `status = 'published'`. Na v1 todo grupo novo já nasce `published`.
-- **Dono do grupo** (`owner_id`) é quem cadastrou. Na v1 o dono não edita/exclui pela UI (v2), mas a coluna existe.
+- **Dono do grupo** (`owner_id`) é quem cadastrou. Na v1 o dono **exclui** o próprio grupo pela UI (spec 022; participações caem em cascata) e **não edita** (v2). Grupos demo não são excluíveis. O dono **não entra** no próprio grupo: `base_participants` já o inclui.
 - **Excluir conta** apaga o usuário → `memberships` caem em cascata, grupos dele ficam com `owner_id = NULL`.
 
 ---
@@ -270,8 +272,9 @@ URLs reais (sem `#hash`). Todas em português, iguais às do protótipo onde pos
 | Rota | Auth | O que faz |
 |---|---|---|
 | `POST /grupos` | ✅ | Cria grupo. Erro → re-renderiza o form com valores e mensagens (status 422). Sucesso → redirect `/grupos/:slug?criado=1` (tela de sucesso do protótipo) |
-| `POST /grupos/:slug/participar` | ✅ | Body: `apelido`, `ok`. Idempotente (`ON CONFLICT DO NOTHING`) |
+| `POST /grupos/:slug/participar` | ✅ | Body: `apelido`, `ok`. Idempotente (`ON CONFLICT DO NOTHING`); dono → 303 para a página do grupo, sem gravar |
 | `POST /grupos/:slug/sair` | ✅ | Remove membership |
+| `POST /grupos/:slug/excluir` | ✅ | Só o dono; grupo demo ou de outro → 404. Confirmação em 2 passos (`?excluir=1` na página do grupo, `?excluir-grupo=<slug>` em `/meus`). Sucesso → flash e redirect `/meus` |
 | `POST /conta/criar` | — | Cria usuário, já loga, redirect `next` ou `/meus` |
 | `POST /conta/entrar` | — | Rate limit: 10 tentativas / 15 min por IP+email |
 | `POST /conta/sair` | ✅ | Destroi sessão (logout é sempre POST) |
@@ -297,6 +300,7 @@ Sem JS, o form de filtros faz GET normal em `/grupos` e tudo funciona.
 ### Fluxo "Entrar no grupo"
 - Visitante **deslogado** clica "Entrar no grupo" → vai para `/conta/entrar?next=/grupos/<slug>%23participar`.
 - **Logado** → abre o modal do protótipo (JS) com campo apelido pré-preenchido com `display_name`; sem JS, `/grupos/:slug#participar` mostra o mesmo form inline.
+- Dono vê "Você organiza este grupo." no lugar do botão; sem painel/modal.
 - Sucesso → flash "Bem-vindo(a), {apelido}!" + próximo treino, e redirect para a página do grupo.
 
 ---
@@ -376,11 +380,12 @@ Detalhes do protótipo que a tabela acima não mostra (spec 008, que segue o pro
 - Topo do form: *"Corrija N campos para continuar."*; foco no primeiro campo com erro; `aria-invalid="true"`.
 
 ### Participar
-- Apelido 2–40 chars: "Informe um nome ou apelido com pelo menos 2 letras."
+- Apelido **opcional** (“Como gostaria de ser chamado?”); vazio = nome completo da conta (gravado como NULL); preenchido, 2–40 chars: «Use pelo menos 2 letras ou deixe em branco.». Não há lista de participantes: ninguém vê os integrantes de um grupo.
 - Checkbox de orientações obrigatório: "Confirme que leu as orientações."
 
 ### Contas
 - E-mail válido e único: "Já existe uma conta com esse e-mail."
+- Nome completo (coluna `display_name`): espaços colapsados, 2–80 chars, **nome e sobrenome** (≥ 2 palavras, cada uma com ≥ 1 letra) só no cadastro: «Informe nome e sobrenome.». Contas antigas de uma palavra continuam válidas.
 - Senha mínimo **8** caracteres. Nunca logar senha; nunca devolver `password_hash`.
 - Login com erro genérico: "E-mail ou senha incorretos." (não revelar qual dos dois).
 - `req.session.regenerate()` no login e no cadastro (evita fixação de sessão).
@@ -414,7 +419,7 @@ Detalhes do protótipo que a tabela acima não mostra (spec 008, que segue o pro
 | cantareira-trail | Cantareira Trail | norte | Parque Estadual Alberto Löfgren (Horto Florestal) | dom | 07:00 | 6:30–8:00 | intermediario | 33 |
 | juventude-em-pace | Juventude em Pace | norte | Parque da Juventude | ter, qui | 19:30 | 6:00–7:00 | iniciante | 41 |
 
-A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o aviso "Versão de demonstração" na home enquanto existirem grupos demo publicados. Grupos reais mostram "Cadastrado por {display_name}" (ou "Cadastrado por você" para o dono).
+A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o aviso "Versão de demonstração" na home enquanto existirem grupos demo publicados. Grupos reais mostram "Cadastrado por {nome completo}" (ou "Cadastrado por você" para o dono).
 
 ---
 
@@ -443,7 +448,7 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 - Recuperar senha (M10): token só como hash no banco; nunca logar token, link nem corpo do e-mail; página de redefinir com `Cache-Control: no-store` e `Referrer-Policy: no-referrer` (o token está na URL); a chave da API de e-mail é segredo (painel do Render, nunca no git).
 - `DATABASE_URL` de produção exige `sslmode` `require`, `verify-ca` ou `verify-full` (usar `verify-full`).
 - `?next=` só aceita caminhos internos (começam com `/` e não com `//`).
-- Dados pessoais mínimos: e-mail, nome de exibição, apelido por grupo. Contato do grupo deve ser canal público do grupo (hint já existe no form).
+- Dados pessoais mínimos: e-mail, nome completo (público só em “Cadastrado por …”), apelido opcional por grupo (visto só pela própria pessoa). Contato do grupo deve ser canal público do grupo (hint já existe no form).
 - "Excluir minha conta" apaga de verdade (LGPD). Texto da página `/sobre` e do rodapé deve deixar de dizer "Nenhum dado é enviado a servidores".
 
 ---
@@ -526,7 +531,7 @@ Estilo de código e comentários: `docs/CONVENTIONS.md`. Marcos M1–M8: `docs/M
 
 ## 12. Roadmap (depois da v1)
 - **M10 (atual)**: recuperar senha por e-mail.
-- **M9**: conteúdo real — moderação (grupo novo `pending` → admin aprova em `/admin`), dono edita/arquiva o próprio grupo, validade dos dados (`last_confirmed_at`), tirar os demos. Detalhes em `docs/PENDENCIAS.md`.
+- **M9**: conteúdo real — moderação (grupo novo `pending` → admin aprova em `/admin`), dono edita/arquiva o próprio grupo (excluir já existe desde a spec 022), validade dos dados (`last_confirmed_at`), tirar os demos. Detalhes em `docs/PENDENCIAS.md`.
 - Outros e-mails, reaproveitando o `modules/email` do M10: boas-vindas, confirmação de e-mail, aviso ao dono para confirmar os dados do grupo.
 - Mapa real com Leaflet + OpenStreetMap (colunas `lat`, `lng`).
 - Confirmação de presença por encontro (tabela `attendances`) e notificações.

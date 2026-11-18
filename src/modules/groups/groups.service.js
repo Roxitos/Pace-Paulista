@@ -41,6 +41,10 @@ export async function getGroupDetail(slug, now, { viewer = null } = {}) {
   return { group, sessions, isOwner, membership, nextSession };
 }
 
+export function deleteOwnGroup(slug, userId) {
+  return groupsRepo.deleteOwned(slug, String(userId));
+}
+
 export async function listMyGroups(userId) {
   const [joined, mine] = await Promise.all([
     groupsRepo.listJoinedBy(userId),

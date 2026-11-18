@@ -59,7 +59,7 @@ describe('visitante', () => {
 
 describe('GET /grupos/novo', () => {
   it('mostra o form do protótipo sem item de menu ativo (CA2)', async () => {
-    const agent = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const agent = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await agent.get('/grupos/novo');
     expect(res.status).toBe(200);
     expect(res.text).toContain('action="/grupos"');
@@ -72,7 +72,7 @@ describe('GET /grupos/novo', () => {
 
 describe('POST /grupos', () => {
   it('nome com aspas e tags sai escapado no data-toast da tela de sucesso', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, { ...valido, nome: 'X" onmouseover="a <b>' });
     expect(res.status).toBe(303);
     const html = (await ana.get(res.headers.location)).text;
@@ -82,7 +82,7 @@ describe('POST /grupos', () => {
 
   it('cria o grupo e mostra o sucesso só para o dono (CA3, CA4, CA5)', async () => {
     const app = createTestApp();
-    const ana = await signedUp(app, 'Ana', 'ana@x.com');
+    const ana = await signedUp(app, 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, valido);
     expect(res.status).toBe(303);
     expect(res.headers.location).toBe('/grupos/corredores-do-sul?criado=1');
@@ -101,7 +101,7 @@ describe('POST /grupos', () => {
       meeting_point: 'Combinado no grupo',
       distance: null,
       base_participants: 1,
-      display_name: 'Ana',
+      display_name: 'Ana Souza',
     });
 
     const sucesso = await ana.get(res.headers.location);
@@ -111,7 +111,7 @@ describe('POST /grupos', () => {
     expect(sucesso.text).toContain('/grupos?zona=sul');
     expect(sucesso.text).toContain('/grupos/novo');
 
-    const bruna = await signedUp(app, 'Bruna', 'bruna@x.com');
+    const bruna = await signedUp(app, 'Bruna Lima', 'bruna@x.com');
     const outro = await bruna.get('/grupos/corredores-do-sul?criado=1');
     expect(outro.text).not.toContain('Ver página do grupo');
     expect(outro.text).toContain('Cadastrado por Ana');
@@ -125,7 +125,7 @@ describe('POST /grupos', () => {
   });
 
   it('form vazio: 422 com os 11 erros e foco só no nome (CA6)', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, {});
     expect(res.status).toBe(422);
     expect(res.text).toContain('Corrija 11 campos para continuar.');
@@ -136,7 +136,7 @@ describe('POST /grupos', () => {
   });
 
   it('reexibe os valores digitados e não grava nada (CA7)', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, { ...valido, paceMax: '', zona: 'leste' });
     expect(res.status).toBe(422);
     expect(res.text).toContain('value="Corredores do Sul"');
@@ -149,7 +149,7 @@ describe('POST /grupos', () => {
   });
 
   it('nome repetido com outra caixa entra na contagem de erros (CA8)', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, { ...valido, nome: 'correria DO carmo', zona: '' });
     expect(res.status).toBe(422);
     expect(res.text).toContain('Já existe um grupo com esse nome.');
@@ -157,7 +157,7 @@ describe('POST /grupos', () => {
   });
 
   it('gera slug livre quando o ocupado é o da base (CA9)', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, { ...valido, nome: 'Pace da Oca!' });
     expect(res.headers.location).toBe('/grupos/pace-da-oca-2?criado=1');
     const novo = await postGroup(ana, { ...valido, nome: 'Novo' });
@@ -165,7 +165,7 @@ describe('POST /grupos', () => {
   });
 
   it('horário 24:00 é recusado (CA10)', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, { ...valido, horario: '24:00' });
     expect(res.status).toBe(422);
     expect(res.text).toContain('Informe o horário do treino.');
@@ -173,7 +173,7 @@ describe('POST /grupos', () => {
 
   it('entradas hostis não viram 500 e o HTML sai escapado (CA11)', async () => {
     const app = createTestApp();
-    const ana = await signedUp(app, 'Ana', 'ana@x.com');
+    const ana = await signedUp(app, 'Ana Souza', 'ana@x.com');
     const csrf = await getCsrf(ana, '/grupos/novo');
     const hostil = await ana
       .post('/grupos')
@@ -193,7 +193,7 @@ describe('POST /grupos', () => {
 
   // Hardener: nome visualmente igual ao de outro grupo (espaço duplo, ZWSP) não pode passar.
   it('nome igual com espaço duplo ou caractere invisível é recusado', async () => {
-    const ana = await signedUp(createTestApp(), 'Ana', 'ana@x.com');
+    const ana = await signedUp(createTestApp(), 'Ana Souza', 'ana@x.com');
     const res = await postGroup(ana, { ...valido, nome: 'Correria  do​ Carmo' });
     expect(res.status).toBe(422);
     expect(res.text).toContain('Já existe um grupo com esse nome.');

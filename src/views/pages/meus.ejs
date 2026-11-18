@@ -1,3 +1,6 @@
+<% if (locals.flash && locals.flash.kind === 'group-deleted') { const msg = `O grupo “${locals.flash.name}” foi excluído.`; -%>
+<div class="wrap notice-top" data-toast="<%= msg %>"><div class="form-alert good" role="status"><%- ic('check') %><span><%= msg %></span></div></div>
+<% } -%>
 <%- include('../partials/page-head', {
   kicker: 'Meus grupos',
   title: 'Seus treinos',
@@ -15,14 +18,14 @@
   <section class="section" style="padding-top:0">
     <div class="sec-head"><h2 class="display" style="font-size:34px">Grupos que você cadastrou</h2></div>
 <% if (mine.length > 0) { -%>
-    <div class="grid-cards"><% for (const g of mine) { %><%- include('../partials/group-card', { g }) %><% } %></div>
+    <div class="grid-cards"><% for (const g of mine) { const su = encodeURIComponent(g.slug); %><div class="mine-item"><%- include('../partials/group-card', { g }) %><%- include('../partials/group-delete', { slug: g.slug, confirm: confirmGroup === g.slug, askHref: `/meus?excluir-grupo=${su}#excluir-${su}`, cancelHref: `/meus#excluir-${su}`, boxId: `excluir-${su}` }) %></div><% } %></div>
 <% } else { -%>
     <div class="empty"><%- ic('plus') %><h3>Nenhum grupo cadastrado</h3><p>Organiza treinos? Cadastre seu grupo para aparecer na busca.</p><a class="btn btn-outline" href="/grupos/novo">Cadastrar grupo</a></div>
 <% } -%>
   </section>
   <div class="panel" id="conta">
     <h2>Conta e dados</h2>
-    <p style="color:var(--muted)">Você entrou como <b><%= user.displayName %></b> (<%= user.email %>).</p>
+    <p class="account-line" style="color:var(--muted)">Você entrou como <b><%= user.displayName %></b> (<%= user.email %>).</p>
     <form method="post" action="/conta/sair" style="margin-top:14px"><%- include('../partials/csrf') %><button class="btn btn-outline btn-sm" type="submit">Sair da conta</button></form>
     <div id="resetBox" style="margin-top:14px">
 <% if (!confirmDelete) { -%>

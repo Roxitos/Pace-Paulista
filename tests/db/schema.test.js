@@ -101,6 +101,32 @@ describe('CHECKs de groups', () => {
   });
 });
 
+describe('nome completo e apelido opcional (migration 007)', () => {
+  const addUser = (name) =>
+    pool.query('INSERT INTO users (email, password_hash, display_name) VALUES ($1, $2, $3)', [
+      `${Math.random()}@exemplo.com`,
+      'hash',
+      name,
+    ]);
+
+  it('display_name aceita 80 e uma palavra, recusa 81', async () => {
+    await addUser('a'.repeat(80));
+    await addUser('Ana');
+    await expect(addUser('a'.repeat(81))).rejects.toMatchObject({ code: '23514' });
+  });
+
+  it('nickname aceita NULL e recusa vazio e 41 caracteres', async () => {
+    const userId = await insertUser('apelido@exemplo.com');
+    const group = await insertGroup();
+    const join = 'INSERT INTO memberships (user_id, group_id, nickname) VALUES ($1, $2, $3)';
+    await expect(pool.query(join, [userId, group.id, ''])).rejects.toMatchObject({ code: '23514' });
+    await expect(pool.query(join, [userId, group.id, 'a'.repeat(41)])).rejects.toMatchObject({
+      code: '23514',
+    });
+    await pool.query(join, [userId, group.id, null]);
+  });
+});
+
 describe('exclusão de usuário', () => {
   it('apaga as memberships e deixa owner_id NULL nos grupos dele', async () => {
     const ownerId = await insertUser('dona@exemplo.com');

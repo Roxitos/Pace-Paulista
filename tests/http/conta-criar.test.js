@@ -6,7 +6,7 @@ import { createTestApp, getCsrf } from '../helpers/auth.js';
 import { migrateTestDb, truncateAll } from '../helpers/db.js';
 
 const SENHA = 'abcdefg!';
-const valido = { nome: 'Ana', email: 'ana@x.com', senha: SENHA };
+const valido = { nome: 'Ana Souza', email: 'ana@x.com', senha: SENHA };
 
 beforeAll(async () => {
   await migrateTestDb(pool);
@@ -115,14 +115,33 @@ describe('POST /conta/criar', () => {
     expect(await countUsers()).toBe(0);
   });
 
+  it('mostra rótulo, hint e textos novos do nome completo (CA2)', async () => {
+    const res = await request(createTestApp()).get('/conta/criar');
+    expect(res.text).toContain('Nome completo *');
+    expect(res.text).toContain('maxlength="80" autocomplete="name"');
+    expect(res.text).toContain('Nome e sobrenome. Aparece como');
+    expect(res.text).toContain('Seu nome completo, que fica público');
+    expect(res.text).toContain('O apelido que você escolher (opcional)');
+  });
+
+  it('só um nome: 422 com aria-invalid e valor reexibido (CA2, CA3)', async () => {
+    const { agent, csrf } = await start();
+    const curto = await post(agent, csrf, { ...valido, nome: 'Ana' });
+    expect(curto.status).toBe(422);
+    expect(curto.text).toContain('Informe nome e sobrenome.');
+    expect(curto.text).toMatch(/id="a-nome"[^>]*aria-invalid="true"/);
+    expect(curto.text).toContain('value="Ana"');
+    expect(await countUsers()).toBe(0);
+  });
+
   it('NUL no nome ou no e-mail não vira 500 (22021 do Postgres)', async () => {
     const { agent, csrf } = await start();
     const ruim = await post(agent, csrf, { ...valido, email: 'a\0na@x.com' });
     expect(ruim.status).toBe(422);
     expect(ruim.text).toContain('Informe um e-mail válido.');
-    await post(agent, csrf, { ...valido, nome: 'A\0na' }).expect(303);
+    await post(agent, csrf, { ...valido, nome: 'A\0na Souza' }).expect(303);
     const { rows } = await pool.query('SELECT display_name FROM users');
-    expect(rows).toEqual([{ display_name: 'Ana' }]);
+    expect(rows).toEqual([{ display_name: 'Ana Souza' }]);
   });
 
   it('três campos inválidos: topo com a contagem (CA7)', async () => {
@@ -161,10 +180,10 @@ describe('POST /conta/criar', () => {
     for (let i = 0; i < 10; i += 1) {
       await post(agent, csrf, { nome: '', email: '', senha: '' }).expect(422);
     }
-    const res = await post(agent, csrf, { ...valido, nome: 'Bia' });
+    const res = await post(agent, csrf, { ...valido, nome: 'Bia Costa' });
     expect(res.status).toBe(429);
     expect(res.text).toContain('Muitas tentativas. Espere alguns minutos e tente de novo.');
-    expect(res.text).toContain('value="Bia"');
+    expect(res.text).toContain('value="Bia Costa"');
     expect(res.text).not.toContain(SENHA);
     expect(await countUsers()).toBe(0);
 

@@ -3,7 +3,8 @@ import { safeNext } from '../../domain/redirect.js';
 
 const MSG = {
   nameTooShort: 'Informe um nome com pelo menos 2 caracteres.',
-  nameTooLong: 'Use no máximo 40 caracteres.',
+  nameTooLong: 'Use no máximo 80 caracteres.',
+  nameSurname: 'Informe nome e sobrenome.',
   email: 'Informe um e-mail válido.',
   passwordLength: 'A senha precisa ter de 8 a 72 caracteres.',
   passwordSpecial: 'A senha precisa de pelo menos 1 caractere especial (ex.: ! @ # $ %).',
@@ -18,12 +19,19 @@ function text(value) {
   return typeof v === 'string' ? v : '';
 }
 
+// Nome e sobrenome: >= 2 palavras, cada uma com pelo menos 1 letra. Só no cadastro (contas antigas de uma palavra seguem válidas).
+function hasSurname(s) {
+  const words = s.split(' ');
+  return words.length >= 2 && words.every((w) => /\p{L}/u.test(w));
+}
+
 // Roda sobre os valores já normalizados (trim/NFC). Tamanhos em code points, como o char_length do banco.
 const signupSchema = z.object({
   nome: z
     .string()
     .refine((s) => [...s].length >= 2, { error: MSG.nameTooShort, abort: true })
-    .refine((s) => [...s].length <= 40, { error: MSG.nameTooLong }),
+    .refine((s) => [...s].length <= 80, { error: MSG.nameTooLong, abort: true })
+    .refine(hasSurname, { error: MSG.nameSurname }),
   email: z.string().refine((s) => s.length <= 254 && EMAIL_RE.test(s), { error: MSG.email }),
   senha: z
     .string()
@@ -49,7 +57,7 @@ const ERROR_ORDER = ['nome', 'email', 'senha'];
 export function parseSignup(body) {
   const src = body !== null && typeof body === 'object' ? body : {};
   // O Postgres recusa texto com NUL (22021): sem isso, nome=%00 virava 500 (mesmo tratamento de filters.js).
-  const nome = text(src.nome).replaceAll('\0', '').trim().normalize('NFC');
+  const nome = text(src.nome).replaceAll('\0', '').normalize('NFC').replace(/\s+/gu, ' ').trim();
   const email = text(src.email).trim().normalize('NFC');
   const senha = text(src.senha);
   const next = safeNext(text(src.next), '');

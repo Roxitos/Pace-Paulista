@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { parseLogin, parseSignup } from '../../src/modules/auth/auth.schemas.js';
 
-const ok = { nome: 'Ana', email: 'ana@x.com', senha: 'abcdefg!' };
+const ok = { nome: 'Ana Souza', email: 'ana@x.com', senha: 'abcdefg!' };
 const errorsOf = (patch) => parseSignup({ ...ok, ...patch }).errors;
 
 describe('parseSignup', () => {
   it('aceita entrada válida e monta data e values', () => {
     const r = parseSignup(ok);
     expect(r.errors).toEqual({});
-    expect(r.data).toEqual({ displayName: 'Ana', email: 'ana@x.com', password: 'abcdefg!' });
-    expect(r.values).toEqual({ nome: 'Ana', email: 'ana@x.com', next: '' });
+    expect(r.data).toEqual({ displayName: 'Ana Souza', email: 'ana@x.com', password: 'abcdefg!' });
+    expect(r.values).toEqual({ nome: 'Ana Souza', email: 'ana@x.com', next: '' });
   });
 
   it('values nunca contém a senha', () => {
@@ -27,14 +27,29 @@ describe('parseSignup', () => {
     it('faz trim antes de medir', () => {
       expect(errorsOf({ nome: '   ' }).nome).toBe('Informe um nome com pelo menos 2 caracteres.');
       expect(errorsOf({ nome: ' a ' }).nome).toBe('Informe um nome com pelo menos 2 caracteres.');
-      expect(parseSignup({ ...ok, nome: '  Ana  ' }).values.nome).toBe('Ana');
     });
-    it('mede em code points: 40 emojis passam, 41 não', () => {
-      expect(errorsOf({ nome: '😀'.repeat(40) }).nome).toBeUndefined();
-      expect(errorsOf({ nome: 'a'.repeat(41) }).nome).toBe('Use no máximo 40 caracteres.');
+    it('colapsa espaços em um só e grava o valor normalizado', () => {
+      const r = parseSignup({ ...ok, nome: '  Ana   da\tSilva  ' });
+      expect(r.values.nome).toBe('Ana da Silva');
+      expect(r.data.displayName).toBe('Ana da Silva');
+    });
+    it('mede em caracteres: 80 passam, 81 não', () => {
+      const nome = (n) => `${'a'.repeat(n - 2)} b`;
+      expect(errorsOf({ nome: nome(80) }).nome).toBeUndefined();
+      expect(errorsOf({ nome: nome(81) }).nome).toBe('Use no máximo 80 caracteres.');
+    });
+    it('aceita nome e sobrenome com acento, hífen, apóstrofo e partículas', () => {
+      for (const nome of ['Ana da Silva', "João D'Ávila", 'Jean-Luc Picard', 'Ana D’Ávila']) {
+        expect(errorsOf({ nome }).nome).toBeUndefined();
+      }
+    });
+    it('recusa nome sem sobrenome ou com palavra sem letra', () => {
+      for (const nome of ['Ana', 'Ana 2', 'Ana -']) {
+        expect(errorsOf({ nome }).nome).toBe('Informe nome e sobrenome.');
+      }
     });
     it('remove NUL (o Postgres recusa com 22021)', () => {
-      expect(parseSignup({ ...ok, nome: 'A\0na' }).values.nome).toBe('Ana');
+      expect(parseSignup({ ...ok, nome: 'A\0na Souza' }).values.nome).toBe('Ana Souza');
       expect(errorsOf({ nome: '\0a\0' }).nome).toBe('Informe um nome com pelo menos 2 caracteres.');
     });
   });

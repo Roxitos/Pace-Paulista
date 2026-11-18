@@ -1,0 +1,9 @@
+<% const slugUrl = encodeURIComponent(slug); -%>
+<div id="<%= boxId %>" class="group-delete">
+<% if (!confirm) { -%>
+  <a class="btn btn-outline btn-sm" href="<%= askHref %>">Excluir grupo</a>
+<% } else { -%>
+  <div class="form-alert bad" role="alert"><%- ic('alert') %><span>Tem certeza que deseja excluir o grupo? Isso apaga o grupo e as participações de todos os membros. Não dá para desfazer.</span></div>
+  <form method="post" action="/grupos/<%= slugUrl %>/excluir" class="choice-row" style="margin-top:10px"><%- include('csrf') %><button class="btn btn-primary btn-sm" type="submit" style="background:var(--pista)">Excluir grupo</button><a class="btn btn-outline btn-sm" href="<%= cancelHref %>">Cancelar</a></form>
+<% } -%>
+</div>

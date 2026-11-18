@@ -43,7 +43,7 @@ describe('GET /api/grupos', () => {
       expect(api.body.chips).toBe(innerOf(page.text, 'chips'));
     }
 
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     const { rows } = await pool.query('SELECT id FROM users WHERE email = $1', ['ana@exemplo.com']);
     await insertMembership(pool, rows[0].id, 'pace-da-oca', 'Ana');
     const [page, api] = await Promise.all([
@@ -56,7 +56,7 @@ describe('GET /api/grupos', () => {
   });
 
   it('não vaza contato, dono nem dados de conta, logado ou não (CA3)', async () => {
-    const agent = await signedUp(app, 'Ana', 'ana@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'ana@exemplo.com');
     await pool.query(
       `INSERT INTO groups (slug, name, zone, location, days, start_time, pace_min_s, pace_max_s,
                            level, description, contact, owner_id)

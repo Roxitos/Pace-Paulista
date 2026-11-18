@@ -26,7 +26,7 @@ afterAll(() => pool.end());
 
 describe('falha ao carregar os grupos do usuário logado', () => {
   it('responde a página 500 completa, sem vazar o erro', async () => {
-    const agent = await signedUp(app, 'Ana', 'falha-badge@exemplo.com');
+    const agent = await signedUp(app, 'Ana Souza', 'falha-badge@exemplo.com');
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     falha.on = true;
     try {

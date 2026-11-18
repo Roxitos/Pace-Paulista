@@ -9,10 +9,18 @@ describe('parseJoinForm', () => {
     expect(data).toEqual({ nickname: 'José' });
   });
 
-  it('recusa apelido curto (inclusive só espaços) e orientações sem aceite, nessa ordem', () => {
+  it('apelido vazio ou só espaços é válido e vira null', () => {
+    for (const apelido of ['', '   ']) {
+      const { errors, data } = parseJoinForm({ apelido, ok: 'on' });
+      expect(errors).toEqual({});
+      expect(data).toEqual({ nickname: null });
+    }
+  });
+
+  it('recusa apelido de 1 caractere e orientações sem aceite, nessa ordem', () => {
     const { errors, data } = parseJoinForm({ apelido: ' a ' });
     expect(Object.keys(errors)).toEqual(['apelido', 'ok']);
-    expect(errors.apelido).toBe('Informe um nome ou apelido com pelo menos 2 letras.');
+    expect(errors.apelido).toBe('Use pelo menos 2 letras ou deixe em branco.');
     expect(errors.ok).toBe('Confirme que leu as orientações.');
     expect(data).toBeNull();
   });
@@ -34,6 +42,6 @@ describe('parseJoinForm', () => {
       apelido: '',
       ok: false,
     });
-    expect(parseJoinForm(undefined).errors.apelido).toBeDefined();
+    expect(parseJoinForm(undefined).errors.apelido).toBeUndefined();
   });
 });

@@ -47,6 +47,7 @@ export function mountRateLimits(app, limits) {
   app.get('/api/grupos', limits.api);
   app.get('/api/mapa/:slug', limits.api);
   app.post('/grupos', limits.createGroup);
+  app.post('/grupos/:slug/excluir', limits.createGroup); // escrita de grupo: mesmo balde
   app.post('/grupos/:slug/participar', limits.membership);
   app.post('/grupos/:slug/sair', limits.membership);
 }
