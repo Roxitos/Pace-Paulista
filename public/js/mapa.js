@@ -13,6 +13,7 @@ if (detail && pins && layout) {
   const cache = new Map();
   if (selected) cache.set(selected, detail.innerHTML);
   let controller = null;
+  let real = null;
 
   function markSelected(slug) {
     for (const item of items) {
@@ -25,13 +26,15 @@ if (detail && pins && layout) {
     }
   }
 
+  const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function scrollToDetail() {
     if (window.innerWidth >= 900) return;
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    detail.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
+    detail.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'nearest' });
   }
 
   async function select(slug, href) {
+    real?.focus(slug);
     if (slug === selected) {
       scrollToDetail();
       return;
@@ -73,4 +76,29 @@ if (detail && pins && layout) {
     e.preventDefault();
     select(slug, link.getAttribute('href'));
   });
+
+  // Mapa real por cima da seleção acima. Qualquer falha (import, Leaflet) deixa o esquema SVG.
+  const mapEl = document.getElementById('mapReal');
+  if (mapEl) {
+    const svg = document.querySelector('.map-box > svg');
+    try {
+      // Variável + @vite-ignore: o caminho só existe no servidor (express.static), não no build.
+      const leafletUrl = '/vendor/leaflet/leaflet-src.esm.js';
+      const L = await import(/* @vite-ignore */ leafletUrl);
+      const { createRealMap } = await import('./mapa-real.js');
+      real = createRealMap(L, {
+        el: mapEl,
+        svg,
+        items,
+        selectedSlug: selected,
+        centerOnSelected: location.pathname.startsWith('/mapa/'),
+        onPick: (slug) =>
+          SLUG_RE.test(slug) && select(slug, `/mapa/${encodeURIComponent(slug)}#mapDetail`),
+        reducedMotion: reduceMotion,
+      });
+    } catch {
+      mapEl.hidden = true;
+      svg?.toggleAttribute('hidden', false);
+    }
+  }
 }

@@ -8,6 +8,8 @@ describe('currentNav', () => {
     ['/grupos/pace-da-oca', 'grupos'],
     ['/grupos/novo', ''],
     ['/zonas', 'zonas'],
+    ['/mapa', 'mapa'],
+    ['/mapa/pace-da-oca', 'mapa'],
     ['/sobre', 'sobre'],
     ['/encontrar', ''],
     ['/gruposx', ''],

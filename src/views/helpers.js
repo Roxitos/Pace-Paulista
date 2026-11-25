@@ -47,6 +47,7 @@ export function currentNav(path) {
   if (path === '/grupos/novo') return '';
   if (path === '/grupos' || path.startsWith('/grupos/')) return 'grupos';
   if (path === '/zonas') return 'zonas';
+  if (path === '/mapa' || path.startsWith('/mapa/')) return 'mapa';
   if (path === '/sobre') return 'sobre';
   return '';
 }

@@ -36,6 +36,8 @@ const GROUP_KEYS = [
   'owner_name',
   'owner_id',
   'map_pin',
+  'lat',
+  'lng',
 ];
 
 const REPO_ORDER = [

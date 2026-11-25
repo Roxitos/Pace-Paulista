@@ -48,6 +48,28 @@ afterAll(async () => {
   await pool.end();
 });
 
+describe('lat/lng de groups (migration 008)', () => {
+  it.each([
+    ['só lat', { lat: -23.55, lng: null }],
+    ['só lng', { lat: null, lng: -46.63 }],
+    ['lat e lng trocados', { lat: -46.6, lng: -23.5 }],
+    ['fora de São Paulo', { lat: -22.9, lng: -43.2 }],
+  ])('recusa %s com 23514', async (_caso, overrides) => {
+    await expect(insertGroup(overrides)).rejects.toMatchObject({ code: '23514' });
+  });
+
+  it('aceita um ponto em São Paulo e aceita grupo sem ponto', async () => {
+    expect(await insertGroup({ lat: -23.5858, lng: -46.6556 })).toMatchObject({
+      lat: -23.5858,
+      lng: -46.6556,
+    });
+    expect(await insertGroup({ slug: 'sem-ponto', name: 'Sem Ponto' })).toMatchObject({
+      lat: null,
+      lng: null,
+    });
+  });
+});
+
 describe('CHECKs de groups', () => {
   it.each([
     ['zona fora da lista', { zone: 'litoral' }],

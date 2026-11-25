@@ -23,7 +23,9 @@ const SELECT_PUBLISHED = `
          g.is_demo,
          u.display_name AS owner_name,
          g.owner_id::text AS owner_id,
-         g.map_pin
+         g.map_pin,
+         g.lat,
+         g.lng
     FROM groups g
     LEFT JOIN users u ON u.id = g.owner_id
     LEFT JOIN memberships m ON m.group_id = g.id AND m.user_id IS DISTINCT FROM g.owner_id`;

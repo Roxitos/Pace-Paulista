@@ -183,3 +183,14 @@ describe('DEMO_GROUPS', () => {
     expect(g.distance).toBe('10 a 14 km');
   });
 });
+
+describe('coordenadas dos demos (spec 024)', () => {
+  it('os 11 têm lat/lng dentro da caixa de São Paulo', () => {
+    for (const g of DEMO_GROUPS) {
+      expect(g.lat, g.slug).toBeGreaterThanOrEqual(-24.05);
+      expect(g.lat, g.slug).toBeLessThanOrEqual(-23.3);
+      expect(g.lng, g.slug).toBeGreaterThanOrEqual(-46.85);
+      expect(g.lng, g.slug).toBeLessThanOrEqual(-46.35);
+    }
+  });
+});

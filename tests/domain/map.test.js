@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { ZONA_ORDEM } from '../../src/domain/constants.js';
-import { gmapsBusca, gmapsRota, pinPos, ZCENTRO, ZLABEL, ZPOLY } from '../../src/domain/map.js';
+import {
+  gmapsBusca,
+  gmapsRota,
+  hasCoords,
+  pinPos,
+  ZCENTRO,
+  ZLABEL,
+  ZPOLY,
+} from '../../src/domain/map.js';
 
 const PROTOTIPO = readFileSync(new URL('../../docs/prototipo.html', import.meta.url), 'utf8');
 
@@ -59,23 +67,43 @@ describe('pinPos', () => {
   });
 });
 
+describe('hasCoords', () => {
+  it('só aceita lat e lng numéricos finitos', () => {
+    expect(hasCoords({ lat: -23.5, lng: -46.6 })).toBe(true);
+    expect(hasCoords({ lat: null, lng: null })).toBe(false);
+    expect(hasCoords({ lat: -23.5, lng: null })).toBe(false);
+    expect(hasCoords({ lat: Number.NaN, lng: -46.6 })).toBe(false);
+    expect(hasCoords({})).toBe(false);
+  });
+});
+
 describe('links do Google Maps', () => {
-  it('gmapsRota monta a rota até o local em São Paulo', () => {
-    expect(gmapsRota('Parque Ibirapuera')).toBe(
+  const semPonto = { location: 'Parque Ibirapuera', lat: null, lng: null };
+  const comPonto = { location: 'Parque Ibirapuera', lat: -23.5858, lng: -46.6556 };
+
+  it('sem coordenadas, usa o local em São Paulo', () => {
+    expect(gmapsRota(semPonto)).toBe(
       'https://www.google.com/maps/dir/?api=1&destination=Parque%20Ibirapuera%2C%20S%C3%A3o%20Paulo%2C%20SP',
     );
-  });
-
-  it('gmapsBusca monta a busca pelo local em São Paulo', () => {
-    expect(gmapsBusca('Parque Ibirapuera')).toBe(
+    expect(gmapsBusca(semPonto)).toBe(
       'https://www.google.com/maps/search/?api=1&query=Parque%20Ibirapuera%2C%20S%C3%A3o%20Paulo%2C%20SP',
     );
   });
 
+  it('com coordenadas, usa lat,lng exatos', () => {
+    expect(gmapsRota(comPonto)).toBe(
+      'https://www.google.com/maps/dir/?api=1&destination=-23.5858%2C-46.6556',
+    );
+    expect(gmapsBusca(comPonto)).toBe(
+      'https://www.google.com/maps/search/?api=1&query=-23.5858%2C-46.6556',
+    );
+  });
+
   it('codifica & e # do local para não quebrar a query', () => {
-    expect(gmapsRota('Praça A & B #2')).toBe(
+    const g = { location: 'Praça A & B #2' };
+    expect(gmapsRota(g)).toBe(
       'https://www.google.com/maps/dir/?api=1&destination=Pra%C3%A7a%20A%20%26%20B%20%232%2C%20S%C3%A3o%20Paulo%2C%20SP',
     );
-    expect(gmapsBusca('Praça A & B #2')).toContain('query=Pra%C3%A7a%20A%20%26%20B%20%232%2C');
+    expect(gmapsBusca(g)).toContain('query=Pra%C3%A7a%20A%20%26%20B%20%232%2C');
   });
 });

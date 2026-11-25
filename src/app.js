@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
@@ -27,11 +28,12 @@ import {
   ZONA_ORDEM,
   ZONAS,
 } from './domain/constants.js';
-import { gmapsBusca, gmapsRota, ZLABEL, ZPOLY } from './domain/map.js';
+import { gmapsBusca, gmapsRota, hasCoords, ZLABEL, ZPOLY } from './domain/map.js';
 import { countLabel } from './domain/filters.js';
 import { fmtFaixa, fmtPace } from './domain/pace.js';
 import { fmtDiasCurto, fmtDiasLongo, fmtHora } from './domain/schedule.js';
 
+const require = createRequire(import.meta.url);
 const root = path.dirname(fileURLToPath(import.meta.url));
 
 // beforeErrorHandlers existe só para os testes registrarem rotas que lançam erro;
@@ -71,6 +73,7 @@ export function createApp({
     ZLABEL,
     gmapsRota,
     gmapsBusca,
+    hasCoords,
   });
 
   // Antes do static: os arquivos estáticos também recebem os cabeçalhos.
@@ -80,6 +83,9 @@ export function createApp({
   app.get('/healthz', (req, res) =>
     res.type('text/plain').set('Cache-Control', 'no-store').send('ok'),
   );
+  // Leaflet servido do próprio site (CSP script-src 'self'); só dist/, nada de node_modules inteiro.
+  const leafletDist = path.join(path.dirname(require.resolve('leaflet/package.json')), 'dist');
+  app.use('/vendor/leaflet', express.static(leafletDist, { immutable: true, maxAge: '1y' }));
   app.use(express.static(path.join(root, '..', 'public')));
   app.get('/favicon.ico', (req, res) => res.redirect(301, '/favicon.svg'));
   app.use(express.urlencoded({ extended: false, limit: '16kb', parameterLimit: 200 }));
