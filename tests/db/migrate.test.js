@@ -16,6 +16,7 @@ const ALL = [
   '005_sessions.sql',
   '006_groups_start_time_check.sql',
   '007_full_name_optional_nickname.sql',
+  '008_groups_lat_lng.sql',
 ];
 const tempDirs = [];
 
@@ -48,15 +49,15 @@ afterAll(async () => {
 });
 
 describe('runMigrations', () => {
-  it('aplica as 7 migrations em ordem num esquema zerado e não reaplica na 2ª execução', async () => {
+  it('aplica as 8 migrations em ordem num esquema zerado e não reaplica na 2ª execução', async () => {
     await resetSchema(pool);
     const logs = [];
     const first = await runMigrations({ pool, log: (line) => logs.push(line) });
-    expect(first).toEqual({ applied: ALL, total: 7 });
+    expect(first).toEqual({ applied: ALL, total: 8 });
     expect(logs).toEqual(ALL.map((file) => `Aplicada ${file}`));
 
     const second = await runMigrations({ pool });
-    expect(second).toEqual({ applied: [], total: 7 });
+    expect(second).toEqual({ applied: [], total: 8 });
 
     const rows = await appliedRows();
     expect(rows.map((row) => row.filename)).toEqual(ALL);
@@ -87,12 +88,12 @@ describe('runMigrations', () => {
   it('falha com a mensagem de imutabilidade se uma migration aplicada foi alterada, sem aplicar nada', async () => {
     const dir = await copyMigrations();
     await appendFile(path.join(dir, '005_sessions.sql'), '-- editada\n');
-    await writeFile(path.join(dir, '008_nova.sql'), 'CREATE TABLE nao_deveria_existir (id INT);\n');
+    await writeFile(path.join(dir, '009_nova.sql'), 'CREATE TABLE nao_deveria_existir (id INT);\n');
 
     await expect(runMigrations({ pool, dir })).rejects.toThrow(
       'A migration 005_sessions.sql foi alterada depois de aplicada. Migrations são imutáveis: crie uma nova.',
     );
-    expect(await appliedRows()).toHaveLength(7);
+    expect(await appliedRows()).toHaveLength(8);
     const { rows } = await pool.query("SELECT to_regclass('nao_deveria_existir') AS t");
     expect(rows[0].t).toBeNull();
   });
@@ -124,13 +125,13 @@ describe('runMigrations', () => {
   it('desfaz só a migration que falhou e informa o arquivo', async () => {
     const dir = await copyMigrations();
     await writeFile(
-      path.join(dir, '008_quebrada.sql'),
+      path.join(dir, '009_quebrada.sql'),
       'CREATE TABLE parcial (id INT);\nSELECT * FROM tabela_que_nao_existe;\n',
     );
     await expect(runMigrations({ pool, dir })).rejects.toThrow(
-      /^Falha na migration 008_quebrada\.sql: /,
+      /^Falha na migration 009_quebrada\.sql: /,
     );
-    expect(await appliedRows()).toHaveLength(7);
+    expect(await appliedRows()).toHaveLength(8);
     const { rows } = await pool.query("SELECT to_regclass('parcial') AS t");
     expect(rows[0].t).toBeNull();
   });
@@ -139,6 +140,29 @@ describe('runMigrations', () => {
     await resetSchema(pool);
     const results = await Promise.all([runMigrations({ pool }), runMigrations({ pool })]);
     expect(results.flatMap((result) => result.applied).sort()).toEqual(ALL);
-    expect(await appliedRows()).toHaveLength(7);
+    expect(await appliedRows()).toHaveLength(8);
+  });
+
+  it('008 preenche lat/lng dos demos já gravados e deixa os outros grupos sem ponto (CA1)', async () => {
+    await resetSchema(pool);
+    const dir = await copyMigrations();
+    await rm(path.join(dir, '008_groups_lat_lng.sql'));
+    await runMigrations({ pool, dir });
+    const insert = (slug, name, isDemo) =>
+      pool.query(
+        `INSERT INTO groups (slug, name, zone, location, days, start_time, pace_min_s, pace_max_s,
+                             level, description, is_demo)
+         VALUES ($1, $2, 'sul', 'Parque', ARRAY['seg'], '06:00', 255, 300, 'avancado',
+                 'Treinos estruturados para quem já corre provas.', $3)`,
+        [slug, name, isDemo],
+      );
+    await insert('pace-da-oca', 'Pace da Oca', true);
+    await insert('pace-da-oca-real', 'Outro', false);
+    await runMigrations({ pool });
+    const { rows } = await pool.query('SELECT slug, lat, lng FROM groups ORDER BY slug');
+    expect(rows).toEqual([
+      { slug: 'pace-da-oca', lat: -23.5858, lng: -46.6556 },
+      { slug: 'pace-da-oca-real', lat: null, lng: null },
+    ]);
   });
 });

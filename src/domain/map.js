@@ -44,15 +44,21 @@ export function pinPos(group) {
   return [cx + (h % 40) - 20, cy + ((h >> 3) % 30) - 15];
 }
 
-// O local é só o nome do parque/rua: sem a cidade, o Maps pode achar um homônimo em outro lugar.
-function inSaoPaulo(location) {
-  return encodeURIComponent(`${location}, São Paulo, SP`);
+export function hasCoords(group) {
+  return Number.isFinite(group?.lat) && Number.isFinite(group?.lng);
 }
 
-export function gmapsBusca(location) {
-  return `https://www.google.com/maps/search/?api=1&query=${inSaoPaulo(location)}`;
+// Com ponto: o par lat,lng exato. Sem: o local é só o nome do parque/rua e, sem a cidade,
+// o Maps pode achar um homônimo em outro lugar.
+function mapsTarget(group) {
+  if (hasCoords(group)) return encodeURIComponent(`${group.lat},${group.lng}`);
+  return encodeURIComponent(`${group.location}, São Paulo, SP`);
 }
 
-export function gmapsRota(location) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${inSaoPaulo(location)}`;
+export function gmapsBusca(group) {
+  return `https://www.google.com/maps/search/?api=1&query=${mapsTarget(group)}`;
+}
+
+export function gmapsRota(group) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${mapsTarget(group)}`;
 }

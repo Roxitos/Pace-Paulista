@@ -23,6 +23,8 @@ export const DEMO_GROUPS = [
       'Recebe quem vem de outros bairros',
     ],
     map_pin: [330, 222],
+    lat: -23.579,
+    lng: -46.474,
     is_demo: true,
   },
   {
@@ -42,6 +44,8 @@ export const DEMO_GROUPS = [
       'Para quem está começando ou voltando a correr. Alternamos corrida e caminhada e ninguém fica para trás: sempre tem alguém fechando o pelotão.',
     profile_tags: ['Corrida e caminhada', 'Ninguém fica para trás', 'Ideal para retomar'],
     map_pin: [300, 160],
+    lat: -23.489,
+    lng: -46.519,
     is_demo: true,
   },
   {
@@ -61,6 +65,8 @@ export const DEMO_GROUPS = [
       'Domingo com a avenida aberta para pedestres: ida e volta pela Paulista em ritmo firme. Subgrupos por pace para ninguém correr sozinho.',
     profile_tags: ['Subgrupos por pace', 'Asfalto plano', 'Fotos no fim do treino'],
     map_pin: [205, 178],
+    lat: -23.5614,
+    lng: -46.6559,
     is_demo: true,
   },
   {
@@ -80,6 +86,8 @@ export const DEMO_GROUPS = [
       'Corrida no meio da semana para fechar o dia em cima do elevado. Percurso de ida e volta, ritmo moderado e muita luz da cidade.',
     profile_tags: ['Treino noturno', 'Pós-expediente', 'Percurso de ida e volta'],
     map_pin: [186, 150],
+    lat: -23.5374,
+    lng: -46.6527,
     is_demo: true,
   },
   {
@@ -99,6 +107,8 @@ export const DEMO_GROUPS = [
       'Treinos estruturados três vezes por semana: tiros às segundas, fartlek às quartas e rodagem às sextas. Para quem já corre provas e quer baixar tempo.',
     profile_tags: ['Planilha de treino', 'Tiros e fartlek', 'Foco em provas'],
     map_pin: [200, 246],
+    lat: -23.5858,
+    lng: -46.6556,
     is_demo: true,
   },
   {
@@ -118,6 +128,8 @@ export const DEMO_GROUPS = [
       'O grupo para o seu primeiro quilômetro. Começamos com aquecimento guiado e progressão de distância semana a semana.',
     profile_tags: ['Aquecimento guiado', 'Progressão semanal', 'Primeira corrida'],
     map_pin: [222, 262],
+    lat: -23.588,
+    lng: -46.662,
     is_demo: true,
   },
   {
@@ -137,6 +149,8 @@ export const DEMO_GROUPS = [
       'Longões de domingo com vista para a represa. Grupo pequeno, ritmo confortável e percursos que variam a cada semana.',
     profile_tags: ['Longões', 'Grupo pequeno', 'Percurso variado'],
     map_pin: [172, 334],
+    lat: -23.71,
+    lng: -46.726,
     is_demo: true,
   },
   {
@@ -156,6 +170,8 @@ export const DEMO_GROUPS = [
       'Treino antes do trabalho no circuito do parque. Pista plana, ótima para manter ritmo e medir evolução.',
     profile_tags: ['Antes do trabalho', 'Circuito plano', 'Controle de ritmo'],
     map_pin: [92, 182],
+    lat: -23.5466,
+    lng: -46.7238,
     is_demo: true,
   },
   {
@@ -175,6 +191,8 @@ export const DEMO_GROUPS = [
       'Longões rápidos na Cidade Universitária para quem treina meia e maratona. Ritmo forte e hidratação combinada.',
     profile_tags: ['Meia e maratona', 'Ritmo forte', 'Hidratação combinada'],
     map_pin: [112, 220],
+    lat: -23.5565,
+    lng: -46.721,
     is_demo: true,
   },
   {
@@ -194,6 +212,8 @@ export const DEMO_GROUPS = [
       'Corrida com subidas, sombra e terra. Pace mais lento por causa da altimetria, mas exige preparo. Ideal para quem quer começar no trail.',
     profile_tags: ['Altimetria', 'Iniciação ao trail', 'Natureza'],
     map_pin: [188, 56],
+    lat: -23.46,
+    lng: -46.6355,
     is_demo: true,
   },
   {
@@ -213,6 +233,8 @@ export const DEMO_GROUPS = [
       'Grupo acolhedor de começo de noite. Treinos curtos, educativos de corrida e muita resenha depois.',
     profile_tags: ['Educativos de corrida', 'Começo de noite', 'Acolhedor'],
     map_pin: [222, 100],
+    lat: -23.5051,
+    lng: -46.6248,
     is_demo: true,
   },
 ];

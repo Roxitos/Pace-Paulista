@@ -17,16 +17,23 @@ function setup(id = 'pace-da-oca') {
       if (type === 'click') onClick = fn;
     },
   };
+  const mapEl = { hidden: true };
+  const svg = {
+    hidden: false,
+    toggleAttribute(n, on) {
+      if (n === 'hidden') this.hidden = on;
+    },
+  };
   vi.stubGlobal('document', {
-    getElementById: (id) => ({ mapDetail: detail, pins })[id] ?? null,
-    querySelector: (sel) => (sel === '.map-layout' ? layout : null),
+    getElementById: (id) => ({ mapDetail: detail, pins, mapReal: mapEl })[id] ?? null,
+    querySelector: (sel) => ({ '.map-layout': layout, '.map-box > svg': svg })[sel] ?? null,
     querySelectorAll: () => [],
   });
   vi.stubGlobal('window', { innerWidth: 1280 });
   vi.stubGlobal('matchMedia', () => ({ matches: false }));
   const replaceState = vi.fn();
   vi.stubGlobal('history', { replaceState });
-  vi.stubGlobal('location', { assign: vi.fn() });
+  vi.stubGlobal('location', { assign: vi.fn(), pathname: '/mapa' });
   const fetchMock = vi.fn(async () => ({
     ok: true,
     json: async () => ({ slug: 'pace-da-oca', panel: '<div>pace</div>' }),
@@ -43,7 +50,7 @@ function setup(id = 'pace-da-oca') {
     onClick(e);
     return e;
   };
-  return { click, fetchMock, replaceState, detail };
+  return { click, fetchMock, replaceState, detail, mapEl, svg };
 }
 
 describe('mapa.js', () => {
@@ -79,5 +86,13 @@ describe('mapa.js', () => {
     const e = click();
     expect(e.preventDefault).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('se o Leaflet não carrega, o esquema SVG continua visível (CA4)', async () => {
+    const { mapEl, svg } = setup();
+    // Em teste não existe /vendor/leaflet: o import falha, como numa falha de rede.
+    await import('../../public/js/mapa.js');
+    expect(mapEl.hidden).toBe(true);
+    expect(svg.hidden).toBe(false);
   });
 });

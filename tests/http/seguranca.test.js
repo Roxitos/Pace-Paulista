@@ -17,7 +17,7 @@ const EXPECTED_CSP = [
   "font-src 'self' https://fonts.gstatic.com",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  "img-src 'self'",
+  "img-src 'self' https://tile.openstreetmap.org",
   "object-src 'none'",
   "script-src 'self'",
   "script-src-attr 'none'",

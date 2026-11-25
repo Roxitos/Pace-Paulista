@@ -40,7 +40,7 @@ describe('runSeed', () => {
     await runSeed({ pool, nodeEnv: 'test' });
     const { rows } = await pool.query(
       `SELECT slug, name, zone, location, days, start_time, pace_min_s, pace_max_s, level,
-              base_participants, is_demo, status, owner_id, contact
+              base_participants, is_demo, status, owner_id, contact, lat, lng
          FROM groups ORDER BY id`,
     );
     expect(rows).toHaveLength(DEMO_GROUPS.length);
@@ -61,6 +61,8 @@ describe('runSeed', () => {
         status: 'published',
         owner_id: null,
         contact: null,
+        lat: demo.lat,
+        lng: demo.lng,
       });
     });
     expect(rows.find((row) => row.slug === 'correria-do-carmo').start_time).toBe('06:30:00');

@@ -143,6 +143,15 @@ describe('getMapData', () => {
     expect(getMapData([], 'pace-da-oca')).toEqual({ groups: [], selected: null });
   });
 
+  it('repassa lat/lng e continua sem contact', () => {
+    const { groups } = getMapData(REPO_ORDER.map((g) => ({ ...g, contact: 'x' })));
+    for (const g of groups) {
+      expect(typeof g.lat).toBe('number');
+      expect(typeof g.lng).toBe('number');
+      expect(g).not.toHaveProperty('contact');
+    }
+  });
+
   it('cada grupo ganha pin, pelo map_pin ou pela zona', () => {
     const groups = REPO_ORDER.map((g) => (g.slug === 'raia-usp' ? { ...g, map_pin: null } : g));
     const data = getMapData(groups);

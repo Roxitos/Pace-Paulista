@@ -27,11 +27,12 @@ Todo o resto do protótipo (busca, filtros, detalhes, zonas, mapa esquemático, 
 ### Estado atual
 - **v1 no ar desde 2026-11-17**: https://pace-paulista.onrender.com/ (Render Free + Neon Free; ver §10 e `docs/DEPLOY.md`).
 - Marcos **M1–M8 concluídos** (specs 001–021). Produção roda **com os grupos demo** até o M9 (`ALLOW_DEMO_SEED=1`).
+- **M11 — Mapa real** (spec 024, pedido do usuário em 2026-11-25; entrou antes do M10): aba "Mapa" com Leaflet + OpenStreetMap e o ponto de encontro de cada grupo.
 - **Fase atual: M10 — Recuperar senha por e-mail** (decisão do usuário, 2026-11-17; vem antes do M9). Regras em §6 "Recuperar senha" e §9.
 
 ### Fora do escopo (não implementar sem pedido explícito)
 - Moderação/aprovação de grupos (deixar só a coluna `status` preparada) — M9.
-- Mapa real (Leaflet/OSM com coordenadas). Manter o mapa esquemático em SVG.
+- Street View, satélite, geolocalização do visitante e busca de endereço no mapa. Marcar o ponto no cadastro de grupo é a spec 025 (até lá, grupo real novo fica sem pino).
 - Notificações, confirmação de presença por encontro, chat.
 - **Qualquer e-mail além da recuperação de senha**: boas-vindas, confirmação de e-mail, avisos ao dono do grupo (pendências em `docs/PENDENCIAS.md`).
 - Login social (Google etc.).
@@ -54,6 +55,7 @@ Todo o resto do protótipo (busca, filtros, detalhes, zonas, mapa esquemático, 
 | Validação | **`zod`** | Mesmo schema valida form e gera mensagens |
 | Segurança | `helmet`, `express-rate-limit`, CSRF por token na sessão (`csrf-sync`) | |
 | E-mail (M10) | **API HTTP do provedor via `fetch` nativo**, sem SDK nem `nodemailer` | O Render Free bloqueia SMTP (portas 25/465/587); `fetch` evita dependência nova. Provedor com plano grátis a escolher na spec (ex.: Resend, Brevo) |
+| Mapa (M11) | **Leaflet 1.9.4** + tiles do OpenStreetMap | Mapa com ruas sem chave de API; servido do próprio site |
 | Testes | **`vitest` + `supertest`** | |
 | Dev | `docker compose` (Postgres), `node --watch`, `dotenv` | |
 | Lint/format | ESLint + Prettier | |
@@ -100,7 +102,8 @@ pace-paulista/
 │   │   ├── 004_memberships.sql
 │   │   ├── 005_sessions.sql
 │   │   ├── 006_groups_start_time_check.sql
-│   │   └── 007_full_name_optional_nickname.sql   ← próxima livre: 008 (M10)
+│   │   ├── 007_full_name_optional_nickname.sql
+│   │   └── 008_groups_lat_lng.sql                ← próxima livre: 009 (M10)
 │   └── seeds/
 │       └── demo-groups.js
 ├── src/
@@ -155,7 +158,8 @@ pace-paulista/
 │       ├── app.js            ← todas as páginas: menu mobile, avisos do servidor → toast, contador de caracteres
 │       ├── participar.js     ← modal "Entrar no grupo" (trap de foco, Esc)
 │       ├── filtros.js        ← filtros ao vivo na /grupos (progressive enhancement)
-│       └── mapa.js           ← seleção de pin/lista no mapa esquemático (/api/mapa/:slug)
+│       ├── mapa.js           ← seleção de pin/lista (/api/mapa/:slug); monta o mapa real se o Leaflet carregar
+│       └── mapa-real.js      ← Leaflet: tiles OSM, marcadores, flyTo (recebe o Leaflet por parâmetro)
 └── tests/
     ├── domain/   ← funções puras, schemas, services com repo falso
     ├── db/       ← migrate, seed, schema, repos (banco de teste)
@@ -207,7 +211,9 @@ CREATE TABLE groups (
   status             TEXT    NOT NULL DEFAULT 'published'
                        CHECK (status IN ('pending','published','rejected')), -- moderação: v2
   owner_id           BIGINT  REFERENCES users(id) ON DELETE SET NULL,     -- NULL nos grupos demo
-  map_pin            INT[],  -- [x,y] no SVG esquemático; NULL = calcular pela zona
+  map_pin            INT[],  -- [x,y] no SVG esquemático (fallback sem JS); NULL = calcular pela zona
+  lat                DOUBLE PRECISION, -- ponto de encontro no mapa real (008); lat e lng juntos ou NULL,
+  lng                DOUBLE PRECISION, --   dentro da caixa de SP; NULL = grupo sem pino
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
   CHECK (pace_min_s < pace_max_s)
@@ -229,7 +235,9 @@ CREATE INDEX memberships_group_idx ON memberships (group_id);
 -- 006_groups_start_time_check.sql → CHECK (start_time < '24:00'): TIME aceita '24:00:00'
 -- 007_full_name_optional_nickname.sql → display_name até 80; memberships.nickname nullable
 
--- 008 (M10, proposta; a spec fecha os detalhes): tokens de recuperação de senha
+-- 008_groups_lat_lng.sql → lat/lng + CHECKs (par e caixa de SP) e coordenadas dos 11 demos (spec 024)
+
+-- 009 (M10, proposta; a spec fecha os detalhes): tokens de recuperação de senha
 CREATE TABLE password_resets (
   token_hash  TEXT        PRIMARY KEY,            -- SHA-256 do token; o token em claro só vai no e-mail
   user_id     BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -261,7 +269,7 @@ URLs reais (sem `#hash`). Todas em português, iguais às do protótipo onde pos
 | `/grupos/novo` | ✅ | `PageCadastrar` | |
 | `/grupos/:slug` | — | `PageDetalhe` | 404 se não existir ou não estiver `published` |
 | `/zonas` | — | `PageZonas` | |
-| `/mapa` e `/mapa/:slug` | — | `PageMapa` | `:slug` pré-seleciona o grupo |
+| `/mapa` e `/mapa/:slug` | — | `PageMapa` | `:slug` pré-seleciona o grupo. Aba "Mapa" no menu. Com JS: mapa real (Leaflet/OSM); sem JS: esquema SVG |
 | `/encontrar` | — | `PageEncontrar` | Formulário de compatibilidade via **query string** (GET, como `/grupos`; spec 008). Sem respostas → form vazio; respostas inválidas → 422 com o form preenchido; válidas → resultados calculados no servidor. Nada é salvo |
 | `/meus` | ✅ | `PageMeus` | Grupos em que entrei + grupos que cadastrei + "Conta e dados" |
 | `/sobre` | — | `PageSobre` | Atualizar "Status do protótipo": banco e login viram **ATIVO** |
@@ -433,6 +441,7 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 - Os "componentes" JS do protótipo (`GroupCard`, `LevelMeter`, `ZoneChip`, `PageHead`, `TrackDeco`, `seal`) viram **partials EJS** com o mesmo HTML.
 - **Escape**: sempre `<%= %>`. `<%- %>` só para partials e SVGs internos, **nunca** com dado vindo do usuário/banco.
 - **Acessibilidade** (já presente no protótipo, manter): foco visível, `aria-current` na navegação, toggles de zona como checkboxes (`label.ztog` + `:has(input:checked)`, mesmo visual do protótipo, para funcionar sem JS — spec 005), `aria-live` na contagem de resultados, modal com trap de foco e `Esc`, `prefers-reduced-motion`.
+- **Mapa** (spec 024): Leaflet 1.9.4 servido de `node_modules` em `/vendor/leaflet` (não 2.x); tiles do OSM com atribuição; o esquema SVG (`map_pin`, `ZPOLY`…) segue como fallback sem JS.
 - JS do cliente é **progressivo**: toda ação precisa funcionar sem JS (forms normais). JS só adiciona modal, filtro ao vivo, toast, menu mobile.
 - Mobile first: testar em 360 px de largura, sem scroll horizontal.
 
@@ -442,9 +451,10 @@ A UI continua marcando grupos demo com a etiqueta **"Fictício · demo"** e o av
 
 - Toda query **parametrizada**. Proibido concatenar input em SQL.
 - CSRF em todo POST. Cookies de sessão: `httpOnly`, `sameSite=lax`, `secure` em produção, `maxAge` 30 dias.
-- `helmet` com CSP permitindo apenas `self`, `fonts.googleapis.com` e `fonts.gstatic.com`. Sem scripts e handlers inline (mover `<script>` para `public/js`); única exceção: `style-src-attr 'unsafe-inline'`, porque as cores das zonas e `--p` vão em `style="…"`.
+- `helmet` com CSP permitindo apenas `self`, `fonts.googleapis.com`, `fonts.gstatic.com` e, em `img-src`, `tile.openstreetmap.org`. Sem scripts e handlers inline (mover `<script>` para `public/js`); única exceção: `style-src-attr 'unsafe-inline'`, porque as cores das zonas e `--p` vão em `style="…"`.
 - Rate limit em `/conta/entrar` e `/conta/criar`; leitura (`/grupos`, `/encontrar`) 120/min por IP, API 300/min por IP, `POST /grupos` 20/h por usuário, participar/sair 60/15 min por usuário.
 - `trust proxy` vem de `TRUST_PROXY` (número de proxies, nunca `true`). Padrão do `env.js` em produção: 1; **no Render o valor correto é 3** (conferido em 2026-11-17, procedimento em `docs/DEPLOY.md`).
+- `img-src` inclui `https://tile.openstreetmap.org` (tiles do mapa; o navegador do visitante fala com o OSM, citado no `/sobre`); os tiles levam `referrerPolicy: strict-origin-when-cross-origin` e o cabeçalho global continua `same-origin`.
 - Recuperar senha (M10): token só como hash no banco; nunca logar token, link nem corpo do e-mail; página de redefinir com `Cache-Control: no-store` e `Referrer-Policy: no-referrer` (o token está na URL); a chave da API de e-mail é segredo (painel do Render, nunca no git).
 - `DATABASE_URL` de produção exige `sslmode` `require`, `verify-ca` ou `verify-full` (usar `verify-full`).
 - `?next=` só aceita caminhos internos (começam com `/` e não com `//`).
@@ -533,7 +543,7 @@ Estilo de código e comentários: `docs/CONVENTIONS.md`. Marcos M1–M8: `docs/M
 - **M10 (atual)**: recuperar senha por e-mail.
 - **M9**: conteúdo real — moderação (grupo novo `pending` → admin aprova em `/admin`), dono edita/arquiva o próprio grupo (excluir já existe desde a spec 022), validade dos dados (`last_confirmed_at`), tirar os demos. Detalhes em `docs/PENDENCIAS.md`.
 - Outros e-mails, reaproveitando o `modules/email` do M10: boas-vindas, confirmação de e-mail, aviso ao dono para confirmar os dados do grupo.
-- Mapa real com Leaflet + OpenStreetMap (colunas `lat`, `lng`).
+- Marcar o ponto no mapa ao cadastrar grupo (spec 025); mini-mapa na página do grupo. (O mapa real em si saiu no M11.)
 - Confirmação de presença por encontro (tabela `attendances`) e notificações.
 - Login com Google.
 - Migrar para TypeScript.

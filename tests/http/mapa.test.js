@@ -47,6 +47,10 @@ async function getMapa(path = '/mapa') {
   return res.text;
 }
 
+async function tirarPontoDaOca() {
+  await pool.query("UPDATE groups SET lat = NULL, lng = NULL WHERE slug = 'pace-da-oca'");
+}
+
 function pins(html) {
   return [...html.matchAll(/<a class="pin"[\s\S]*?<\/a>/g)].map((m) => m[0]);
 }
@@ -86,10 +90,10 @@ describe('GET /mapa (CA1)', () => {
   it('renderiza o cabeçalho, as 5 zonas e a nota do esquema', async () => {
     const html = await getMapa();
     expect(html).toContain('<title>Mapa e rotas · Pace Paulista</title>');
-    expect(html).toContain('<span class="eyebrow">Mapa e rotas</span>');
+    expect(html).toContain('<span class="eyebrow">Mapa</span>');
     expect(html).toContain('<h1 class="display">Pontos de encontro</h1>');
     expect(html).toContain(
-      '<p>Selecione um grupo para ver onde ele se encontra e abrir a rota até lá no Google Maps.</p>',
+      '<p>Veja onde cada grupo se encontra. Toque num pino ou na lista para ver os detalhes e abrir a rota no Google Maps.</p>',
     );
     expect(html).toContain(
       '<svg viewBox="0 0 400 380" role="group" aria-label="Esquema das zonas de São Paulo com os grupos">',
@@ -111,7 +115,7 @@ describe('GET /mapa (CA1)', () => {
     expect(html).toContain('<text x="200" y="40" text-anchor="middle"');
     expect(html.match(/stroke-dasharray="5 5" opacity=".6"\/>/g)).toHaveLength(2);
     expect(html).toContain(
-      '<span>Esquema ilustrativo das zonas, não um mapa real. As posições indicam apenas a zona do grupo. O endereço e a rota abrem no Google Maps. Mapa interativo previsto para a próxima versão.</span></p>',
+      '<span>Os pinos mostram o ponto de encontro aproximado de cada grupo; confirme o local exato no grupo. A rota abre no Google Maps. Sem JavaScript, o mapa aparece como esquema das zonas.</span></p>',
     );
   });
 
@@ -146,7 +150,7 @@ describe('GET /mapa (CA1)', () => {
     const html = await getMapa();
     const tiete = items(html).find((i) => dataId(i) === 'tiete-em-movimento');
     expect(tiete).toBe(
-      '<a class="map-item" href="/mapa/tiete-em-movimento#mapDetail" style="--z:#C8402F;--zon:#FFFFFF" data-act="map-select" data-id="tiete-em-movimento" aria-current="false"><span class="dotz"></span><span><b>Tietê em Movimento</b><small>Parque Ecológico do Tietê</small></span><span class="mono" style="font-size:12px;color:var(--muted)">Ter, Qui</span></a>',
+      '<a class="map-item" href="/mapa/tiete-em-movimento#mapDetail" style="--z:#C8402F;--zon:#FFFFFF" data-act="map-select" data-id="tiete-em-movimento" data-lat="-23.489" data-lng="-46.519" aria-current="false"><span class="dotz"></span><span><b>Tietê em Movimento</b><small>Parque Ecológico do Tietê</small></span><span class="mono" style="font-size:12px;color:var(--muted)">Ter, Qui</span></a>',
     );
     expect(html).toContain('<ul class="map-list"><li><a class="map-item"');
   });
@@ -164,16 +168,83 @@ describe('GET /mapa/:slug (CA2)', () => {
   it('abre a rota e a busca no Google Maps em nova aba e liga aos detalhes do grupo', async () => {
     const panel = detail(await getMapa('/mapa/pace-da-oca'));
     expect(panel).toContain(
-      '<a class="btn btn-primary btn-sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parque%20Ibirapuera%2C%20S%C3%A3o%20Paulo%2C%20SP" target="_blank" rel="noopener">',
+      '<a class="btn btn-primary btn-sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=-23.5858%2C-46.6556" target="_blank" rel="noopener">',
     );
     expect(panel).toContain(
-      '<a class="btn btn-outline btn-sm" href="https://www.google.com/maps/search/?api=1&amp;query=Parque%20Ibirapuera%2C%20S%C3%A3o%20Paulo%2C%20SP" target="_blank" rel="noopener">',
+      '<a class="btn btn-outline btn-sm" href="https://www.google.com/maps/search/?api=1&amp;query=-23.5858%2C-46.6556" target="_blank" rel="noopener">',
     );
     expect(panel).toMatch(/<\/svg> Traçar rota<\/a>/);
     expect(panel).toMatch(/<\/svg> Abrir no Maps<\/a>/);
     expect(panel).toContain(
       '<a class="link" href="/grupos/pace-da-oca" style="display:inline-block;margin-top:12px">Ver detalhes do grupo</a>',
     );
+  });
+});
+
+describe('Mapa real (spec 024)', () => {
+  it('traz o contêiner escondido, o esquema SVG, o CSS e o script do mapa', async () => {
+    const html = await getMapa();
+    expect(html).toContain(
+      '<div id="mapReal" class="map-real" hidden role="region" aria-label="Mapa de São Paulo com os pontos de encontro dos grupos"></div>',
+    );
+    expect(html).toContain('<svg viewBox="0 0 400 380"');
+    expect(html).toContain('<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">');
+    expect(html).toContain('<script type="module" src="/js/mapa.js">');
+  });
+
+  it('itens com coordenadas trazem data-lat/data-lng; sem coordenadas mostram o aviso (CA6)', async () => {
+    await tirarPontoDaOca();
+    const html = await getMapa();
+    const oca = items(html).find((i) => dataId(i) === 'pace-da-oca');
+    expect(oca).not.toContain('data-lat');
+    expect(oca).toContain('<small class="map-nopin">Sem ponto no mapa</small>');
+    const carmo = items(html).find((i) => dataId(i) === 'correria-do-carmo');
+    expect(carmo).toContain('data-lat="-23.579" data-lng="-46.474"');
+    expect(carmo).not.toContain('Sem ponto no mapa');
+  });
+
+  it('sem coordenadas, rota e busca usam o texto do local (CA7)', async () => {
+    await tirarPontoDaOca();
+    const panel = detail(await getMapa('/mapa/pace-da-oca'));
+    expect(panel).toContain('destination=Parque%20Ibirapuera%2C%20S%C3%A3o%20Paulo%2C%20SP');
+    expect(panel).toContain('query=Parque%20Ibirapuera%2C%20S%C3%A3o%20Paulo%2C%20SP');
+  });
+
+  it('a CSP libera só os tiles do OSM em img-src (CA9)', async () => {
+    const res = await request(app).get('/mapa');
+    expect(res.headers['content-security-policy']).toContain(
+      "img-src 'self' https://tile.openstreetmap.org;",
+    );
+    expect(res.text).not.toMatch(/<script(?![^>]*\bsrc=)/);
+  });
+
+  it('o menu tem "Mapa" com aria-current em /mapa e /mapa/<slug>, e sem ele nas outras (CA3)', async () => {
+    const link = '<a href="/mapa" data-nav="mapa" aria-current="page">Mapa</a>';
+    expect(await getMapa('/mapa')).toContain(link);
+    expect(await getMapa('/mapa/pace-da-oca')).toContain(link);
+    const sobre = (await request(app).get('/sobre')).text;
+    expect(sobre).toContain('<a href="/mapa" data-nav="mapa">Mapa</a>');
+  });
+
+  it('serve o Leaflet do próprio site, com cache longo, e nada fora de dist/ (CA11)', async () => {
+    for (const [file, type] of [
+      ['leaflet-src.esm.js', /javascript/],
+      ['leaflet.css', /css/],
+    ]) {
+      const res = await request(app).get(`/vendor/leaflet/${file}`);
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toMatch(type);
+      expect(res.headers['cache-control']).toMatch(/max-age=31536000/);
+      expect(res.headers['content-security-policy']).toBeDefined();
+    }
+    for (const path of [
+      '/vendor/leaflet/../package.json',
+      '/vendor/leaflet/%2e%2e/package.json',
+      '/vendor/leaflet/..%2fpackage.json',
+      '/vendor/leaflet/package.json',
+    ]) {
+      expect((await request(app).get(path)).status).toBe(404);
+    }
   });
 });
 
@@ -267,7 +338,8 @@ describe('Escape (CA8)', () => {
   it('nome e local com <script> saem escapados no pin, na lista e no painel', async () => {
     const owner = await insertUser(pool, XSS);
     await pool.query(
-      `UPDATE groups SET name = $1, location = $2, meeting_point = $3, is_demo = false, owner_id = $4
+      `UPDATE groups SET name = $1, location = $2, meeting_point = $3, is_demo = false, owner_id = $4,
+                        lat = NULL, lng = NULL
         WHERE slug = 'pace-da-oca'`,
       [XSS, XSS, XSS, owner],
     );
@@ -307,6 +379,8 @@ describe('CSS do mapa sem JS (CA3, CA9)', () => {
     'a.map-item{text-decoration:none}',
     // Ao seguir o link para #mapDetail, o painel para abaixo do cabeçalho fixo (68px + 3px de borda).
     '.map-detail{scroll-margin-top:84px}',
+    // O display:block do protótipo anularia o hidden do SVG com o mapa real ativo (CA4).
+    '.map-box > svg[hidden]{display:none}',
     // Nome e local sem espaço não abrem scroll horizontal em 360 px.
     '.map-item b,.map-item small,.map-detail h2{overflow-wrap:anywhere}',
   ])('tem %s fora do bloco literal do protótipo', async (rule) => {
@@ -389,5 +463,15 @@ describe('Mapa com JS: pins, script e CSS (CA9 a CA12)', () => {
       'a.pin:focus-visible circle.ring{r:14px;stroke:var(--focus);stroke-width:3;stroke-dasharray:none}';
     expect(css).toContain(rule);
     expect(css.indexOf(rule)).toBeLessThan(css.indexOf('/* Layout: cabeçalho fixo'));
+  });
+});
+
+describe('imagem vazia do Leaflet (CA9)', () => {
+  it('serve o GIF próprio do mesmo site, sem acrescentar data: ao img-src', async () => {
+    const res = await request(app).get('/img/vazio.gif');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/image\/gif/);
+    const csp = (await request(app).get('/mapa')).headers['content-security-policy'];
+    expect(csp).not.toMatch(/img-src[^;]*data:/);
   });
 });

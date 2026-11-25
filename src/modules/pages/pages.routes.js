@@ -8,7 +8,7 @@ export const pagesRouter = Router();
 const MAP_TITLE = 'Mapa e rotas · Pace Paulista';
 
 const renderMap = (res, data) =>
-  res.renderPage('mapa', { title: MAP_TITLE, scripts: ['mapa'], ...data });
+  res.renderPage('mapa', { title: MAP_TITLE, scripts: ['mapa'], styles: ['leaflet'], ...data });
 
 pagesRouter.get('/', async (req, res) => {
   await res.renderPage('home', {

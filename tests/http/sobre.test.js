@@ -50,7 +50,7 @@ describe('GET /sobre (CA7)', () => {
       ],
       ['on', 'ATIVO', 'Banco de dados compartilhado para todos verem os mesmos grupos.'],
       ['on', 'ATIVO', 'Login e conta de usuário.'],
-      ['off', 'PENDENTE', 'Mapa interativo com coordenadas reais dos pontos de encontro.'],
+      ['on', 'ATIVO', 'Mapa com ruas (OpenStreetMap) e os pontos de encontro dos grupos.'],
       ['off', 'PENDENTE', 'Notificações e confirmação de presença por encontro.'],
     ]);
   });
@@ -58,10 +58,10 @@ describe('GET /sobre (CA7)', () => {
   it('mantém a nota final e não fala mais de Supabase nem de dados no navegador', async () => {
     const html = await getSobre();
     expect(html).toContain(
-      '<p style="color:var(--muted);font-size:14px;margin-top:14px">Todos os grupos de demonstração são fictícios. Os locais citados são espaços públicos reais da cidade.</p>',
+      '<p style="color:var(--muted);font-size:14px;margin-top:14px">Todos os grupos de demonstração são fictícios. Os locais citados são espaços públicos reais da cidade. O mapa usa o OpenStreetMap; ao abri-lo, seu navegador carrega as imagens do mapa de lá.</p>',
     );
     expect(html).not.toContain('Supabase');
-    expect(html).not.toContain('navegador');
+    expect(html).not.toContain('no navegador');
     expect(html).not.toContain('href="#');
   });
 });

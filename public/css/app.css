@@ -29,6 +29,8 @@ ul.map-list{list-style:none;margin:0;padding:0 4px 0 0}
 a.map-item{text-decoration:none}
 /* Os links levam a #mapDetail: o painel para abaixo do cabeçalho fixo, como .filters. */
 .map-detail{scroll-margin-top:84px}
+/* Com o mapa real ativo o esquema SVG fica escondido: sem isto o display:block do protótipo anula o hidden. */
+.map-box > svg[hidden]{display:none}
 /* Nome (50) e local (80) sem espaço não podem abrir scroll horizontal em 360 px. */
 .map-item b,.map-item small,.map-detail h2{overflow-wrap:anywhere}
 /* Encontrar (spec 008): a âncora #matchResults para abaixo do cabeçalho fixo, como .filters. */
@@ -64,6 +66,15 @@ a.pin:focus-visible circle.ring{r:14px;stroke:var(--focus);stroke-width:3;stroke
 /* Nome completo longo (spec 023) */
 .field .hint{overflow-wrap:anywhere}
 .account-line{overflow-wrap:anywhere}
+
+/* Mapa real (spec 024). O esquema SVG continua como fallback sem JS. */
+.map-real{height:clamp(320px,60vh,560px);border-radius:calc(var(--r) - 4px);overflow:hidden;z-index:0}
+.map-pin{display:flex;align-items:center;justify-content:center}
+.map-pin span{display:block;width:16px;height:16px;border-radius:50%;background:var(--z);border:3px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.4);box-sizing:content-box;transition:transform .15s}
+.map-pin:hover span{transform:scale(1.15)}
+.map-pin.is-selected span{width:22px;height:22px;outline:2px dashed var(--z);outline-offset:3px}
+.map-real .leaflet-control-attribution{color:#333}
+.map-nopin{display:block;font-size:12px;color:var(--muted)}
 
 /* Layout: cabeçalho fixo, faixa escura de "asfalto" com curva de pista no topo, conteúdo em concreto com cards por zona. */
 :root{

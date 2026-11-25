@@ -13,8 +13,8 @@ export function demoSeedAllowed(value) {
 const INSERT_GROUP = `
   INSERT INTO groups (slug, name, zone, location, meeting_point, days, start_time, pace_min_s,
                       pace_max_s, distance, level, base_participants, description, profile_tags,
-                      map_pin, is_demo, status)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+                      map_pin, is_demo, status, lat, lng)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
   ON CONFLICT (slug) DO NOTHING`;
 
 export async function runSeed({ pool, nodeEnv, allowDemoSeed = false, groups = DEMO_GROUPS }) {
@@ -45,6 +45,8 @@ export async function runSeed({ pool, nodeEnv, allowDemoSeed = false, groups = D
         group.map_pin,
         group.is_demo,
         'published',
+        group.lat,
+        group.lng,
       ]);
       count += result.rowCount;
     }

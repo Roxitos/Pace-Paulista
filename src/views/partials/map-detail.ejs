@@ -3,8 +3,8 @@
     <h2 style="margin:10px 0 6px;font-size:28px"><%= g.name %></h2>
     <dl class="spec"><div><dt><%- ic('pin', 'ico-sm') %>Local</dt><dd><%= g.location %></dd></div><div><dt><%- ic('door', 'ico-sm') %>Encontro</dt><dd style="font-weight:500"><%= g.meeting_point %></dd></div><div><dt><%- ic('cal', 'ico-sm') %>Quando</dt><dd><%= fmtDiasCurto(g.days) %> · <%= fmtHora(g.start_time) %></dd></div><div><dt><%- ic('gauge', 'ico-sm') %>Pace</dt><dd class="mono"><%= fmtFaixa(g.pace_min_s, g.pace_max_s) %></dd></div></dl>
     <div class="row2" style="margin-top:14px;gap:8px">
-      <a class="btn btn-primary btn-sm" href="<%= gmapsRota(g.location) %>" target="_blank" rel="noopener"><%- ic('route', 'ico-sm') %> Traçar rota</a>
-      <a class="btn btn-outline btn-sm" href="<%= gmapsBusca(g.location) %>" target="_blank" rel="noopener"><%- ic('ext', 'ico-sm') %> Abrir no Maps</a>
+      <a class="btn btn-primary btn-sm" href="<%= gmapsRota(g) %>" target="_blank" rel="noopener"><%- ic('route', 'ico-sm') %> Traçar rota</a>
+      <a class="btn btn-outline btn-sm" href="<%= gmapsBusca(g) %>" target="_blank" rel="noopener"><%- ic('ext', 'ico-sm') %> Abrir no Maps</a>
     </div>
     <a class="link" href="/grupos/<%= encodeURIComponent(g.slug) %>" style="display:inline-block;margin-top:12px">Ver detalhes do grupo</a>
   </div>
