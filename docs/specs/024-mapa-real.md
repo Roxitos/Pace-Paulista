@@ -1,5 +1,5 @@
 # 024 — Mapa real (ruas, OpenStreetMap) na aba "Mapa"
-Marco: M11 — Mapa real (pedido do usuário em 2026-11-25; **antes do M10**) · Status: **aguardando OK do usuário** (P1–P7 abaixo, todas com proposta)
+Marco: M11 — Mapa real (pedido do usuário em 2026-11-25; **antes do M10**) · Status: **pronta para Coder** (OK do usuário em 2026-11-25: P1–P7 com as propostas)
 Depende de: 007 (mapa esquemático), 018 (mapa sem recarregar), 019 (CSP)
 Próxima: 025 — ponto no mapa no cadastro de grupo (ver "Fora do escopo")
 
@@ -160,3 +160,6 @@ Mantém tudo da spec 018 (seleção sem recarregar, cache, `AbortController`, `r
 - Risco: neste ambiente de desenvolvimento os tiles podem estar bloqueados pela rede; testes automáticos não dependem deles (Leaflet mocado no teste de cliente, HTML/CSP nos testes HTTP). A conferência visual é manual (QA) em navegador com internet.
 - Risco: `leaflet@1.9.4` — conferir no `npm view leaflet` se há 1.9.x mais nova sem mudança de API; **não** usar 2.x (API diferente, ESM-only) sem nova spec.
 - Docs a atualizar no mesmo PR (orquestrador/Coder): AGENTS §1 (mapa real sai do "Fora do escopo"; fase atual), §3 (`008_groups_lat_lng.sql`, próxima livre 009), §4 (colunas `lat`/`lng`; `password_resets` vira 009), §5 (menu "Mapa"), §8 (mapa esquemático vira fallback sem JS), §9 (CSP `img-src` com OSM), §12; `docs/MILESTONES.md` (M11) e `.env.example`/`render.yaml` (nada muda — sem env novo).
+
+## Respostas (2026-11-25)
+OK do usuário a todas as propostas (P1–P7). P1: o usuário não enviou correções; ficam os valores aproximados desta spec, e a conferência visual dos 11 pinos fica para o QA (navegador com internet). Se algum ponto estiver errado, corrige-se com nova migration (a 008 é imutável depois do commit). P7: o texto proposto para o `/sobre` está aprovado: "O mapa usa o OpenStreetMap; ao abri-lo, seu navegador carrega as imagens do mapa de lá."
